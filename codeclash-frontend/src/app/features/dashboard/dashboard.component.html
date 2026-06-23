@@ -1,0 +1,155 @@
+<div class="min-h-screen bg-[#000000] text-slate-100 font-sans pt-28 pb-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white">Recruitment & Clash Console</h1>
+        <p class="text-sm text-slate-400">Monitor active developer challenges, tournament scorecards and screen pipeline metrics.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/25 text-violet-400 text-xs font-semibold">
+          <span class="h-2 w-2 rounded-full bg-violet-400 animate-pulse"></span>
+          Assess System Live
+        </span>
+        <button class="px-4 py-2 bg-violet-600 text-white font-bold rounded-xl text-sm hover:bg-violet-500 hover:shadow-[0_0_15px_rgba(124,58,237,0.25)] transition duration-200">
+          + Create Challenge
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <!-- Stat 1 -->
+      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Total Assessments</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-white">{{ totalAssessments }}</span>
+          <span class="text-xs text-violet-400 font-semibold">+12 this week</span>
+        </div>
+      </div>
+
+      <!-- Stat 2 -->
+      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Active Challenges</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-white">{{ activeChallenges }}</span>
+          <span class="text-xs text-indigo-400 font-semibold">4 languages code</span>
+        </div>
+      </div>
+
+      <!-- Stat 3 -->
+      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Avg. Completion Rate</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-violet-500">{{ avgCompletionRate }}</span>
+          <span class="text-xs text-violet-400 font-semibold">98.4% uptime</span>
+        </div>
+      </div>
+
+      <!-- Stat 4 -->
+      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Multiplayer Matches</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-white">{{ newMatches }}</span>
+          <span class="text-xs text-amber-400 font-semibold">Live Arenas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Section Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Candidates Scorecard Table -->
+      <div class="lg:col-span-8 bg-[#02040a] border border-slate-900 rounded-2xl p-6 shadow-lg shadow-black/40">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-950 mb-6">
+          <h3 class="text-lg font-bold text-white">Recent Candidate Submissions</h3>
+          <a href="#" class="text-xs text-violet-500 hover:underline font-bold">View all submissions</a>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead>
+              <tr class="text-xs text-slate-600 uppercase font-extrabold border-b border-slate-950">
+                <th class="py-3">Candidate</th>
+                <th class="py-3">Challenge/Role</th>
+                <th class="py-3 text-center">Score</th>
+                <th class="py-3">Status</th>
+                <th class="py-3 text-right">Completed</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-950">
+              <tr *ngFor="let candidate of candidates" class="hover:bg-slate-950/40 transition duration-150">
+                <!-- Name -->
+                <td class="py-4 font-semibold text-white">{{ candidate.name }}</td>
+                <!-- Role -->
+                <td class="py-4 text-slate-500">{{ candidate.role }}</td>
+                <!-- Score -->
+                <td class="py-4 text-center">
+                  <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono"
+                        [class]="candidate.score >= 90 ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : candidate.score >= 70 ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
+                    {{ candidate.score }}/100
+                  </span>
+                </td>
+                <!-- Status -->
+                <td class="py-4">
+                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full"
+                        [class]="candidate.status === 'Hired' ? 'bg-violet-500/15 text-violet-400' : candidate.status === 'Evaluating' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'">
+                    {{ candidate.status }}
+                  </span>
+                </td>
+                <!-- Completed time -->
+                <td class="py-4 text-right text-xs text-slate-600 font-medium">{{ candidate.completedAt }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Live Multiplayer Arena Lobbies -->
+      <div class="lg:col-span-4 bg-[#02040a] border border-slate-900 rounded-2xl p-6 shadow-lg shadow-black/40 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-4 border-b border-slate-950 mb-6">
+            <h3 class="text-lg font-bold text-white">Live Match Lobbies</h3>
+            <span class="h-2 w-2 rounded-full bg-violet-500 animate-ping"></span>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <!-- Lobby 1 -->
+            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-violet-500/40 transition duration-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-violet-500 font-mono">CODE-CLASH-542</span>
+                <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold">In Progress</span>
+              </div>
+              <h4 class="text-sm font-bold text-white mb-1">Algorithm Duel: Binary Search</h4>
+              <p class="text-xs text-slate-600">8 Developers clash • Python, C++</p>
+            </div>
+
+            <!-- Lobby 2 -->
+            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-violet-500/40 transition duration-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-violet-500 font-mono">CODE-CLASH-981</span>
+                <span class="px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 text-[10px] font-bold">Open Lobby</span>
+              </div>
+              <h4 class="text-sm font-bold text-white mb-1">Dynamic Programming Blitz</h4>
+              <p class="text-xs text-slate-600">3/12 spots filled • JavaScript, Go</p>
+            </div>
+
+            <!-- Lobby 3 -->
+            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-violet-500/40 transition duration-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-violet-500 font-mono">CODE-CLASH-112</span>
+                <span class="px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 text-[10px] font-bold">Open Lobby</span>
+              </div>
+              <h4 class="text-sm font-bold text-white mb-1">Weekly Speed Coding Challenge</h4>
+              <p class="text-xs text-slate-600">14/50 spots filled • All languages</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full mt-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-sm transition duration-200">
+          Enter Matchmaker Room
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+<div class="relative min-h-screen bg-[#000000] flex flex-col md:flex-row overflow-hidden font-sans">
+  <!-- Glowing Violet Blobs -->
+  <div class="absolute top-[20%] left-[10%] w-[35vw] h-[35vw] rounded-full bg-violet-600 opacity-10 blur-[130px] pointer-events-none"></div>
+  <div class="absolute bottom-[20%] right-[10%] w-[35vw] h-[35vw] rounded-full bg-indigo-600 opacity-5 blur-[130px] pointer-events-none"></div>
+
+  <!-- Left Side: Interactive Code Preview & Stats (Hidden on mobile) -->
+  <div class="hidden md:flex md:w-1/2 flex-col justify-between p-12 relative border-r border-slate-900 bg-[#020308]/40 backdrop-blur-sm">
+    <!-- Grid Overlay -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#090d16_1px,transparent_1px),linear-gradient(to_bottom,#090d16_1px,transparent_1px)] bg-[size:4rem_4rem] mask-radial opacity-30 pointer-events-none"></div>
+
+    <!-- Floating Background Tech Terms -->
+    <div class="absolute top-1/4 left-10 text-slate-800 font-mono text-xs select-none pointer-events-none">hashmap</div>
+    <div class="absolute top-16 right-20 text-slate-800 font-mono text-xs select-none pointer-events-none">two pointers</div>
+    <div class="absolute bottom-1/4 right-16 text-slate-800 font-mono text-xs select-none pointer-events-none">binary search</div>
+    <div class="absolute bottom-40 left-20 text-slate-800 font-mono text-xs select-none pointer-events-none">memoization</div>
+
+    <!-- Logo top-left -->
+    <a routerLink="/" class="flex items-center gap-2.5 z-10">
+      <div class="w-10 h-10 rounded-xl bg-violet-600/10 border border-violet-500/20 flex items-center justify-center text-violet-500 font-mono font-bold text-lg">
+        &lt;/&gt;
+      </div>
+      <span class="text-xl font-black tracking-tight text-white">
+        Code<span class="text-violet-500">Clash</span>
+      </span>
+    </a>
+
+    <!-- Mock IDE window (HackerRank layout style) -->
+    <div class="w-full max-w-lg mx-auto bg-[#04060f] border border-slate-900 rounded-2xl overflow-hidden shadow-2xl shadow-black/80 z-10 my-auto">
+      <div class="flex items-center justify-between px-5 py-3 bg-[#010206] border-b border-slate-950">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
+          <span class="text-xs text-slate-500 font-mono ml-2">two_sum.py</span>
+        </div>
+      </div>
+      <div class="p-6 font-mono text-sm leading-relaxed text-slate-300">
+        <div class="flex gap-4">
+          <div class="text-slate-700 text-right select-none pr-1">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+            <div>6</div>
+            <div>7</div>
+            <div>8</div>
+          </div>
+          <pre class="text-slate-300 w-full"><code><span class="text-violet-400">def</span> <span class="text-white">two_sum</span>(nums, target):
+    seen = {{ '{' }}{{ '}' }}
+    <span class="text-violet-400">for</span> i, n <span class="text-violet-400">in</span> <span class="text-white">enumerate</span>(nums):
+        comp = target - n
+        <span class="text-violet-400">if</span> comp <span class="text-violet-400">in</span> seen:
+            <span class="text-violet-400">return</span> [seen[comp], i]
+        seen[n] = i
+    <span class="text-violet-400">return</span> []</code></pre>
+        </div>
+      </div>
+      <!-- Footer IDE bar (Violet accent) -->
+      <div class="flex items-center justify-between px-5 py-2.5 bg-violet-600 text-white text-xs font-semibold">
+        <span>Python 3.11</span>
+        <span>UTF-8</span>
+      </div>
+    </div>
+
+    <!-- Stats badge bottom-left -->
+    <div class="z-10 self-start">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-950/20 border border-violet-900/30 text-xs font-semibold text-violet-400 tracking-wide">
+        <!-- Sword cross icon -->
+        <svg class="w-4 h-4 text-violet-500 fill-current" viewBox="0 0 24 24"><path d="M12 2c5.522 0 10 4.477 10 10s-4.478 10-10 10-10-4.477-10-10 4.478-10 10-10zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8zm-1.5 5h3v2h-3v-2zm0 4h3v4h-3v-4z"/></svg>
+        500,000+ battles fought
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Forms (Login / Register) -->
+  <div class="w-full md:w-1/2 flex items-center justify-center p-8 bg-[#000000] relative">
+    <div class="w-full max-w-md z-10">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

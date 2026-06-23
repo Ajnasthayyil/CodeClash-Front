@@ -1,0 +1,228 @@
+<!-- Hero Section & Grid Backdrop -->
+<div class="relative overflow-hidden min-h-screen bg-[#000000] text-slate-100 font-sans">
+  <!-- Glowing Violet background blobs -->
+  <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-violet-600 opacity-10 blur-[180px] pointer-events-none"></div>
+  <div class="absolute bottom-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-indigo-600 opacity-5 blur-[150px] pointer-events-none"></div>
+
+  <!-- Tech Grid Background -->
+  <div class="absolute inset-0 bg-[linear-gradient(to_right,#090d16_1px,transparent_1px),linear-gradient(to_bottom,#090d16_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none"></div>
+
+  <main class="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10">
+    <!-- Hero Badging (Black / White / Violet Theme) -->
+    <div class="flex justify-center mb-10">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-950/80 border border-slate-900 text-xs font-semibold tracking-wide text-slate-300 backdrop-blur-md hover:border-violet-500/40 transition duration-300 cursor-default">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+        </span>
+        <span class="text-violet-500">CodeClash 2.0</span> The future of technical screening
+      </div>
+    </div>
+
+    <!-- Main Hero Content (HackerRank Layout Style) -->
+    <div class="text-center max-w-4xl mx-auto mb-20">
+      <h1 class="text-5xl md:text-8xl font-black tracking-tight text-slate-500 mb-8 leading-tight">
+        The future <br>
+        of development <br>
+        is <span class="text-white inline-flex items-center gap-2 md:gap-3 bg-clip-text">
+          <!-- Fingerprint SVG Icon -->
+          <svg class="w-10 h-10 md:w-16 md:h-16 text-violet-500 inline-block fill-none stroke-current" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" d="M12 11c0-2.21-1.79-4-4-4s-4 1.79-4 4M12 14c0-3.31-2.69-6-6-6S0 10.69 0 14M16 11c0-4.42-3.58-8-8-8s-8 3.58-8 8M20 14c0-5.52-4.48-10-10-10S0 8.48 0 14"/>
+            <path stroke-linecap="round" d="M12 17c0-1.1.9-2 2-2s2 .9 2 2v4M8 20h8"/>
+          </svg>
+          human
+        </span> + <span class="text-white inline-flex items-center gap-2 md:gap-3 bg-clip-text">
+          <!-- Sparkles/Star SVG Icon -->
+          <svg class="w-10 h-10 md:w-16 md:h-16 text-violet-500 inline-block fill-current" viewBox="0 0 24 24">
+            <path d="M12 0l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/>
+          </svg>
+          AI
+        </span>
+      </h1>
+      <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+        We help you map the skills you need, track the skills you have, and close your gaps to thrive in a GenAI world.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a routerLink="/auth/register" class="w-full sm:w-auto px-8 py-4 rounded-full font-bold bg-violet-600 text-white hover:bg-violet-500 hover:scale-102 hover:shadow-[0_0_30px_rgba(124,58,237,0.4)] transition-all duration-300 text-center">
+          Sign Up
+        </a>
+        <a href="#interactive-playground" class="w-full sm:w-auto px-8 py-4 rounded-full font-bold bg-transparent text-slate-200 border border-slate-800 hover:border-slate-600 hover:bg-slate-950/80 transition-all duration-300 text-center">
+          Request Demo
+        </a>
+      </div>
+    </div>
+
+    <!-- Interactive Code Playground / Mock IDE (Violet accents) -->
+    <div id="interactive-playground" class="max-w-5xl mx-auto bg-[#04060f] border border-slate-900 rounded-2xl overflow-hidden shadow-2xl shadow-black/90 mb-28">
+      <!-- IDE Header Tab bar -->
+      <div class="flex items-center justify-between px-6 py-4 bg-[#010206] border-b border-slate-950">
+        <div class="flex items-center gap-2">
+          <!-- Window controls -->
+          <div class="flex gap-1.5 mr-4">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
+          </div>
+          <!-- Language Tabs -->
+          <div class="flex items-center gap-1">
+            <button *ngFor="let lang of languages" 
+                    (click)="selectLanguage(lang)"
+                    [class]="selectedLanguage === lang ? 'px-3 py-1.5 rounded-lg bg-slate-950 text-violet-500 border border-slate-900 text-xs font-semibold' : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-950/50 text-xs font-medium'"
+                    class="transition-all duration-200">
+              {{ lang }}
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button (click)="runCode()" [disabled]="isRunning" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-400 text-xs font-bold hover:bg-violet-600 hover:text-white hover:border-violet-600 disabled:opacity-50 transition duration-300">
+            <span *ngIf="isRunning" class="animate-spin border-2 border-current border-t-transparent rounded-full h-3.5 w-3.5 mr-1"></span>
+            <svg *ngIf="!isRunning" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            {{ isRunning ? 'Running...' : 'Run Challenge' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- IDE Editor area -->
+      <div class="grid grid-cols-1 md:grid-cols-12 min-h-[400px]">
+        <!-- Code editor -->
+        <div class="md:col-span-7 bg-[#02040a] p-6 border-r border-slate-950 font-mono text-sm leading-relaxed overflow-x-auto text-slate-300">
+          <div class="flex gap-4">
+            <!-- Line numbers -->
+            <div class="text-slate-700 text-right select-none pr-2">
+              <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]">
+                {{ i }}
+              </div>
+            </div>
+            <!-- Pre Code content -->
+            <pre class="text-slate-300 w-full"><code class="language-javascript">{{ currentCode }}</code></pre>
+          </div>
+        </div>
+
+        <!-- Live Terminal console logs -->
+        <div class="md:col-span-5 bg-[#010206] p-6 flex flex-col justify-between font-mono text-xs">
+          <div>
+            <div class="flex items-center justify-between text-slate-500 border-b border-slate-950 pb-3 mb-4">
+              <span class="uppercase tracking-wider font-semibold">Test Suite Output</span>
+              <span class="px-2 py-0.5 rounded bg-slate-950 text-violet-500 border border-slate-900 text-[10px]">Sandbox v3.1</span>
+            </div>
+            <pre class="text-slate-300 whitespace-pre-wrap leading-relaxed">{{ terminalOutput }}</pre>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-950 flex items-center justify-between text-[11px] text-slate-600">
+            <span>Solved: 3/3 Cases</span>
+            <span>Performance: O(N) Complexity</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client Ticker / Social Proof -->
+    <div class="text-center mb-28">
+      <p class="text-xs uppercase tracking-widest text-slate-600 font-bold mb-8">
+        TRUSTED BY 4,000+ LEADING TEAMS WORLDWIDE
+      </p>
+      <!-- Moving Ticker logos (glass hover effects) -->
+      <div class="flex flex-wrap items-center justify-center gap-12 opacity-40">
+        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
+          <span class="text-slate-500 font-bold text-lg tracking-wider">STRIPE</span>
+        </div>
+        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
+          <span class="text-slate-500 font-bold text-lg tracking-wider">NETFLIX</span>
+        </div>
+        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
+          <span class="text-slate-500 font-bold text-lg tracking-wider">MICROSOFT</span>
+        </div>
+        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
+          <span class="text-slate-500 font-bold text-lg tracking-wider">UBER</span>
+        </div>
+        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
+          <span class="text-slate-500 font-bold text-lg tracking-wider">AIRBNB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature tab details section -->
+    <div class="mb-28 text-center max-w-3xl mx-auto">
+      <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6">
+        Full Suite for Engineering Managers
+      </h2>
+      <p class="text-slate-400 text-lg">
+        Unlock automated screening, host competitive tournaments, and standardise interviews with code execution support.
+      </p>
+    </div>
+
+    <!-- 4 Feature Grid Cards with high-end hover glows -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-28">
+      <!-- Card 1 -->
+      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
+        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
+        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Skill Screening</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Create automated assessments with customizable coding puzzles in 45+ languages. Generate instant scorecards and check plagiarism index automatically.
+        </p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
+        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
+        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Multiplayer Coding Arenas</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Engage developers with competitive live tournaments, leaderboard battles, and real-time coding challenges. Excellent for branding and tech community engagement.
+        </p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
+        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
+        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Collaborative IDE Interviews</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Conduct live whiteboard coding interviews with real-time editing, compiled testing loops, and integrated chat. Keep interviewers in sync with custom templates.
+        </p>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
+        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
+        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">AI Scorecards & Insights</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Deep analytics detailing candidate strength maps, performance trends, code speed, and optimal code quality metrics. Make hiring decisions based on hard data.
+        </p>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="relative bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900 rounded-3xl p-12 text-center overflow-hidden">
+      <!-- Glow bubble -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-violet-500/5 rounded-full blur-[80px]"></div>
+
+      <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 relative z-10">
+        Ready to find your next tech lead?
+      </h2>
+      <p class="text-slate-400 text-lg max-w-xl mx-auto mb-8 relative z-10 font-medium">
+        Set up assessment rules, compile coding templates, and host tournaments with CodeClash. Start scaling today.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+        <a routerLink="/auth/register" class="px-8 py-3.5 bg-violet-600 text-white font-bold rounded-full hover:bg-violet-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition duration-300">
+          Get Started For Free
+        </a>
+        <a href="mailto:sales@codeclash.io" class="px-8 py-3.5 border border-slate-800 bg-slate-950 text-slate-300 font-bold rounded-full hover:bg-slate-900 transition duration-300">
+          Contact Sales
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
