@@ -1,0 +1,87 @@
+<div class="contest-management-root">
+  <!-- Split columns: left scheduler, right list -->
+  <div class="split-row">
+    
+    <!-- Left column: Scheduler Form -->
+    <div class="scheduler-card card">
+      <div class="card-header">
+        <h3 class="card-title">Schedule New Contest</h3>
+        <span class="card-subtitle">Setup Rated Match, Weekly Duel or Tournament</span>
+      </div>
+      
+      <form (submit)="scheduleContest(); $event.preventDefault();" class="schedule-form">
+        <div class="form-group">
+          <label class="form-label">Contest Name</label>
+          <input type="text" [(ngModel)]="newContestName" name="name" placeholder="e.g. CodeClash Grand Duel #4" class="form-input" required />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Contest Type</label>
+          <select [(ngModel)]="newContestType" name="type" class="form-select">
+            <option value="Rated Match">Rated Match</option>
+            <option value="Weekly Duel">Weekly Duel</option>
+            <option value="Tournament">Tournament</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Date & Time</label>
+          <input type="text" [(ngModel)]="newContestDate" name="date" placeholder="e.g. July 12, 2026, 20:00" class="form-input" required />
+        </div>
+        
+        <button type="submit" class="btn-submit">
+          Schedule Match
+        </button>
+      </form>
+    </div>
+
+    <!-- Right column: Contest Lists -->
+    <div class="list-card card">
+      <div class="card-header">
+        <h3 class="card-title">Contest Board</h3>
+        <span class="card-subtitle">{{ contests.length }} contests loaded</span>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="contests-table">
+          <thead>
+            <tr>
+              <th class="text-left">CONTEST</th>
+              <th class="text-center">STATUS</th>
+              <th class="text-center">PARTICIPANTS</th>
+              <th class="text-center">SCHEDULED TIME</th>
+              <th class="text-right">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let contest of contests">
+              <td>
+                <div class="contest-info">
+                  <span class="contest-name font-bold">{{ contest.name }}</span>
+                  <span class="contest-type text-slate-500 text-xs">{{ contest.type }}</span>
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="{
+                  'badge-ongoing': contest.status === 'Ongoing',
+                  'badge-scheduled': contest.status === 'Scheduled',
+                  'badge-completed': contest.status === 'Completed'
+                }">
+                  {{ contest.status }}
+                </span>
+              </td>
+              <td class="text-center font-mono font-medium">{{ contest.participants }}</td>
+              <td class="text-center font-mono text-xs text-slate-400">{{ contest.dateTime }}</td>
+              <td class="text-right">
+                <button *ngIf="contest.status !== 'Completed'" (click)="cancelContest(contest)" class="btn-cancel" title="Cancel Contest">
+                  Cancel
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

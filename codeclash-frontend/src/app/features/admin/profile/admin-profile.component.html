@@ -1,0 +1,93 @@
+<div class="admin-profile-root">
+  <div class="profile-split-row">
+    
+    <!-- Left Column: Info Profile Card -->
+    <div class="profile-card card">
+      <div class="profile-header">
+        <div class="avatar-circle bg-[#f97316]/10 border border-[#f97316]/25 text-[#f97316]">
+          {{ adminInfo.username.charAt(0) }}
+        </div>
+        <h2 class="profile-username text-white">{{ adminInfo.username }}</h2>
+        <span class="profile-role-badge uppercase">{{ adminInfo.role }}</span>
+      </div>
+
+      <div class="profile-details-list">
+        <div class="detail-item">
+          <span class="detail-label">Email Address</span>
+          <span class="detail-value">{{ adminInfo.email }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Privilege Level</span>
+          <span class="detail-value text-orange-500 font-bold">{{ adminInfo.privilegeTier }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Last Active</span>
+          <span class="detail-value">{{ adminInfo.lastActive }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Console IP</span>
+          <span class="detail-value font-mono">{{ adminInfo.ipAddress }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Settings & Audits -->
+    <div class="profile-actions-column">
+      
+      <!-- Settings Panel Card -->
+      <div class="settings-card card">
+        <div class="card-header">
+          <h3 class="card-title">Console Settings</h3>
+          <span class="card-subtitle">Global administrative settings overrides</span>
+        </div>
+
+        <div class="settings-list">
+          <div *ngFor="let setting of settings" class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name font-bold">{{ setting.name }}</span>
+              <span class="setting-desc text-slate-500 text-xs">{{ setting.description }}</span>
+            </div>
+            
+            <!-- Toggle switch slider -->
+            <button type="button" (click)="toggleSetting(setting)" class="toggle-switch" [class.enabled]="setting.enabled">
+              <span class="toggle-thumb"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Logs Panel Card -->
+      <div class="audit-card card">
+        <div class="card-header">
+          <h3 class="card-title">Recent Activity Audit</h3>
+          <span class="card-subtitle">Platform action log record stream</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th class="text-left">ACTION LOG</th>
+                <th class="text-center">TIMESTAMP</th>
+                <th class="text-right">STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of securityLogs">
+                <td class="font-medium text-slate-300">{{ log.action }}</td>
+                <td class="text-center font-mono text-xs text-slate-500">{{ log.time }}</td>
+                <td class="text-right">
+                  <span class="status-badge" [ngClass]="log.status.toLowerCase() === 'success' || log.status.toLowerCase() === 'completed' || log.status.toLowerCase() === 'approved' ? 'success' : 'failed'">
+                    {{ log.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

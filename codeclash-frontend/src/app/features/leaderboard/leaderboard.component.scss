@@ -1,0 +1,624 @@
+// ─── Variables & Theme Colors ───────────────────────────────────────────────
+$bg:         #0d1117;
+$surface:    #161b22;
+$elevate:    #21262d;
+$border:     #30363d;
+$orange:     #f97316;
+$orange-hover:#ea580c;
+$text-main:  #c9d1d9;
+$text-muted: #8b949e;
+$text-light: #f0f6fc;
+
+.leaderboard-root {
+  background-color: $bg;
+  color: $text-main;
+  min-height: 100vh;
+  padding-top: 110px; // accommodate fixed navbar
+  padding-bottom: 80px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.leaderboard-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+// ─── Main Section (Left) ────────────────────────────────────────────────────
+.leaderboard-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 850;
+    color: $text-light;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .badge-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba($orange, 0.1);
+    border: 1px solid rgba($orange, 0.2);
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $orange;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba($orange, 0.15);
+      border-color: rgba($orange, 0.4);
+    }
+
+    .dropdown-chevron {
+      width: 12px;
+      height: 12px;
+      stroke: $orange;
+    }
+  }
+}
+
+// Tabs Bar
+.tabs-bar {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid $border;
+  margin-bottom: 32px;
+
+  .tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 4px 12px 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-muted;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: $text-light;
+    }
+
+    &.tab-on {
+      color: $orange;
+      border-bottom-color: $orange;
+      text-shadow: 0 0 15px rgba($orange, 0.3);
+    }
+  }
+}
+
+// 🏆 Podiums Layout
+.podium-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding: 20px 0;
+
+  @media (max-width: 576px) {
+    gap: 8px;
+  }
+
+  .podium-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 180px;
+    text-align: center;
+    position: relative;
+
+    .podium-avatar-wrap {
+      position: relative;
+      margin-bottom: 12px;
+
+      .podium-avatar-ring {
+        border: 3px solid transparent;
+        border-radius: 50%;
+        padding: 4px;
+        transition: all 0.3s ease;
+
+        &.highlight-ring {
+          box-shadow: 0 0 25px rgba($orange, 0.25);
+          animation: ring-pulse 2s infinite ease-in-out;
+        }
+
+        .podium-avatar {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          font-weight: 900;
+          
+          @media (max-width: 576px) {
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+          }
+        }
+      }
+
+      .medal-badge {
+        position: absolute;
+        bottom: -6px;
+        right: -6px;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 99px;
+        border: 2px solid $bg;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+
+        &.medal-gold {
+          background: linear-gradient(135deg, #ffd700, #b8860b);
+          color: #000;
+        }
+
+        &.medal-silver {
+          background: linear-gradient(135deg, #e0e0e0, #808080);
+          color: #000;
+        }
+
+        &.medal-bronze {
+          background: linear-gradient(135deg, #cd7f32, #8b4513);
+          color: #fff;
+        }
+
+        @media (max-width: 576px) {
+          font-size: 8px;
+          padding: 2px 6px;
+        }
+      }
+    }
+
+    .crown-icon-svg {
+      position: absolute;
+      top: -30px;
+      width: 24px;
+      height: 24px;
+      fill: #ffd700;
+      filter: drop-shadow(0 2px 8px rgba(#ffd700, 0.4));
+      animation: crown-float 2.5s infinite ease-in-out;
+    }
+
+    .podium-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: $text-light;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .podium-elo {
+      font-size: 12px;
+      font-weight: 800;
+      color: $orange;
+      margin-bottom: 6px;
+    }
+
+    .podium-lang-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: $elevate;
+      color: $text-muted;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: 12px;
+      border: 1px solid $border;
+    }
+
+    .podium-box {
+      width: 100%;
+      background: $surface;
+      border: 1px solid $border;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+
+      .rank-label {
+        font-size: 20px;
+        font-weight: 900;
+        color: $text-muted;
+      }
+    }
+
+    &.rank-1 {
+      max-width: 195px;
+      z-index: 2;
+
+      .podium-box {
+        height: 120px;
+        background: linear-gradient(180deg, $surface 0%, rgba($orange, 0.05) 100%);
+        border-color: rgba($orange, 0.3);
+        box-shadow: 0 -4px 20px rgba($orange, 0.06);
+
+        .rank-label {
+          font-size: 28px;
+          color: $orange;
+          text-shadow: 0 0 10px rgba($orange, 0.2);
+        }
+      }
+    }
+
+    &.rank-2 {
+      .podium-box {
+        height: 85px;
+        .rank-label { font-size: 22px; color: #a0aec0; }
+      }
+    }
+
+    &.rank-3 {
+      .podium-box {
+        height: 65px;
+        .rank-label { font-size: 22px; color: #d69e2e; }
+      }
+    }
+  }
+}
+
+// ─── Table Section ──────────────────────────────────────────────────────────
+.table-container {
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th, td {
+    padding: 14px 20px;
+    font-size: 13px;
+  }
+
+  th {
+    background-color: rgba(255, 255, 255, 0.02);
+    color: $text-muted;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid $border;
+  }
+
+  td {
+    border-bottom: 1px solid rgba($border, 0.5);
+    vertical-align: middle;
+  }
+
+  .data-row {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.015);
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+
+    &.current-user-row {
+      background-color: rgba($orange, 0.04);
+      
+      td {
+        border-bottom-color: rgba($orange, 0.2);
+      }
+
+      .player-name {
+        color: $orange;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .rank-td {
+    width: 60px;
+    padding-right: 0;
+  }
+
+  .rank-badge {
+    font-size: 12px;
+    font-weight: 800;
+    color: $text-muted;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .player-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .player-name {
+      font-weight: 600;
+      color: $text-light;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      .you-tag {
+        font-size: 10px;
+        font-weight: 700;
+        background: rgba($orange, 0.1);
+        border: 1px solid rgba($orange, 0.3);
+        color: $orange;
+        padding: 1px 6px;
+        border-radius: 99px;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  .elo-cell {
+    color: $text-light;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 14px;
+  }
+
+  .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+
+    &.streak-zero {
+      background: none;
+      border: none;
+      color: $text-muted;
+    }
+  }
+
+  .lang-cell-badge {
+    background-color: $elevate;
+    border: 1px solid $border;
+    color: $text-muted;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.text-muted { color: $text-muted !important; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  
+  .empty-icon-svg {
+    width: 44px;
+    height: 44px;
+    display: block;
+    margin: 0 auto 16px;
+    stroke: $text-muted;
+    opacity: 0.6;
+  }
+
+  p {
+    color: $text-muted;
+    font-size: 14px;
+  }
+}
+
+// ─── Sidebar (Right) ────────────────────────────────────────────────────────
+.leaderboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card {
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: $text-light;
+    margin: 0 0 20px 0;
+    letter-spacing: -0.2px;
+  }
+}
+
+// Your Rank Details
+.rank-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .rank-large {
+    font-size: 44px;
+    font-weight: 900;
+    color: $orange;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba($orange, 0.2);
+  }
+
+  .rank-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .rank-total {
+      font-size: 13px;
+      color: $text-muted;
+    }
+
+    .pct-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 1px 8px;
+      border-radius: 99px;
+      width: fit-content;
+    }
+  }
+}
+
+// ELO Sparkline Section
+.elo-spark-section {
+  border-top: 1px solid rgba($border, 0.5);
+  padding-top: 20px;
+
+  .spark-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-muted;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    height: 70px;
+    background-color: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba($border, 0.4);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .spark-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Filter Group & Dropdowns
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+
+    &::after {
+      content: "▾";
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: $text-muted;
+      pointer-events: none;
+    }
+
+    select {
+      width: 100%;
+      background-color: $elevate;
+      border: 1px solid $border;
+      color: $text-light;
+      border-radius: 8px;
+      padding: 10px 32px 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      appearance: none; // remove browser default arrow
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: rgba($orange, 0.5);
+      }
+
+      &:focus {
+        border-color: $orange;
+        box-shadow: 0 0 10px rgba($orange, 0.15);
+      }
+    }
+  }
+}
+
+// ─── Animations ─────────────────────────────────────────────────────────────
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); }
+}

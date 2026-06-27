@@ -1,0 +1,14 @@
+@import "../coding-arena/coding-arena.component.scss";
+
+.arena-body.practice-layout {
+  grid-template-columns: 350px 1fr !important;
+}
+
+.toast-success {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}

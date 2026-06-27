@@ -1,0 +1,70 @@
+<div class="notifications-list-container">
+  <!-- Header -->
+  <div class="list-header border-b border-slate-900/60">
+    <span class="header-title">Notifications</span>
+    <div class="header-actions" *ngIf="(notifications$ | async)?.length">
+      <button (click)="markAllAsRead($event)" class="btn-action text-orange-500 hover:text-orange-400">Read All</button>
+      <span class="divider text-slate-700">&middot;</span>
+      <button (click)="clearAll($event)" class="btn-action text-slate-500 hover:text-slate-300">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="list-body">
+    <!-- List -->
+    <div *ngIf="(notifications$ | async)?.length; else emptyState" class="notifications-list">
+      <div *ngFor="let notif of notifications$ | async" 
+           class="notification-item border-b border-slate-900/30" 
+           [class.unread]="!notif.read"
+           [class]="notif.type">
+        
+        <!-- Type indicators Left Border or Icon -->
+        <div class="item-accent"></div>
+
+        <div class="item-content-wrap">
+          <!-- Text content -->
+          <div class="item-main">
+            <span class="item-title text-slate-100">{{ notif.title }}</span>
+            <p class="item-desc text-slate-400">{{ notif.message }}</p>
+            <span class="item-time text-[10px] text-slate-500">{{ notif.time | date:'shortTime' }}</span>
+          </div>
+
+          <!-- Item actions -->
+          <div class="item-actions">
+            <!-- Mark read button -->
+            <button *ngIf="!notif.read" 
+                    (click)="markAsRead(notif.id, $event)" 
+                    class="btn-item-action text-slate-500 hover:text-green-400" 
+                    title="Mark as Read">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+            <!-- Delete button -->
+            <button (click)="clearNotification(notif.id, $event)" 
+                    class="btn-item-action text-slate-500 hover:text-red-400" 
+                    title="Delete">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <div class="empty-icon-wrap bg-slate-900/30 border border-slate-900/60">
+          <svg class="w-7 h-7 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </div>
+        <span class="empty-title text-slate-300">You're all caught up!</span>
+        <p class="empty-desc text-slate-500">No new notifications at this time.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

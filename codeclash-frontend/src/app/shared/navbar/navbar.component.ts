@@ -7,6 +7,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NavbarComponent implements OnInit {
   isDarkMode = true;
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
 
   ngOnInit() {
     const savedTheme = localStorage.getItem('theme');

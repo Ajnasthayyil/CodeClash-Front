@@ -1,1 +1,328 @@
-<p>profile works!</p>
+<div class="profile-root">
+  <!-- Profile Hero Banner -->
+  <section class="profile-hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <!-- Avatar -->
+        <div class="avatar-wrap">
+          <div class="avatar-box">
+            {{ user.initials }}
+          </div>
+          <span class="tier-badge">{{ user.tier }}</span>
+        </div>
+
+        <!-- Info -->
+        <div class="hero-info">
+          <div class="name-edit-row flex items-center gap-3">
+            <h1 class="hero-name">{{ user.name }}</h1>
+            <button (click)="openEditModal()" class="btn-edit-profile" title="Edit Profile Details">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>Edit Details</span>
+            </button>
+          </div>
+          <p class="hero-bio">{{ user.bio }}</p>
+          <div class="hero-meta">
+            <!-- Designation -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>{{ user.designation }}</span>
+            </span>
+            <!-- Email -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>{{ user.email }}</span>
+            </span>
+            <!-- Location -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>{{ user.location }}</span>
+            </span>
+            <!-- Joined Date -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Joined {{ user.joined }}</span>
+            </span>
+            <!-- Handle -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+              </svg>
+              <span>@{{ user.handle }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ELO Status -->
+      <div class="hero-elo">
+        <span class="elo-label">ELO Rating</span>
+        <span class="elo-value">{{ user.eloRatingDisplay }}</span>
+        <div class="elo-track">
+          <div class="elo-fill"></div>
+        </div>
+        <span class="elo-rank">Rank #422</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Strip -->
+  <section class="stats-strip">
+    <div class="stats-inner">
+      <div *ngFor="let item of stats; let last = last" class="stat-item" [class.stat-accent]="item.accent">
+        <span class="stat-num">{{ item.value }}</span>
+        <span class="stat-lbl">{{ item.label }}</span>
+        <div *ngIf="!last" class="stat-divider"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Wrap -->
+  <div class="content-wrap">
+    <!-- Tabs Navigation Bar -->
+    <div class="tabs-bar">
+      <div class="tabs-group">
+        <button (click)="setTab('overview')" class="tab" [class.tab-on]="activeTab === 'overview'">Overview</button>
+        <button (click)="setTab('history')" class="tab" [class.tab-on]="activeTab === 'history'">Match History</button>
+        <button (click)="setTab('achievements')" class="tab" [class.tab-on]="activeTab === 'achievements'">Achievements</button>
+        <button (click)="setTab('stats')" class="tab" [class.tab-on]="activeTab === 'stats'">Detailed Stats</button>
+      </div>
+    </div>
+
+    <!-- Tab View Container -->
+    <div class="tab-body" [ngSwitch]="activeTab">
+      
+      <!-- Overview Tab -->
+      <div *ngSwitchCase="'overview'" class="overview-grid">
+        
+        <!-- Left Column: Language Preference & ELO chart -->
+        <div class="flex flex-col gap-4">
+          <!-- Card: Languages Preference -->
+          <div class="card">
+            <h2 class="card-title">Language Preference</h2>
+            <div class="donut-layout">
+              <canvas #donutCanvas class="donut-canvas"></canvas>
+              <ul class="lang-list">
+                <li *ngFor="let lang of languages" class="lang-row">
+                  <span class="lang-dot" [style.backgroundColor]="lang.color"></span>
+                  <span class="lang-name">{{ lang.name }}</span>
+                  <span class="lang-pct">{{ lang.pct }}%</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card: ELO progress chart -->
+          <div class="card mt-16">
+            <h2 class="card-title">ELO Progress</h2>
+            <div class="elo-wrap">
+              <canvas #eloCanvas class="elo-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Recent Battles list -->
+        <div class="card">
+          <div class="card-header-row">
+            <h2 class="card-title mb-0">Recent Activity</h2>
+            <span class="record-tag">Recent Battles</span>
+          </div>
+
+          <div class="recent-list">
+            <div *ngFor="let match of matchHistory" class="recent-row">
+              <div class="recent-left">
+                <span class="result-dot" [class.dot-win]="match.result === 'Win'" [class.dot-loss]="match.result === 'Loss'"></span>
+                <div class="recent-vs">
+                  <span class="recent-opp">vs {{ match.opponent }}</span>
+                  <span class="recent-prob">{{ match.problem }}</span>
+                </div>
+              </div>
+
+              <div class="recent-right">
+                <span class="recent-lang">{{ match.language }}</span>
+                <span class="recent-time">{{ match.duration }}</span>
+                <span class="recent-date">{{ match.date }}</span>
+                <span class="recent-elo" [class.pos]="match.eloChange > 0" [class.neg]="match.eloChange < 0">
+                  {{ match.eloChange > 0 ? '+' : '' }}{{ match.eloChange }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Match History Tab -->
+      <div *ngSwitchCase="'history'" class="card card-wide">
+        <h2 class="card-title">Battle Records</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Opponent</th>
+                <th>Problem</th>
+                <th class="tc">Result</th>
+                <th class="tc">Score</th>
+                <th>Language</th>
+                <th class="tr">Duration</th>
+                <th class="tr">ELO Change</th>
+                <th class="tr">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let match of matchHistory" class="data-row">
+                <td>
+                  <div class="opp-cell">
+                    <span class="mini-avatar">{{ match.opponent.charAt(0) }}</span>
+                    <span>{{ match.opponent }}</span>
+                  </div>
+                </td>
+                <td class="prob-td" [title]="match.problem">{{ match.problem }}</td>
+                <td class="tc">
+                  <span class="badge-result" [class.badge-win]="match.result === 'Win'" [class.badge-loss]="match.result === 'Loss'">
+                    {{ match.result | uppercase }}
+                  </span>
+                </td>
+                <td class="tc mono" [class.score-hi]="match.score === 100">{{ match.score }}/100</td>
+                <td class="lang-td">{{ match.language }}</td>
+                <td class="tr mono">{{ match.duration }}</td>
+                <td class="tr mono" [class.elo-p]="match.eloChange > 0" [class.elo-n]="match.eloChange < 0">
+                  {{ match.eloChange > 0 ? '+' : '' }}{{ match.eloChange }}
+                </td>
+                <td class="tr muted-td">{{ match.date }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Achievements Tab -->
+      <div *ngSwitchCase="'achievements'">
+        <div class="ach-header-row">
+          <h2 class="section-title">Unlocked Accomplishments</h2>
+          <span class="ach-earned">Earned: {{ earnedCount }}/{{ achievements.length }}</span>
+        </div>
+
+        <div class="ach-grid">
+          <div *ngFor="let ach of achievements" class="ach-card" [class.ach-locked]="!ach.earned">
+            <span class="ach-icon">{{ ach.earned ? ach.icon : '🔒' }}</span>
+            <div class="ach-content">
+              <div class="ach-top">
+                <span class="ach-name">{{ ach.title }}</span>
+                <span class="rarity" [class]="getRarityClass(ach.rarity)">{{ ach.rarity }}</span>
+              </div>
+              <p class="ach-desc">{{ ach.desc }}</p>
+            </div>
+            <div *ngIf="!ach.earned" class="lock-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Stats Tab -->
+      <div *ngSwitchCase="'stats'" class="stats-grid">
+        <!-- Solving progress -->
+        <div class="card">
+          <h2 class="card-title">Problem Solving Breakdown</h2>
+          <div class="bars">
+            <div *ngFor="let stat of detailedStats" class="bar-row">
+              <div class="bar-top">
+                <span class="bar-lbl">
+                  <span class="bar-dot" [style.backgroundColor]="stat.color"></span>
+                  {{ stat.label }}
+                </span>
+                <span class="bar-val">
+                  {{ stat.value }} <span class="bar-max">/ {{ stat.max }}</span>
+                </span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" [style.backgroundColor]="stat.color" [style.width.%]="(stat.value / stat.max) * 100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Summary Stats Grid -->
+        <div class="card quick-card flex flex-col justify-between">
+          <h2 class="card-title">Quick Stats Summary</h2>
+          <div class="quick-grid">
+            <div class="quick-item">
+              <span class="q-num">124</span>
+              <span class="q-lbl">Win Count</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">62</span>
+              <span class="q-lbl">Loss Count</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">98%</span>
+              <span class="q-lbl">Max Accuracy</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">5.5m</span>
+              <span class="q-lbl">Avg Duration</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">14</span>
+              <span class="q-lbl">Trophies</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">99.2%</span>
+              <span class="q-lbl">Percentile</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal Overlay -->
+<div class="modal-overlay" *ngIf="isEditModalOpen">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Personal Details</h3>
+      <button (click)="closeEditModal()" class="btn-close-modal" title="Dismiss">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <form (ngSubmit)="saveProfile()" class="modal-form">
+      <div class="form-group">
+        <label for="editName">Full Name</label>
+        <input type="text" id="editName" name="name" [(ngModel)]="editUser.name" class="form-input" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="editEmail">Email Address</label>
+        <input type="email" id="editEmail" name="email" [(ngModel)]="editUser.email" class="form-input" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="editDesignation">Designation</label>
+        <input type="text" id="editDesignation" name="designation" [(ngModel)]="editUser.designation" class="form-input" required />
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" (click)="closeEditModal()" class="btn-cancel">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>

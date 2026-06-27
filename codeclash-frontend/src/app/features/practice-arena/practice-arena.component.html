@@ -1,0 +1,147 @@
+<!-- PRACTICE ARENA — 2-Panel practice workspace layout -->
+<div class="arena-shell">
+
+  <!-- ══════════════════ 2-PANEL BODY ══════════════════ -->
+  <div class="arena-body practice-layout">
+
+    <!-- ─── LEFT: Problem Description ─── -->
+    <aside class="panel panel-left">
+      <div class="panel-tabs">
+        <button (click)="activePanel = 'problem'" class="panel-tab" [class.tab-active]="activePanel === 'problem'">Description</button>
+        <button (click)="activePanel = 'hints'"   class="panel-tab" [class.tab-active]="activePanel === 'hints'">Hints</button>
+      </div>
+
+      <div class="panel-scroll">
+        <!-- Title + Difficulty -->
+        <div class="problem-header">
+          <h2 class="problem-title">{{ problem.title }}</h2>
+          <span class="diff-badge" [class]="getDifficultyClass(problem.difficulty)">{{ problem.difficulty }}</span>
+        </div>
+
+        <!-- Tags -->
+        <div class="tag-row">
+          <span *ngFor="let tag of problem.tags" class="tag-chip">{{ tag }}</span>
+        </div>
+
+        <!-- Description -->
+        <div class="problem-body" [innerHTML]="problem.description">
+        </div>
+
+        <!-- Examples -->
+        <div *ngFor="let ex of problem.examples; let i = index" class="example-box">
+          <div class="example-label">Example {{ i + 1 }}</div>
+          <div class="example-body">
+            <p><span class="ex-key">Input: </span><code class="ex-val">{{ ex.input }}</code></p>
+            <p><span class="ex-key">Output: </span><code class="ex-val">{{ ex.output }}</code></p>
+            <p *ngIf="ex.explanation" class="ex-explain">{{ ex.explanation }}</p>
+          </div>
+        </div>
+
+        <!-- Constraints -->
+        <div class="constraints-section">
+          <p class="constraints-title">Constraints</p>
+          <ul class="constraints-list">
+            <li *ngFor="let c of problem.constraints">{{ c }}</li>
+          </ul>
+        </div>
+
+        <!-- Hints (shown only when hints tab active) -->
+        <div *ngIf="activePanel === 'hints'" class="hints-wrap">
+          <div class="hint-card">
+            <div class="hint-label">Hint 1</div>
+            <p>Read the problem requirements carefully and think about boundary values.</p>
+          </div>
+          <div class="hint-card">
+            <div class="hint-label">Hint 2</div>
+            <p>Optimize your runtime and space complexity; standard arrays can be optimized via binary search or hash-maps.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- My progress (pinned to bottom) -->
+      <div class="my-progress">
+        <div class="progress-row">
+          <span class="progress-label">Practice Progress</span>
+          <span class="progress-frac">{{ myTestsPassed }} / {{ totalTests }} tests</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill prog-fill-blue" [style.width.%]="myFillPercent"></div></div>
+      </div>
+    </aside>
+
+    <!-- ─── CENTER: Code Editor ─── -->
+    <main class="panel panel-center">
+
+      <!-- Editor top bar: language + autosave -->
+      <div class="editor-topbar">
+        <div class="lang-tabs">
+          <button *ngFor="let lang of languages"
+                  (click)="selectLanguage(lang)"
+                  class="lang-tab"
+                  [class.lang-active]="selectedLanguage === lang">
+            {{ lang }}
+          </button>
+        </div>
+        <div class="autosave-wrap">
+          <span class="autosave-text" [class.saved]="autoSaveIndicator">
+            <span *ngIf="autoSaveIndicator" class="save-dot"></span>
+            {{ autoSaveIndicator ? 'saved' : 'auto-save' }}
+          </span>
+          <button class="toggle" [class.toggle-on]="autoSave" (click)="autoSave = !autoSave">
+            <span class="toggle-knob"></span>
+          </button>
+          <svg class="check-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+
+      <!-- Code editor: line numbers + textarea -->
+      <div class="editor-area">
+        <div class="line-nums" aria-hidden="true">
+          <div *ngFor="let ln of codeLines; let i = index" class="ln">{{ i + 1 }}</div>
+        </div>
+        <textarea
+          #codeEditor
+          class="code-area"
+          [(ngModel)]="currentCode"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        ></textarea>
+      </div>
+
+      <!-- Terminal output -->
+      <div class="terminal-wrap">
+        <div class="terminal-bar">
+          <div class="mac-dots">
+            <span class="mac-dot mac-red"></span>
+            <span class="mac-dot mac-yellow"></span>
+            <span class="mac-dot mac-green"></span>
+          </div>
+          <span class="terminal-title">$ Test Suite Output</span>
+          <span class="sandbox-tag">Sandbox v3.1</span>
+        </div>
+        <pre class="terminal-out">{{ terminalOutput }}</pre>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button (click)="runCode()" [disabled]="isRunning || isSubmitting" class="btn-run">
+          <span *ngIf="isRunning" class="spin"></span>
+          <svg *ngIf="!isRunning" class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          {{ isRunning ? 'Running...' : 'Run Code' }}
+        </button>
+        <button (click)="submitSolution()" [disabled]="isRunning || isSubmitting" class="btn-submit">
+          <span *ngIf="isSubmitting" class="spin spin-white"></span>
+          {{ isSubmitting ? 'Submitting...' : 'Submit Solution' }}
+        </button>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Success toast notification -->
+  <div *ngIf="showSubmitSuccess" class="toast-success shadow-lg">
+    🎉 All {{ totalTests }}/{{ totalTests }} test cases passed successfully!
+  </div>
+
+</div>

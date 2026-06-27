@@ -1,0 +1,52 @@
+<div class="bg-[#161b22]/60 border border-slate-800 hover:border-orange-500/30 rounded-2xl p-8 shadow-2xl hover:shadow-orange-500/5 transition-all duration-300 backdrop-blur-md">
+  <!-- Card Header Branding -->
+  <div class="flex items-center gap-3.5 mb-8">
+    <div class="w-12 h-12 rounded-xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center text-orange-500 font-mono font-bold text-xl">
+      &lt;/&gt;
+    </div>
+    <div>
+      <h2 class="text-xl font-black text-white">CodeClash</h2>
+      <p class="text-xs text-slate-500">Competitive coding arena</p>
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <h3 class="text-lg font-bold text-white mb-2">Verify OTP Code</h3>
+    <p class="text-xs text-slate-400 leading-relaxed font-semibold">
+      Please enter the 6-digit verification code sent to your work email address.
+    </p>
+  </div>
+
+  <!-- Form -->
+  <form (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+    <!-- Error banner -->
+    <div *ngIf="errorMessage" class="p-3 bg-red-500/10 border border-red-500/25 text-red-400 rounded-xl text-xs font-semibold">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Success banner -->
+    <div *ngIf="successMessage" class="p-3 bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 rounded-xl text-xs font-semibold">
+      {{ successMessage }}
+    </div>
+
+    <!-- OTP Code Input -->
+    <div class="flex flex-col gap-1.5">
+      <label for="otpCode" class="text-xs font-bold text-slate-200">6-Digit Code</label>
+      <input type="text" id="otpCode" name="otpCode" [(ngModel)]="otpCode" maxlength="6" placeholder="000000" [disabled]="isLoading" class="px-4 py-2.5 bg-[#0d1117] border border-slate-700 rounded-xl text-sm text-white font-medium placeholder-slate-400 text-center tracking-[1em] focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 hover:border-slate-500 transition duration-200">
+    </div>
+
+    <!-- Submit button (Verify) -->
+    <button type="submit" [disabled]="isLoading" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-orange-600 to-amber-500 text-white font-bold rounded-xl hover:opacity-90 transition duration-200 disabled:opacity-65">
+      <span *ngIf="isLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full h-4 w-4"></span>
+      {{ isLoading ? 'Verifying OTP...' : 'Verify & Continue' }}
+    </button>
+  </form>
+
+  <div class="flex flex-col gap-2 mt-8 text-center text-xs font-bold text-slate-400">
+    <p>
+      Didn't receive the code?
+      <button type="button" (click)="resendCode()" class="text-orange-500 hover:underline">Resend code</button>
+    </p>
+    <a routerLink="/auth/login" class="text-slate-500 hover:text-white transition duration-200 mt-2">Back to login</a>
+  </div>
+</div>

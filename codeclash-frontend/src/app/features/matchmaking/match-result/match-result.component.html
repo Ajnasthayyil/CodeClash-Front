@@ -1,0 +1,67 @@
+<div class="result-root">
+  <div class="result-container">
+    
+    <!-- Header Section -->
+    <div class="result-header">
+      <h1 class="victory-title">Victory!</h1>
+      <p class="contest-subtitle">{{ problemName }} &middot; {{ contestType }} &middot; {{ contestDate }}</p>
+    </div>
+
+    <!-- Competitors Row -->
+    <div class="competitors-row">
+      <!-- Player Card (YOU) -->
+      <div class="competitor-card you-card">
+        <div class="avatar-box bg-[#f97316]/10 border border-[#f97316]/25 text-[#f97316]">
+          <span class="avatar-initial">{{ you.initial }}</span>
+        </div>
+        <h3 class="competitor-name text-white">{{ you.name }}</h3>
+        <span class="competitor-elo font-mono text-slate-400">{{ you.elo }} ELO</span>
+        <div class="winner-badge">Winner</div>
+      </div>
+
+      <!-- Opponent Card -->
+      <div class="competitor-card opponent-card">
+        <div class="avatar-box bg-[#3b82f6]/10 border border-[#3b82f6]/25 text-[#3b82f6]">
+          <span class="avatar-initial">{{ opponent.initial }}</span>
+        </div>
+        <h3 class="competitor-name text-white">{{ opponent.name }}</h3>
+        <span class="competitor-elo font-mono text-slate-400">{{ opponent.elo }} ELO</span>
+      </div>
+    </div>
+
+    <!-- Comparison Table Card -->
+    <div class="metrics-table-card card">
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th class="text-left font-bold tracking-wider text-slate-500 text-xs">METRIC</th>
+            <th class="text-center font-bold tracking-wider text-[#f97316] text-xs">YOU</th>
+            <th class="text-center font-bold tracking-wider text-slate-500 text-xs">OPPONENT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let metric of metrics">
+            <td class="metric-label text-slate-300">{{ metric.label }}</td>
+            <td class="metric-value you-value text-[#f97316] font-bold font-mono">{{ metric.youValue }}</td>
+            <td class="metric-value opponent-value text-slate-500 font-medium font-mono">{{ metric.opponentValue }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ELO Rating Change Section -->
+    <div class="rating-change-section">
+      <span class="rating-change-label text-slate-500 uppercase tracking-widest">Rating Change</span>
+      <h2 class="rating-change-delta text-[#f97316] font-extrabold">+{{ eloDelta }} ⬆️</h2>
+      <p class="rating-change-range font-mono text-slate-400">{{ eloStart }} &rarr; {{ eloEnd }} ELO</p>
+    </div>
+
+    <!-- Footer Action Buttons -->
+    <div class="actions-row">
+      <button type="button" (click)="viewAiReview()" class="btn-dark hover:text-white">View AI Review</button>
+      <button type="button" (click)="requestRematch()" class="btn-gradient text-white">Rematch</button>
+      <button type="button" (click)="goToDashboard()" class="btn-dark hover:text-white">Dashboard</button>
+    </div>
+
+  </div>
+</div>

@@ -1,1 +1,221 @@
-<p>leaderboard works!</p>
+<div class="leaderboard-root">
+  <div class="leaderboard-container">
+    
+    <!-- ═════ Main Leaderboard Panel (Left) ═════ -->
+    <div class="leaderboard-main">
+      
+      <!-- Header Row -->
+      <div class="leaderboard-header">
+        <h1 class="page-title">Leaderboard</h1>
+        <div class="badge-dropdown">
+          <span class="badge-text">
+            <svg class="h-4 w-4 mr-1 inline-block text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4m-4 0H8m12 9a2 2 0 11-4 0v-2h4v2zm-12-2v2a2 2 0 11-4 0v-2h4z" />
+            </svg>
+            Leaderboard
+          </span>
+          <svg class="dropdown-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-bar">
+        <button *ngFor="let tab of tabs" 
+                (click)="setTab(tab)" 
+                [class.tab-on]="activeTab === tab" 
+                class="tab">
+          {{ tab }}
+        </button>
+      </div>
+
+      <!-- Podium Section (Top 3 Players) -->
+      <div class="podium-section" *ngIf="topThree.length > 0">
+        
+        <!-- Podium Rank #2 (Left) -->
+        <div class="podium-card rank-2" *ngIf="topThree[1]">
+          <div class="podium-avatar-wrap">
+            <div class="podium-avatar-ring" [style.border-color]="topThree[1].avatarColor">
+              <div class="podium-avatar" [style.background]="topThree[1].avatarColor + '20'" [style.color]="topThree[1].avatarColor">
+                {{ topThree[1].initial }}
+              </div>
+            </div>
+            <div class="medal-badge medal-silver">2nd</div>
+          </div>
+          <span class="podium-name">{{ topThree[1].name }}</span>
+          <span class="podium-elo">{{ topThree[1].elo }} ELO</span>
+          <span class="podium-lang-badge">{{ topThree[1].lang }}</span>
+          <div class="podium-box">
+            <span class="rank-label">#2</span>
+          </div>
+        </div>
+
+        <!-- Podium Rank #1 (Center - Taller & Elevated) -->
+        <div class="podium-card rank-1" *ngIf="topThree[0]">
+          <div class="crown-icon-svg">
+            <svg fill="currentColor" viewBox="0 0 24 24" stroke="none">
+              <path d="M12 2l3 6 6-1-4 6 5 7H2l5-7-4-6 6 1z" />
+            </svg>
+          </div>
+          <div class="podium-avatar-wrap">
+            <div class="podium-avatar-ring highlight-ring" [style.border-color]="topThree[0].avatarColor">
+              <div class="podium-avatar" [style.background]="topThree[0].avatarColor + '20'" [style.color]="topThree[0].avatarColor">
+                {{ topThree[0].initial }}
+              </div>
+            </div>
+            <div class="medal-badge medal-gold">1st</div>
+          </div>
+          <span class="podium-name">{{ topThree[0].name }}</span>
+          <span class="podium-elo">{{ topThree[0].elo }} ELO</span>
+          <span class="podium-lang-badge">{{ topThree[0].lang }}</span>
+          <div class="podium-box highlight-box">
+            <span class="rank-label">#1</span>
+          </div>
+        </div>
+
+        <!-- Podium Rank #3 (Right) -->
+        <div class="podium-card rank-3" *ngIf="topThree[2]">
+          <div class="podium-avatar-wrap">
+            <div class="podium-avatar-ring" [style.border-color]="topThree[2].avatarColor">
+              <div class="podium-avatar" [style.background]="topThree[2].avatarColor + '20'" [style.color]="topThree[2].avatarColor">
+                {{ topThree[2].initial }}
+              </div>
+            </div>
+            <div class="medal-badge medal-bronze">3rd</div>
+          </div>
+          <span class="podium-name">{{ topThree[2].name }}</span>
+          <span class="podium-elo">{{ topThree[2].elo }} ELO</span>
+          <span class="podium-lang-badge">{{ topThree[2].lang }}</span>
+          <div class="podium-box">
+            <span class="rank-label">#3</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Leaderboard Table (Ranks 4+) -->
+      <div class="table-container">
+        <table class="data-table" *ngIf="filteredPlayers.length > 0; else noPlayers">
+          <thead>
+            <tr>
+              <th class="rank-th">#</th>
+              <th>PLAYER</th>
+              <th class="text-right">ELO</th>
+              <th class="text-right text-muted">W/L</th>
+              <th class="text-right text-muted">BATTLES</th>
+              <th class="text-center text-muted">STREAK</th>
+              <th class="text-center">LANG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of filteredPlayers" 
+                [class.current-user-row]="p.isCurrentUser" 
+                class="data-row">
+              <td class="rank-td">
+                <span class="rank-badge" [class.gold-rank]="p.rank === 1" [class.silver-rank]="p.rank === 2" [class.bronze-rank]="p.rank === 3">
+                  {{ p.rank }}
+                </span>
+              </td>
+              <td>
+                <div class="player-cell">
+                  <div class="avatar-sm" [style.background-color]="p.avatarColor + '20'" [style.color]="p.avatarColor">
+                    {{ p.initial }}
+                  </div>
+                  <span class="player-name">
+                    {{ p.name }}
+                    <span class="you-tag" *ngIf="p.isCurrentUser">You</span>
+                  </span>
+                </div>
+              </td>
+              <td class="text-right font-bold elo-cell">{{ p.elo }}</td>
+              <td class="text-right text-muted">{{ p.wl }}</td>
+              <td class="text-right text-muted">{{ p.battles }}</td>
+              <td class="text-center streak-cell">
+                <span class="streak-badge" *ngIf="p.streak > 0">
+                  <svg class="h-3 w-3 mr-1 inline-block text-red-500 fill-current" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                  </svg>
+                  {{ p.streak }}
+                </span>
+                <span class="streak-badge streak-zero" *ngIf="p.streak === 0">-</span>
+              </td>
+              <td class="text-center">
+                <span class="lang-cell-badge">{{ p.lang }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <ng-template #noPlayers>
+          <div class="empty-state">
+            <svg class="empty-icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p>No players matched your active filters.</p>
+          </div>
+        </ng-template>
+      </div>
+
+    </div>
+
+    <!-- ═════ Sidebar Options (Right) ═════ -->
+    <div class="leaderboard-sidebar">
+      
+      <!-- Your Rank Card -->
+      <div class="card rank-card">
+        <h3 class="card-title">Your Rank</h3>
+        <div class="rank-summary">
+          <div class="rank-large">#7</div>
+          <div class="rank-details">
+            <span class="rank-total">of 48,293 players</span>
+            <span class="pct-badge">Top 5%</span>
+          </div>
+        </div>
+        
+        <!-- ELO Sparkline Section -->
+        <div class="elo-spark-section">
+          <span class="spark-title">ELO History (30d)</span>
+          <div class="canvas-wrap">
+            <canvas #eloSparkline class="spark-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Card -->
+      <div class="card filter-card">
+        <h3 class="card-title">Filters</h3>
+        
+        <div class="filter-group">
+          <label class="filter-label">Country</label>
+          <div class="select-wrapper">
+            <select [(ngModel)]="selectedCountry" (change)="applyFilters()">
+              <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Language</label>
+          <div class="select-wrapper">
+            <select [(ngModel)]="selectedLanguage" (change)="applyFilters()">
+              <option *ngFor="let l of languages" [value]="l">{{ l === 'All' ? 'All Languages' : l }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Time Period</label>
+          <div class="select-wrapper">
+            <select [(ngModel)]="selectedTimePeriod" (change)="applyFilters()">
+              <option *ngFor="let t of timePeriods" [value]="t">{{ t === 'All' ? 'All Time' : t }}</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -1,154 +1,266 @@
-<div class="min-h-screen bg-[#000000] text-slate-100 font-sans pt-28 pb-20 px-6">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-      <div>
-        <h1 class="text-3xl font-extrabold text-white">Recruitment & Clash Console</h1>
-        <p class="text-sm text-slate-400">Monitor active developer challenges, tournament scorecards and screen pipeline metrics.</p>
-      </div>
+<div class="min-h-screen bg-[#0d1117] text-slate-100 font-sans pt-24 pb-20 px-4 sm:px-8">
+  <div class="max-w-[1600px] mx-auto">
 
-      <div class="flex items-center gap-3">
-        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/25 text-violet-400 text-xs font-semibold">
-          <span class="h-2 w-2 rounded-full bg-violet-400 animate-pulse"></span>
-          Assess System Live
-        </span>
-        <button class="px-4 py-2 bg-violet-600 text-white font-bold rounded-xl text-sm hover:bg-violet-500 hover:shadow-[0_0_15px_rgba(124,58,237,0.25)] transition duration-200">
+    <!-- ===== HEADER ===== -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-500/10 border border-orange-500/25 text-orange-400 text-[11px] font-bold tracking-wide">
+            <span class="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse"></span>
+            LIVE
+          </span>
+          <span class="text-xs text-slate-500">Clash &amp; Recruitment Console</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Recruitment &amp; Clash Console</h1>
+        <p class="text-sm text-slate-400 mt-1">Monitor active developer challenges, tournament scorecards and screen pipeline metrics.</p>
+      </div>
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <button class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-900 text-slate-300 font-semibold rounded-xl text-sm hover:bg-slate-800 border border-slate-800 transition duration-200">
+          Export Report
+        </button>
+        <button class="flex-1 sm:flex-none px-4 py-2.5 bg-orange-600 text-white font-bold rounded-xl text-sm hover:bg-orange-500 hover:shadow-[0_0_15px_rgba(249,115,22,0.25)] transition duration-200">
           + Create Challenge
         </button>
       </div>
     </div>
 
-    <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <!-- ===== STATS GRID ===== -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+
       <!-- Stat 1 -->
-      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Total Assessments</span>
-        <div class="flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold text-white">{{ totalAssessments }}</span>
-          <span class="text-xs text-violet-400 font-semibold">+12 this week</span>
+      <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 hover:border-orange-500/20 transition duration-300 group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Total Assessments</span>
+          <div class="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 text-orange-500 fill-current" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
         </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-extrabold text-white">{{ totalAssessments }}</span>
+        </div>
+        <span class="text-[11px] text-orange-400 font-semibold">↑ +12 this week</span>
       </div>
 
       <!-- Stat 2 -->
-      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Active Challenges</span>
-        <div class="flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold text-white">{{ activeChallenges }}</span>
-          <span class="text-xs text-indigo-400 font-semibold">4 languages code</span>
+      <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 hover:border-orange-500/20 transition duration-300 group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Active Challenges</span>
+          <div class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 text-amber-500 fill-current" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
         </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-extrabold text-white">{{ activeChallenges }}</span>
+        </div>
+        <span class="text-[11px] text-amber-400 font-semibold">4 languages active</span>
       </div>
 
       <!-- Stat 3 -->
-      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Avg. Completion Rate</span>
-        <div class="flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold text-violet-500">{{ avgCompletionRate }}</span>
-          <span class="text-xs text-violet-400 font-semibold">98.4% uptime</span>
+      <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 hover:border-orange-500/20 transition duration-300 group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Avg. Completion</span>
+          <div class="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 text-orange-500 fill-current" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
         </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-extrabold text-orange-500">{{ avgCompletionRate }}</span>
+        </div>
+        <span class="text-[11px] text-orange-400 font-semibold">98.4% uptime</span>
       </div>
 
       <!-- Stat 4 -->
-      <div class="p-6 rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Multiplayer Matches</span>
-        <div class="flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold text-white">{{ newMatches }}</span>
-          <span class="text-xs text-amber-400 font-semibold">Live Arenas</span>
+      <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 hover:border-orange-500/20 transition duration-300 group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Live Matches</span>
+          <div class="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
+            <span class="h-2 w-2 rounded-full bg-orange-500 animate-ping inline-block"></span>
+          </div>
         </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-extrabold text-white">{{ newMatches }}</span>
+        </div>
+        <span class="text-[11px] text-amber-400 font-semibold">Live arenas open</span>
       </div>
     </div>
 
-    <!-- Main Section Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <!-- Candidates Scorecard Table -->
-      <div class="lg:col-span-8 bg-[#02040a] border border-slate-900 rounded-2xl p-6 shadow-lg shadow-black/40">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-950 mb-6">
-          <h3 class="text-lg font-bold text-white">Recent Candidate Submissions</h3>
-          <a href="#" class="text-xs text-violet-500 hover:underline font-bold">View all submissions</a>
+    <!-- ===== MAIN GRID ===== -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+      <!-- LEFT COLUMN (submissions + skill metrics) -->
+      <div class="xl:col-span-8 flex flex-col gap-6">
+
+        <!-- Candidate Submissions Table -->
+        <div class="bg-[#161b22] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-850 mb-5">
+            <h3 class="text-base sm:text-lg font-bold text-white">Recent Candidate Submissions</h3>
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+              <button (click)="activeTab = 'all'"
+                [class]="activeTab === 'all' ? 'px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold whitespace-nowrap' : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 border border-slate-900 text-xs font-semibold whitespace-nowrap transition duration-200'">
+                All ({{ candidates.length }})
+              </button>
+              <button (click)="activeTab = 'hired'"
+                [class]="activeTab === 'hired' ? 'px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold whitespace-nowrap' : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 border border-slate-900 text-xs font-semibold whitespace-nowrap transition duration-200'">
+                Hired
+              </button>
+              <button (click)="activeTab = 'evaluating'"
+                [class]="activeTab === 'evaluating' ? 'px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold whitespace-nowrap' : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 border border-slate-900 text-xs font-semibold whitespace-nowrap transition duration-200'">
+                Evaluating
+              </button>
+              <button (click)="activeTab = 'rejected'"
+                [class]="activeTab === 'rejected' ? 'px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-bold whitespace-nowrap' : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 border border-slate-900 text-xs font-semibold whitespace-nowrap transition duration-200'">
+                Rejected
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto -mx-2 sm:mx-0">
+            <table class="w-full text-left text-sm text-slate-300 min-w-[540px]">
+              <thead>
+                <tr class="text-[11px] text-slate-600 uppercase font-extrabold border-b border-slate-900/50">
+                  <th class="py-3 pl-2">Candidate</th>
+                  <th class="py-3 hidden sm:table-cell">Role</th>
+                  <th class="py-3 text-center">Score</th>
+                  <th class="py-3">Status</th>
+                  <th class="py-3 text-right pr-2">Completed</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-900/50">
+                <tr *ngFor="let candidate of filteredCandidates"
+                    class="hover:bg-slate-950/40 transition duration-150 group">
+                  <!-- Avatar + Name -->
+                  <td class="py-3.5 pl-2">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 text-xs font-bold flex-shrink-0">
+                        {{ candidate.avatar }}
+                      </div>
+                      <div>
+                        <p class="font-semibold text-white text-sm leading-tight">{{ candidate.name }}</p>
+                        <p class="text-[11px] text-slate-500 font-mono hidden sm:block">{{ candidate.language }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <!-- Role -->
+                  <td class="py-3.5 text-slate-400 text-xs hidden sm:table-cell">{{ candidate.role }}</td>
+                  <!-- Score -->
+                  <td class="py-3.5 text-center">
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono"
+                          [class]="candidate.score >= 90 ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : candidate.score >= 70 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
+                      {{ candidate.score }}/100
+                    </span>
+                  </td>
+                  <!-- Status -->
+                  <td class="py-3.5">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                          [class]="candidate.status === 'Hired' ? 'bg-orange-500/15 text-orange-400' : candidate.status === 'Evaluating' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'">
+                      <span class="h-1.5 w-1.5 rounded-full inline-block"
+                            [class]="candidate.status === 'Hired' ? 'bg-orange-400' : candidate.status === 'Evaluating' ? 'bg-amber-400' : 'bg-red-400'"></span>
+                      {{ candidate.status }}
+                    </span>
+                  </td>
+                  <!-- Date -->
+                  <td class="py-3.5 text-right pr-2 text-xs text-slate-600 font-medium">{{ candidate.completedAt }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Empty state -->
+            <div *ngIf="filteredCandidates.length === 0" class="text-center py-12 text-slate-600">
+              <p class="text-sm font-semibold">No candidates in this filter</p>
+            </div>
+          </div>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead>
-              <tr class="text-xs text-slate-600 uppercase font-extrabold border-b border-slate-950">
-                <th class="py-3">Candidate</th>
-                <th class="py-3">Challenge/Role</th>
-                <th class="py-3 text-center">Score</th>
-                <th class="py-3">Status</th>
-                <th class="py-3 text-right">Completed</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-950">
-              <tr *ngFor="let candidate of candidates" class="hover:bg-slate-950/40 transition duration-150">
-                <!-- Name -->
-                <td class="py-4 font-semibold text-white">{{ candidate.name }}</td>
-                <!-- Role -->
-                <td class="py-4 text-slate-500">{{ candidate.role }}</td>
-                <!-- Score -->
-                <td class="py-4 text-center">
-                  <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono"
-                        [class]="candidate.score >= 90 ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : candidate.score >= 70 ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
-                    {{ candidate.score }}/100
-                  </span>
-                </td>
-                <!-- Status -->
-                <td class="py-4">
-                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full"
-                        [class]="candidate.status === 'Hired' ? 'bg-violet-500/15 text-violet-400' : candidate.status === 'Evaluating' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'">
-                    {{ candidate.status }}
-                  </span>
-                </td>
-                <!-- Completed time -->
-                <td class="py-4 text-right text-xs text-slate-600 font-medium">{{ candidate.completedAt }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Skill Performance Breakdown -->
+        <div class="bg-[#161b22] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-850 mb-5">
+            <h3 class="text-base sm:text-lg font-bold text-white">Candidate Skill Breakdown</h3>
+            <span class="text-xs text-slate-500">Based on {{ totalAssessments }} submissions</span>
+          </div>
+          <div class="flex flex-col gap-5">
+            <div *ngFor="let metric of skillMetrics" class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-slate-300">{{ metric.skill }}</span>
+                <span class="text-sm font-bold text-white font-mono">{{ metric.percentage }}%</span>
+              </div>
+              <div class="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-700"
+                     [style.width.%]="metric.percentage"
+                     [style.background]="metric.color">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Live Multiplayer Arena Lobbies -->
-      <div class="lg:col-span-4 bg-[#02040a] border border-slate-900 rounded-2xl p-6 shadow-lg shadow-black/40 flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between pb-4 border-b border-slate-950 mb-6">
-            <h3 class="text-lg font-bold text-white">Live Match Lobbies</h3>
-            <span class="h-2 w-2 rounded-full bg-violet-500 animate-ping"></span>
+      <!-- RIGHT COLUMN (lobbies + activity feed) -->
+      <div class="xl:col-span-4 flex flex-col gap-6">
+
+        <!-- Live Match Lobbies -->
+        <div class="bg-[#161b22] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-850 mb-5">
+            <h3 class="text-base sm:text-lg font-bold text-white">Live Match Lobbies</h3>
+            <span class="h-2 w-2 rounded-full bg-orange-500 animate-ping inline-block"></span>
           </div>
 
           <div class="flex flex-col gap-4">
-            <!-- Lobby 1 -->
-            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-violet-500/40 transition duration-200">
+            <div *ngFor="let lobby of lobbies"
+                 class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-orange-500/40 transition duration-200 cursor-pointer group">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-violet-500 font-mono">CODE-CLASH-542</span>
-                <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold">In Progress</span>
+                <span class="text-xs font-bold text-orange-500 font-mono">{{ lobby.id }}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                      [class]="lobby.status === 'In Progress' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'">
+                  {{ lobby.status }}
+                </span>
               </div>
-              <h4 class="text-sm font-bold text-white mb-1">Algorithm Duel: Binary Search</h4>
-              <p class="text-xs text-slate-600">8 Developers clash • Python, C++</p>
-            </div>
+              <h4 class="text-sm font-bold text-white mb-2 group-hover:text-orange-400 transition duration-200">{{ lobby.title }}</h4>
 
-            <!-- Lobby 2 -->
-            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-violet-500/40 transition duration-200">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-violet-500 font-mono">CODE-CLASH-981</span>
-                <span class="px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 text-[10px] font-bold">Open Lobby</span>
+              <!-- Player Fill Bar -->
+              <div class="mb-2">
+                <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+                  <span>{{ lobby.players }}/{{ lobby.maxPlayers }} players</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold"
+                        [class]="lobby.difficulty === 'Hard' ? 'text-red-400' : lobby.difficulty === 'Medium' ? 'text-amber-400' : 'text-green-400'">
+                    {{ lobby.difficulty }}
+                  </span>
+                </div>
+                <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-orange-500/70 rounded-full transition-all duration-500"
+                       [style.width.%]="getLobbyFill(lobby)">
+                  </div>
+                </div>
               </div>
-              <h4 class="text-sm font-bold text-white mb-1">Dynamic Programming Blitz</h4>
-              <p class="text-xs text-slate-600">3/12 spots filled • JavaScript, Go</p>
-            </div>
 
-            <!-- Lobby 3 -->
-            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-900 hover:border-violet-500/40 transition duration-200">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-violet-500 font-mono">CODE-CLASH-112</span>
-                <span class="px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 text-[10px] font-bold">Open Lobby</span>
+              <p class="text-[11px] text-slate-500">{{ lobby.languages.join(' • ') }}</p>
+            </div>
+          </div>
+
+          <button class="w-full mt-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-sm transition duration-200 hover:shadow-[0_0_15px_rgba(249,115,22,0.25)]">
+            Enter Matchmaker Room
+          </button>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="bg-[#161b22] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-850 mb-5">
+            <h3 class="text-base sm:text-lg font-bold text-white">Recent Activity</h3>
+            <a href="#" class="text-xs text-orange-500 hover:underline font-bold">View all</a>
+          </div>
+          <div class="flex flex-col gap-4">
+            <div *ngFor="let item of activityFeed"
+                 class="flex items-start gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-base flex-shrink-0">
+                {{ item.icon }}
               </div>
-              <h4 class="text-sm font-bold text-white mb-1">Weekly Speed Coding Challenge</h4>
-              <p class="text-xs text-slate-600">14/50 spots filled • All languages</p>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-slate-300 leading-relaxed">{{ item.message }}</p>
+                <span class="text-[11px] text-slate-600 font-medium">{{ item.time }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <button class="w-full mt-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-sm transition duration-200">
-          Enter Matchmaker Room
-        </button>
       </div>
     </div>
   </div>

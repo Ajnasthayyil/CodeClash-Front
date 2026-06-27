@@ -1,213 +1,150 @@
-<!-- Hero Section & Grid Backdrop -->
-<div class="relative overflow-hidden min-h-screen bg-[#000000] text-slate-100 font-sans">
-  <!-- Glowing Violet background blobs -->
-  <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-violet-600 opacity-10 blur-[180px] pointer-events-none"></div>
-  <div class="absolute bottom-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-indigo-600 opacity-5 blur-[150px] pointer-events-none"></div>
+<app-hero-section></app-hero-section>
 
-  <!-- Tech Grid Background -->
-  <div class="absolute inset-0 bg-[linear-gradient(to_right,#090d16_1px,transparent_1px),linear-gradient(to_bottom,#090d16_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none"></div>
+<div class="relative overflow-hidden bg-[#0d1117] text-slate-100 font-sans pb-24">
+  <!-- Glowing background blobs -->
+  <div class="absolute bottom-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-amber-600 opacity-5 blur-[150px] pointer-events-none"></div>
 
-  <main class="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10">
-    <!-- Hero Badging (Black / White / Violet Theme) -->
-    <div class="flex justify-center mb-10">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-950/80 border border-slate-900 text-xs font-semibold tracking-wide text-slate-300 backdrop-blur-md hover:border-violet-500/40 transition duration-300 cursor-default">
-        <span class="flex h-2 w-2 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-        </span>
-        <span class="text-violet-500">CodeClash 2.0</span> The future of technical screening
+  <main class="max-w-7xl mx-auto px-6 relative z-10">
+    <!-- The Ecosystem Section -->
+    <div class="mb-28 max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-orange-500 font-bold mb-3">THE ECOSYSTEM</h2>
+        <h3 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">Every technology. Tracked.</h3>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+          CodeClash sandbox environments support major programming languages, runtimes, and frameworks with sub-millisecond execution analysis.
+        </p>
       </div>
-    </div>
 
-    <!-- Main Hero Content (HackerRank Layout Style) -->
-    <div class="text-center max-w-4xl mx-auto mb-20">
-      <h1 class="text-5xl md:text-8xl font-black tracking-tight text-slate-500 mb-8 leading-tight">
-        The future <br>
-        of development <br>
-        is <span class="text-white inline-flex items-center gap-2 md:gap-3 bg-clip-text">
-          <!-- Fingerprint SVG Icon -->
-          <svg class="w-10 h-10 md:w-16 md:h-16 text-violet-500 inline-block fill-none stroke-current" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" d="M12 11c0-2.21-1.79-4-4-4s-4 1.79-4 4M12 14c0-3.31-2.69-6-6-6S0 10.69 0 14M16 11c0-4.42-3.58-8-8-8s-8 3.58-8 8M20 14c0-5.52-4.48-10-10-10S0 8.48 0 14"/>
-            <path stroke-linecap="round" d="M12 17c0-1.1.9-2 2-2s2 .9 2 2v4M8 20h8"/>
-          </svg>
-          human
-        </span> + <span class="text-white inline-flex items-center gap-2 md:gap-3 bg-clip-text">
-          <!-- Sparkles/Star SVG Icon -->
-          <svg class="w-10 h-10 md:w-16 md:h-16 text-violet-500 inline-block fill-current" viewBox="0 0 24 24">
-            <path d="M12 0l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/>
-          </svg>
-          AI
-        </span>
-      </h1>
-      <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-        We help you map the skills you need, track the skills you have, and close your gaps to thrive in a GenAI world.
-      </p>
-
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a routerLink="/auth/register" class="w-full sm:w-auto px-8 py-4 rounded-full font-bold bg-violet-600 text-white hover:bg-violet-500 hover:scale-102 hover:shadow-[0_0_30px_rgba(124,58,237,0.4)] transition-all duration-300 text-center">
-          Sign Up
-        </a>
-        <a href="#interactive-playground" class="w-full sm:w-auto px-8 py-4 rounded-full font-bold bg-transparent text-slate-200 border border-slate-800 hover:border-slate-600 hover:bg-slate-950/80 transition-all duration-300 text-center">
-          Request Demo
-        </a>
-      </div>
-    </div>
-
-    <!-- Interactive Code Playground / Mock IDE (Violet accents) -->
-    <div id="interactive-playground" class="max-w-5xl mx-auto bg-[#04060f] border border-slate-900 rounded-2xl overflow-hidden shadow-2xl shadow-black/90 mb-28">
-      <!-- IDE Header Tab bar -->
-      <div class="flex items-center justify-between px-6 py-4 bg-[#010206] border-b border-slate-950">
-        <div class="flex items-center gap-2">
-          <!-- Window controls -->
-          <div class="flex gap-1.5 mr-4">
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span>
-          </div>
-          <!-- Language Tabs -->
-          <div class="flex items-center gap-1">
-            <button *ngFor="let lang of languages" 
-                    (click)="selectLanguage(lang)"
-                    [class]="selectedLanguage === lang ? 'px-3 py-1.5 rounded-lg bg-slate-950 text-violet-500 border border-slate-900 text-xs font-semibold' : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-950/50 text-xs font-medium'"
-                    class="transition-all duration-200">
-              {{ lang }}
-            </button>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Interactive Technology Badges Grid (8 Cols) -->
+        <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div *ngFor="let tech of technologies" 
+               (mouseenter)="selectTech(tech.id)"
+               (click)="selectTech(tech.id)"
+               [class]="selectedTech === tech.id ? 'border-orange-500 bg-orange-500/5 text-white shadow-[0_0_20px_rgba(249,115,22,0.15)]' : 'border-slate-900 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:text-slate-200'"
+               class="group relative flex flex-col items-center justify-center p-6 rounded-2xl border backdrop-blur-sm cursor-pointer transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-600/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            
+            <div class="w-12 h-12 flex items-center justify-center mb-3 text-slate-300 group-hover:scale-110 transition duration-300">
+              <ng-container [ngSwitch]="tech.id">
+                <svg *ngSwitchCase="'React'" class="w-10 h-10 text-cyan-400 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(30 12 12)"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(90 12 12)"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(150 12 12)"/>
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                </svg>
+                <svg *ngSwitchCase="'TypeScript'" class="w-9 h-9 text-blue-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M0 0h24v24H0V0zm21.6 19.3c0-1.8-1-2.9-3.2-3.8-1.5-.6-2-.9-2-1.5 0-.5.4-.8 1.1-.8.9 0 1.5.3 1.9.9l1.9-1.2c-.7-1.1-1.9-1.7-3.8-1.7-2.3 0-3.8 1.3-3.8 3.2 0 1.9 1.1 2.8 3.4 3.7 1.5.6 1.8 1 1.8 1.5 0 .6-.5.9-1.3.9-1.2 0-2-.6-2.5-1.5l-1.9 1.1c.7 1.4 2.2 2.2 4.4 2.2 2.5 0 4.1-1.2 4.1-3.5zm-8.8-9.4h-7.6V22h2.2v-4.8h5.4V12.1v-2.2z"/>
+                </svg>
+                <svg *ngSwitchCase="'NodeJS'" class="w-9 h-9 text-green-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7.7v11.5L12 25l10-5.8V7.7L12 2zm8 16.4l-8 4.6-8-4.6V8.9l8-4.6 8 4.6v9.5z"/>
+                  <path d="M12 7.4v7l6 3.5V11L12 7.4z"/>
+                </svg>
+                <svg *ngSwitchCase="'NextJS'" class="w-9 h-9 text-white fill-current" viewBox="0 0 24 24">
+                  <path d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm5.952 18.066l-6.144-8.082v8.082h-1.564V7.998h1.472l6.096 8.016V7.998h1.564v10.068h-1.424z"/>
+                </svg>
+                <svg *ngSwitchCase="'Docker'" class="w-10 h-10 text-sky-400 fill-current" viewBox="0 0 24 24">
+                  <path d="M13.983 11.078h2.119c.102 0 .186-.084.186-.186V8.78c0-.102-.084-.186-.186-.186h-2.119c-.102 0-.186.084-.186.186v2.11c0 .103.085.188.186.188zm-2.925 0h2.12c.102 0 .185-.084.185-.186V8.78c0-.102-.083-.186-.185-.186h-2.12c-.103 0-.186.084-.186.186v2.11c0 .103.083.188.186.188zm-2.927 0h2.117c.103 0 .187-.084.187-.186V8.78c0-.102-.084-.186-.187-.186H8.131c-.103 0-.187.084-.187.186v2.11c0 .103.084.188.187.188zm-2.913 0h2.119c.102 0 .185-.084.185-.186V8.78c0-.102-.083-.186-.185-.186H5.218c-.103 0-.186.084-.186.186v2.11c0 .103.083.188.186.188zM5.218 8.14h2.119c.102 0 .185-.083.185-.185V5.836c0-.102-.083-.185-.185-.185H5.218c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm2.913 0h2.117c.103 0 .187-.083.187-.185V5.836c0-.102-.084-.185-.187-.185H8.131c-.103 0-.187.083-.187.185v2.119c0 .102.084.185.187.185zm2.927 0h2.12c.102 0 .185-.083.185-.185V5.836c0-.102-.083-.185-.185-.185h-2.12c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm-5.84 5.828h2.119c.102 0 .185-.083.185-.185v-2.119c0-.102-.083-.185-.185-.185H5.218c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm2.913 0h2.117c.103 0 .187-.083.187-.185v-2.119c0-.102-.084-.185-.187-.185H8.131c-.103 0-.187.083-.187.185v2.119c0 .102.084.185.187.185zm-5.84-8.63h2.119c.102 0 .185-.083.185-.185V3.12c0-.103-.083-.186-.185-.186H5.218c-.103 0-.186.083-.186.186v2.119c0 .101.083.184.186.184zm23.304 9.954c-.116-.367-.936-2.522-3.136-3.79-.196-.113-.42-.08-.577.082-.41.417-.96.657-1.547.677-.076 0-.15.01-.225.01-1.396 0-2.482-1.007-2.658-2.34-.047-.358-.352-.628-.716-.628-.016 0-.03 0-.047.002-.375.015-.67.313-.703.687-.272 3.125-2.029 4.887-5.223 5.237-.367.04-.632.355-.62.723.013.35.3.623.648.623.023 0 .047-.002.07-.004.148-.016.297-.03.447-.05 2.127-.27 4.142-1.378 5.76-3.155 1.157 1.258 2.802 2.015 4.604 2.015.158 0 .313-.01.468-.02 1.348-.1 2.457-.96 2.895-2.22z"/>
+                </svg>
+                <svg *ngSwitchCase="'AWS'" class="w-10 h-10 text-orange-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5zm2.8-5.3l-3.3 3.3c-.3.3-.8.3-1.1 0l-3.3-3.3c-.3-.3-.3-.8 0-1.1s.8-.3 1.1 0l2 2V8c0-.4.3-.8.8-.8s.8.4.8.8v5.2l2-2c.3-.3.8-.3 1.1 0s.3.7 0 1z"/>
+                </svg>
+                <svg *ngSwitchCase="'GitHub'" class="w-9 h-9 text-slate-100 fill-current" viewBox="0 0 24 24">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.197 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/>
+                </svg>
+                <svg *ngSwitchCase="'MongoDB'" class="w-9 h-9 text-emerald-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M17.15 11.23a10.63 10.63 0 00-4.63-7.53c-.3-.21-.74-.21-1.04 0a10.63 10.63 0 00-4.63 7.53c-.3 2.73.47 5.48 2.14 7.6a16.64 16.64 0 003.01 3.03c.3.23.7.23 1 0a16.64 16.64 0 003.01-3.03c1.67-2.12 2.44-4.87 2.14-7.6zM12 19.33c-.7-.78-2.31-2.91-2.31-6.1a12.75 12.75 0 01.37-3.13c.12-.49.33-.95.63-1.35.37-.48.79-.87 1.31-1.15V19.33zm2.31-6.1c0 3.19-1.61 5.32-2.31 6.1V7.5a4.34 4.34 0 011.31 1.15c.3.4.51.86.63 1.35.24 1 .37 2.06.37 3.13-.01.03-.01.07-.01.1z"/>
+                </svg>
+                <svg *ngSwitchCase="'Redis'" class="w-9 h-9 text-red-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2L2 6.5v11L12 22l10-4.5v-11L12 2zm8 14.5l-8 3.6-8-3.6V8l8 3.6 8-3.6v8.5zm0-9.8L12 10.3 4 6.7 12 3.1l8 3.6z"/>
+                </svg>
+                <svg *ngSwitchCase="'Python'" class="w-9 h-9 text-yellow-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M14.25.18c-.98-.04-1.92.07-2.73.34-1.25.43-2.15 1.35-2.45 2.5v1.8H14.1c1.35 0 2.45 1.1 2.45 2.45v2.85h1.95c1.47 0 2.66-1.18 2.66-2.65V4.6c0-1.47-1.19-2.66-2.66-2.66h-1.95V.59c-.43-.28-1.26-.37-2.3-.41zM5.44 3.7c-1.47 0-2.66 1.18-2.66 2.65v2.85c0 1.47 1.19 2.66 2.66 2.66H7.4v-1.8c0-1.35 1.1-2.45 2.45-2.45h4.9V4.76h-4.9c-1.35 0-2.45-1.1-2.45-2.45v-1.8H7.4c-1.07.01-1.93.87-1.96 1.94v1.25zm4.07 8.35c.98.04 1.92-.07 2.73-.34 1.25-.43 2.15-1.35 2.45-2.5v-1.8H9.9c-1.35 0-2.45-1.1-2.45-2.45V4.11H5.5c-1.47 0-2.66 1.18-2.66 2.65v2.85c0 1.47 1.19 2.66 2.66 2.66h1.95v1.36c.43.28 1.26.37 2.3.41z"/>
+                </svg>
+                <svg *ngSwitchCase="'Rust'" class="w-10 h-10 text-orange-600 fill-current" viewBox="0 0 24 24">
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(45 12 12)" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(135 12 12)" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+                <svg *ngSwitchCase="'Postgres'" class="w-9 h-9 text-blue-400 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5c-1.5 0-2.8-.8-3.5-2H8c-.6 0-1-.4-1-1v-2c0-.6.4-1 1-1h1.5c.7-1.2 2-2 3.5-2 2.2 0 4 1.8 4 4s-1.8 4-4 4z"/>
+                </svg>
+                <svg *ngSwitchDefault class="w-9 h-9 text-slate-400 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                </svg>
+              </ng-container>
+            </div>
+            
+            <span class="text-sm font-bold tracking-wide mt-1">{{ tech.name }}</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button (click)="runCode()" [disabled]="isRunning" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-400 text-xs font-bold hover:bg-violet-600 hover:text-white hover:border-violet-600 disabled:opacity-50 transition duration-300">
-            <span *ngIf="isRunning" class="animate-spin border-2 border-current border-t-transparent rounded-full h-3.5 w-3.5 mr-1"></span>
-            <svg *ngIf="!isRunning" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            {{ isRunning ? 'Running...' : 'Run Challenge' }}
-          </button>
-        </div>
-      </div>
+        <!-- Telemetry & Info Dashboard Panel (4 Cols) -->
+        <div class="lg:col-span-4 bg-[#161b22] border border-slate-800 rounded-2xl p-6 font-mono relative overflow-hidden shadow-xl min-h-[350px]">
+          <div class="absolute -top-12 -right-12 w-28 h-28 bg-orange-600/10 rounded-full blur-2xl"></div>
 
-      <!-- IDE Editor area -->
-      <div class="grid grid-cols-1 md:grid-cols-12 min-h-[400px]">
-        <!-- Code editor -->
-        <div class="md:col-span-7 bg-[#02040a] p-6 border-r border-slate-950 font-mono text-sm leading-relaxed overflow-x-auto text-slate-300">
-          <div class="flex gap-4">
-            <!-- Line numbers -->
-            <div class="text-slate-700 text-right select-none pr-2">
-              <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]">
-                {{ i }}
+          <div class="flex items-center justify-between pb-4 border-b border-slate-950 mb-6">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">TELEMETRY MONITOR</span>
+            </div>
+            <span class="text-[10px] text-orange-400 px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 font-bold uppercase">SANDBOX SECURE</span>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <span class="text-xs text-slate-500 block uppercase tracking-wider mb-1">Target Engine</span>
+              <div class="text-lg font-black text-white flex items-baseline gap-2">
+                {{ activeTech.name }}
+                <span class="text-xs text-orange-500 font-bold">{{ activeTech.version }}</span>
               </div>
             </div>
-            <!-- Pre Code content -->
-            <pre class="text-slate-300 w-full"><code class="language-javascript">{{ currentCode }}</code></pre>
-          </div>
-        </div>
 
-        <!-- Live Terminal console logs -->
-        <div class="md:col-span-5 bg-[#010206] p-6 flex flex-col justify-between font-mono text-xs">
-          <div>
-            <div class="flex items-center justify-between text-slate-500 border-b border-slate-950 pb-3 mb-4">
-              <span class="uppercase tracking-wider font-semibold">Test Suite Output</span>
-              <span class="px-2 py-0.5 rounded bg-slate-950 text-violet-500 border border-slate-900 text-[10px]">Sandbox v3.1</span>
+            <div>
+              <span class="text-xs text-slate-500 block uppercase tracking-wider mb-2">Sandbox Isolation Features</span>
+              <p class="text-xs text-slate-300 leading-relaxed font-sans bg-slate-950/80 p-3 rounded-lg border border-slate-900">
+                {{ activeTech.desc }}
+              </p>
             </div>
-            <pre class="text-slate-300 whitespace-pre-wrap leading-relaxed">{{ terminalOutput }}</pre>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-900">
+                <span class="text-[10px] text-slate-500 block uppercase mb-1">Execution Speed</span>
+                <span class="text-sm font-bold text-emerald-400">{{ activeTech.speed }}</span>
+              </div>
+              <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-900">
+                <span class="text-[10px] text-slate-500 block uppercase mb-1">Isolation State</span>
+                <span class="text-sm font-bold text-orange-400">Isolated</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-950/90 p-4 rounded-xl border border-slate-950 text-[10px] text-slate-500 space-y-1.5 min-h-[110px]">
+              <div><span class="text-slate-700">></span> initializing target container...</div>
+              <div><span class="text-slate-700">></span> mounting code sandbox partition</div>
+              <div><span class="text-slate-700">></span> virtual env matching runtime <span class="text-orange-500">{{ activeTech.version }}</span></div>
+              <div class="text-slate-400"><span class="text-slate-700">></span> speed optimized: <span class="text-emerald-400 font-bold">{{ activeTech.speed }}</span> latency</div>
+            </div>
           </div>
-
-          <div class="mt-6 pt-4 border-t border-slate-950 flex items-center justify-between text-[11px] text-slate-600">
-            <span>Solved: 3/3 Cases</span>
-            <span>Performance: O(N) Complexity</span>
-          </div>
         </div>
+      </div>
+      
+      <div class="text-center mt-8 text-xs text-slate-500 italic">
+        * Demand scores and compilation runners are updated weekly from production testing cycles.
       </div>
     </div>
 
-    <!-- Client Ticker / Social Proof -->
-    <div class="text-center mb-28">
-      <p class="text-xs uppercase tracking-widest text-slate-600 font-bold mb-8">
-        TRUSTED BY 4,000+ LEADING TEAMS WORLDWIDE
-      </p>
-      <!-- Moving Ticker logos (glass hover effects) -->
-      <div class="flex flex-wrap items-center justify-center gap-12 opacity-40">
-        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
-          <span class="text-slate-500 font-bold text-lg tracking-wider">STRIPE</span>
-        </div>
-        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
-          <span class="text-slate-500 font-bold text-lg tracking-wider">NETFLIX</span>
-        </div>
-        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
-          <span class="text-slate-500 font-bold text-lg tracking-wider">MICROSOFT</span>
-        </div>
-        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
-          <span class="text-slate-500 font-bold text-lg tracking-wider">UBER</span>
-        </div>
-        <div class="h-8 flex items-center hover:opacity-100 transition duration-300 cursor-pointer">
-          <span class="text-slate-500 font-bold text-lg tracking-wider">AIRBNB</span>
-        </div>
-      </div>
-    </div>
+    <!-- Feature Cards Component -->
+    <app-feature-cards></app-feature-cards>
 
-    <!-- Feature tab details section -->
-    <div class="mb-28 text-center max-w-3xl mx-auto">
-      <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6">
-        Full Suite for Engineering Managers
-      </h2>
-      <p class="text-slate-400 text-lg">
-        Unlock automated screening, host competitive tournaments, and standardise interviews with code execution support.
-      </p>
-    </div>
+    <!-- Stats Component -->
+    <app-stats></app-stats>
 
-    <!-- 4 Feature Grid Cards with high-end hover glows -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-28">
-      <!-- Card 1 -->
-      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
-        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
-        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-3">Skill Screening</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Create automated assessments with customizable coding puzzles in 45+ languages. Generate instant scorecards and check plagiarism index automatically.
-        </p>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
-        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
-        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-3">Multiplayer Coding Arenas</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Engage developers with competitive live tournaments, leaderboard battles, and real-time coding challenges. Excellent for branding and tech community engagement.
-        </p>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
-        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
-        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-3">Collaborative IDE Interviews</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Conduct live whiteboard coding interviews with real-time editing, compiled testing loops, and integrated chat. Keep interviewers in sync with custom templates.
-        </p>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="group relative rounded-2xl bg-gradient-to-b from-[#02040a] to-[#000000] p-8 border border-slate-900 hover:border-violet-500/30 hover:-translate-y-1 transition duration-300">
-        <div class="absolute inset-0 bg-violet-500/1 opacity-0 group-hover:opacity-100 rounded-2xl transition duration-300"></div>
-        <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center mb-6 text-violet-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-3">AI Scorecards & Insights</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Deep analytics detailing candidate strength maps, performance trends, code speed, and optimal code quality metrics. Make hiring decisions based on hard data.
-        </p>
-      </div>
-    </div>
+    <!-- Testimonials Component -->
+    <app-testimonials></app-testimonials>
 
     <!-- CTA Section -->
-    <div class="relative bg-gradient-to-b from-[#02040a] to-[#000000] border border-slate-900 rounded-3xl p-12 text-center overflow-hidden">
-      <!-- Glow bubble -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-violet-500/5 rounded-full blur-[80px]"></div>
+    <div class="relative bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 rounded-3xl p-12 text-center overflow-hidden my-16">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-orange-500/5 rounded-full blur-[80px]"></div>
 
       <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 relative z-10">
         Ready to find your next tech lead?
@@ -216,7 +153,7 @@
         Set up assessment rules, compile coding templates, and host tournaments with CodeClash. Start scaling today.
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-        <a routerLink="/auth/register" class="px-8 py-3.5 bg-violet-600 text-white font-bold rounded-full hover:bg-violet-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition duration-300">
+        <a routerLink="/auth/register" class="px-8 py-3.5 bg-orange-600 text-white font-bold rounded-full hover:bg-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.3)] transition duration-300">
           Get Started For Free
         </a>
         <a href="mailto:sales@codeclash.io" class="px-8 py-3.5 border border-slate-800 bg-slate-950 text-slate-300 font-bold rounded-full hover:bg-slate-900 transition duration-300">

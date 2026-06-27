@@ -1,0 +1,17 @@
+.content-with-sidebar {
+  margin-left: 80px;
+  width: calc(100% - 80px);
+  transition: margin-left 0.15s cubic-bezier(0.4, 0, 0.2, 1), width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+// Sibling selector to shift content layout when sidebar wrapper is hovered or focused
+app-sidebar:hover + .content-with-sidebar,
+app-sidebar:focus-within + .content-with-sidebar {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+}

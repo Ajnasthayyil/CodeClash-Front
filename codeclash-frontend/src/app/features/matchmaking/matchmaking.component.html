@@ -1,1 +1,203 @@
-<p>matchmaking works!</p>
+<div class="matchmaking-root">
+  <div class="matchmaking-container">
+
+    <!-- ═════ Header Section ═════ -->
+    <div class="matchmaking-header">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-500/10 border border-orange-500/25 text-orange-400 text-[11px] font-bold tracking-wide">
+            <svg class="h-3 w-3 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            BATTLE ARENA
+          </span>
+          <span class="text-xs text-slate-500">Competitive Play</span>
+        </div>
+        <h1 class="page-title">Select Battle Pattern</h1>
+        <p class="page-subtitle">Select a mode to challenge other players, duel friends, or take part in bracket tournaments.</p>
+      </div>
+    </div>
+
+    <!-- ═════ Cards Grid ═════ -->
+    <div class="cards-grid">
+
+      <!-- CARD 1: RANKED DUEL -->
+      <div class="mode-card ranked-card" [class.active-mode]="queueStatus !== 'idle'">
+        <div class="mode-badge-wrap">
+          <span class="mode-badge rank-badge">Ranked Match</span>
+        </div>
+        <div class="card-icon-box ranked-icon-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h2 class="card-title">Online Duel (1v1)</h2>
+        <p class="card-desc">Face a random opponent of similar ELO standing. Gain points, rank up, and climb the global leaderboards.</p>
+
+        <div class="interactive-area">
+          <!-- Idle Mode -->
+          <button *ngIf="queueStatus === 'idle'" (click)="startSearch()" class="btn-primary-shine">
+            Find Opponent
+          </button>
+          <button *ngIf="queueStatus !== 'idle'" class="btn-primary-shine opacity-60 cursor-not-allowed" disabled>
+            Searching...
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD 2: PLAY WITH FRIENDS -->
+      <div class="mode-card friends-card" [class.active-mode]="friendlyRoomId !== ''">
+        <div class="mode-badge-wrap">
+          <span class="mode-badge friends-badge">Custom Duel</span>
+        </div>
+        <div class="card-icon-box friends-icon-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <h2 class="card-title">Play with Friends</h2>
+        <p class="card-desc">Create a private duel room. Generate a room key and share the link with a friend to play a two-person clash.</p>
+
+        <div class="interactive-area">
+          <!-- Generate trigger -->
+          <button *ngIf="!friendlyRoomId" (click)="createFriendlyRoom()" class="btn-primary-purple">
+            Create Custom Room
+          </button>
+
+          <!-- Generated Links -->
+          <div *ngIf="friendlyRoomId" class="room-details">
+            <div class="room-label">Room Code: <span class="font-mono text-purple-400 font-bold">{{ friendlyRoomId }}</span></div>
+            
+            <div class="link-input-group">
+              <input type="text" readonly [value]="friendlyUrl" class="friendly-url-input" />
+              <button (click)="copyRoomLink()" class="btn-copy" [class.copied]="linkCopied" [title]="linkCopied ? 'Copied!' : 'Copy Link'">
+                <svg *ngIf="!linkCopied" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                <span *ngIf="linkCopied" class="text-xs font-bold text-green-400">Copied</span>
+              </button>
+            </div>
+
+            <div class="room-action-row">
+              <button (click)="startFriendlyDuel()" class="btn-start-duel">
+                Launch Duel
+              </button>
+              <button (click)="shareRoom()" class="btn-share-room">
+                <svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l5.474-2.737m0 0a3.978 3.978 0 110-3.01m0 3.01a3.978 3.978 0 110 3.01m0-3.01l-5.474 2.737m0 0a3.978 3.978 0 11-3.01 0m3.01 0a3.978 3.978 0 113.01 0" />
+                </svg>
+                <span>Share Link</span>
+              </button>
+              <button (click)="friendlyRoomId = ''" class="btn-close-room text-slate-500 hover:text-slate-200">
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: TOURNAMENT LEAGUES -->
+      <div class="mode-card tournament-card">
+        <div class="mode-badge-wrap">
+          <span class="mode-badge tourney-badge">Official Event</span>
+        </div>
+        <div class="card-icon-box tourney-icon-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4m-4 0H8m12 9a2 2 0 11-4 0v-2h4v2zm-12-2v2a2 2 0 11-4 0v-2h4z" />
+          </svg>
+        </div>
+        <h2 class="card-title">Tournament Brackets</h2>
+        <p class="card-desc">Join season championships and structured tournament grids. Beat opponents round by round to win the grand prize.</p>
+
+        <div class="interactive-area">
+          <a routerLink="/tournament" class="btn-primary-orange text-center flex items-center justify-center decoration-transparent">
+            View Active Brackets
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Fullscreen Matchmaking Overlay -->
+  <div *ngIf="queueStatus !== 'idle'" class="search-overlay">
+    <div class="search-overlay-content">
+      
+      <!-- Searching State -->
+      <ng-container *ngIf="queueStatus === 'searching'">
+        <!-- Radar Widget -->
+        <div class="radar-container">
+          <div class="radar-circle circle-1"></div>
+          <div class="radar-circle circle-2"></div>
+          <div class="radar-circle circle-3"></div>
+          <div class="radar-circle circle-4"></div>
+          <div class="radar-sweep"></div>
+          <div class="radar-center">
+            <span class="user-avatar-initial">{{ userInitial }}</span>
+          </div>
+        </div>
+
+        <!-- Search Status Details -->
+        <h2 class="search-title">Searching for opponent...</h2>
+        <p class="search-wait-info">~23 sec avg wait &middot; {{ queueSeconds }}s elapsed</p>
+
+        <!-- Status Badges -->
+        <div class="search-badges">
+          <span class="badge-elo">{{ userElo }} ELO</span>
+          <span class="badge-lang">{{ selectedLanguage }}</span>
+        </div>
+
+        <!-- Difficulty Selection -->
+        <div class="selector-section">
+          <span class="selector-label">Difficulty</span>
+          <div class="difficulty-buttons">
+            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'easy'" (click)="setDifficulty('easy')">Easy</button>
+            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'medium'" (click)="setDifficulty('medium')">Medium</button>
+            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'hard'" (click)="setDifficulty('hard')">Hard</button>
+          </div>
+        </div>
+
+        <!-- Language Selection -->
+        <div class="selector-section">
+          <span class="selector-label">Language</span>
+          <div class="language-dropdown-wrapper">
+            <select class="lang-select" [ngModel]="selectedLanguage" (ngModelChange)="onLanguageChange($event)">
+              <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
+            </select>
+            <div class="select-chevron">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cancel Search Button -->
+        <button type="button" class="btn-cancel-search" (click)="cancelSearch()">
+          Cancel Search
+        </button>
+      </ng-container>
+
+      <!-- Match Found State -->
+      <ng-container *ngIf="queueStatus === 'matched'">
+        <div class="success-ring-pulse">
+          <svg class="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        
+        <div class="matched-info-container">
+          <h2 class="matched-title">MATCH FOUND!</h2>
+          <p class="matched-opp-desc">Opponent: <strong class="text-orange-400">ByteWizard</strong> (1766 ELO)</p>
+          <div class="matched-details-chips">
+            <span class="matched-chip">Difficulty: {{ selectedDifficulty | titlecase }}</span>
+            <span class="matched-chip">Language: {{ selectedLanguage }}</span>
+          </div>
+          <p class="matched-redirect-msg text-slate-400">Teleporting to arena in 2 seconds...</p>
+        </div>
+      </ng-container>
+
+    </div>
+  </div>
+</div>

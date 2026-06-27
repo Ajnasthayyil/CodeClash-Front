@@ -1,0 +1,29 @@
+<div class="relative bg-[#0d1117] text-slate-100 py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-16 text-center max-w-3xl mx-auto">
+      <h2 class="text-xs uppercase tracking-widest text-orange-500 font-bold mb-3">TESTIMONIALS</h2>
+      <h3 class="text-3xl md:text-5xl font-extrabold text-white">Trusted by Engineering Leaders</h3>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div *ngFor="let item of testimonials" class="group relative rounded-2xl bg-[#161b22] p-8 border border-slate-800 hover:border-orange-500/20 transition-all duration-300">
+        <!-- Quote icon -->
+        <span class="text-orange-500/20 text-6xl absolute top-4 right-6 font-serif pointer-events-none">“</span>
+        
+        <p class="text-slate-300 text-sm leading-relaxed mb-6 relative z-10 font-medium">
+          "{{ item.quote }}"
+        </p>
+        
+        <div class="flex items-center gap-3.5 mt-auto">
+          <div class="w-10 h-10 rounded-full bg-orange-600/10 border border-orange-500/30 flex items-center justify-center text-orange-500 font-bold text-xs">
+            {{ item.avatar }}
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white">{{ item.author }}</div>
+            <div class="text-xs text-slate-500">{{ item.role }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

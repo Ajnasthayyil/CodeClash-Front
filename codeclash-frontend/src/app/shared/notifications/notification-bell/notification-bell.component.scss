@@ -1,0 +1,71 @@
+.notification-bell-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.bell-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s;
+  outline: none;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  svg {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+.unread-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #f97316;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.45);
+  border: 1.5px solid #000000;
+}
+
+.dropdown-drawer {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  z-index: 9999;
+  transform-origin: top right;
+  animation: slideDownDropdown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDownDropdown {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+:host-context(.light-mode) {
+  .bell-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .unread-badge {
+    border-color: #ffffff;
+  }
+}

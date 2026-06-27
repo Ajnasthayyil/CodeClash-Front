@@ -1,0 +1,99 @@
+.toast-container {
+  position: fixed;
+  top: 96px; // below standard header
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(13, 17, 23, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-left-width: 4px;
+  border-radius: 12px;
+  padding: 16px;
+  padding-bottom: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  animation: toastSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+  &.success { border-left-color: #10b981; }
+  &.info { border-left-color: #3b82f6; }
+  &.warning { border-left-color: #f59e0b; }
+  &.error { border-left-color: #ef4444; }
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex-grow: 1;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.4;
+  color: #f1f5f9 !important;
+}
+
+.btn-close-toast {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  color: #94a3b8 !important;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff !important;
+  }
+}
+
+.toast-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  animation: toastProgress linear forwards;
+  
+  .success & { background: rgba(16, 185, 129, 0.6); }
+  .info & { background: rgba(59, 130, 246, 0.6); }
+  .warning & { background: rgba(245, 158, 11, 0.6); }
+  .error & { background: rgba(239, 68, 68, 0.6); }
+}
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+:host-context(.light-mode) {
+  .toast-item {
+    background: rgba(15, 23, 42, 0.98); // Maintain premium dark contrast
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+  }
+}

@@ -1,0 +1,117 @@
+<div class="user-management-root">
+  <!-- Top Search Bar -->
+  <div class="controls-card card">
+    <div class="search-input-wrapper">
+      <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search users by name..." class="search-input" />
+    </div>
+  </div>
+
+  <!-- Users Table Card -->
+  <div class="table-card card">
+    <div class="card-header">
+      <h3 class="card-title">User Accounts</h3>
+      <span class="card-subtitle">{{ filteredUsers.length }} registered accounts found</span>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th class="text-left">USERNAME</th>
+            <th class="text-center">ELO RATING</th>
+            <th class="text-center">ROLE</th>
+            <th class="text-center">STATUS</th>
+            <th class="text-center">JOIN DATE</th>
+            <th class="text-right">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers">
+            <td class="username-cell">
+              <div class="avatar bg-slate-900 border border-slate-800 text-slate-400">
+                {{ user.username.charAt(0) }}
+              </div>
+              <span class="username">{{ user.username }}</span>
+            </td>
+            <td class="text-center font-mono font-bold">{{ user.elo }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="user.role === 'Admin' ? 'badge-admin' : 'badge-user'">
+                {{ user.role }}
+              </span>
+            </td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="user.status === 'Active' ? 'badge-active' : 'badge-suspended'">
+                {{ user.status }}
+              </span>
+            </td>
+            <td class="text-center font-mono text-xs text-slate-500">{{ user.joinDate }}</td>
+            <td class="actions-cell text-right">
+              <button (click)="openNotificationModal(user)" class="btn-action btn-notify" title="Send Notification">
+                <svg class="action-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </button>
+              <button (click)="toggleStatus(user)" class="btn-action" [ngClass]="user.status === 'Active' ? 'btn-suspend' : 'btn-activate'">
+                {{ user.status === 'Active' ? 'Suspend' : 'Activate' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredUsers.length === 0">
+            <td colspan="6" class="empty-cell">No users found matching query.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Notification Modal Overlay -->
+  <div class="modal-overlay" *ngIf="isModalOpen && selectedUser">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Send Notification</h3>
+        <button class="btn-close" (click)="closeNotificationModal()">
+          <svg class="close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="recipient-badge">
+          <span class="badge-lbl">To:</span>
+          <span class="badge-val">{{ selectedUser.username }}</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notification Title</label>
+          <input type="text" [(ngModel)]="notificationTitle" placeholder="Enter title (e.g. System Warning)" class="form-input" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Message Content</label>
+          <textarea [(ngModel)]="notificationMsg" placeholder="Type notification message here..." class="form-textarea" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notification Type</label>
+          <select [(ngModel)]="notificationType" class="form-select">
+            <option value="info">Information</option>
+            <option value="success">Success</option>
+            <option value="warning">Warning / Alert</option>
+            <option value="error">Critical Error</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeNotificationModal()">Cancel</button>
+        <button class="btn-submit" (click)="sendNotification()" [disabled]="!notificationTitle.trim() || !notificationMsg.trim()">
+          Send Notification
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

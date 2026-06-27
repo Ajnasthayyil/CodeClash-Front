@@ -1,0 +1,52 @@
+<div class="submission-monitor-root">
+  <!-- Live submissions card -->
+  <div class="monitor-card card">
+    <div class="card-header">
+      <h3 class="card-title">Real-Time Submission Monitor</h3>
+      <span class="live-ticker">
+        <span class="pulse-ring"></span>
+        Monitoring Live Feed
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="monitor-table">
+        <thead>
+          <tr>
+            <th class="text-left">SUBMISSION ID</th>
+            <th class="text-left">USER</th>
+            <th class="text-left">PROBLEM</th>
+            <th class="text-center">LANGUAGE</th>
+            <th class="text-center">RESULT STATUS</th>
+            <th class="text-center">SPEED</th>
+            <th class="text-center">MEMORY</th>
+            <th class="text-right">SUBMIT TIME</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sub of submissions" class="feed-row">
+            <td class="font-mono text-slate-400 font-bold text-xs">{{ sub.id }}</td>
+            <td class="user-cell font-semibold text-white">{{ sub.user }}</td>
+            <td>{{ sub.problem }}</td>
+            <td class="text-center">
+              <span class="lang-badge">{{ sub.language }}</span>
+            </td>
+            <td class="text-center">
+              <span class="status-badge" [ngClass]="{
+                'status-accepted': sub.status === 'Accepted',
+                'status-wrong': sub.status === 'Wrong Answer',
+                'status-tle': sub.status === 'Time Limit Exceeded',
+                'status-re': sub.status === 'Runtime Error'
+              }">
+                {{ sub.status }}
+              </span>
+            </td>
+            <td class="text-center font-mono text-xs">{{ sub.runtime }}</td>
+            <td class="text-center font-mono text-xs">{{ sub.memory }}</td>
+            <td class="text-right font-mono text-xs text-slate-500">{{ sub.timeAgo }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

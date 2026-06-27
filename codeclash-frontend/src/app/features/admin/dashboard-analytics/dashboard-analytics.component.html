@@ -1,0 +1,103 @@
+<div class="analytics-root">
+  <!-- Stats Row -->
+  <div class="stats-grid">
+    <div *ngFor="let stat of stats" class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">{{ stat.label }}</span>
+        <div class="stat-icon-wrapper">
+          <!-- Users Icon -->
+          <svg *ngIf="stat.icon === 'users'" class="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Lightning Icon -->
+          <svg *ngIf="stat.icon === 'lightning'" class="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <!-- Code Icon -->
+          <svg *ngIf="stat.icon === 'code'" class="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+          <!-- Server Icon -->
+          <svg *ngIf="stat.icon === 'server'" class="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value-row">
+        <h3 class="stat-value">{{ stat.value }}</h3>
+        <span class="stat-change" [ngClass]="{'change-up': stat.up, 'change-down': !stat.up}">
+          {{ stat.change }}
+        </span>
+      </div>
+      <span class="stat-detail text-slate-500 text-xs">{{ stat.detail }}</span>
+    </div>
+  </div>
+
+  <!-- Bottom Row: Chart & Logs -->
+  <div class="analytics-row">
+    <!-- Chart Column -->
+    <div class="chart-card card">
+      <div class="card-header">
+        <h3 class="card-title">Submission Volume</h3>
+        <span class="card-subtitle">Last 7 Days</span>
+      </div>
+      <div class="chart-wrapper">
+        <svg class="line-chart" viewBox="0 0 500 200" preserveAspectRatio="none">
+          <!-- Gradients -->
+          <defs>
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.25" />
+              <stop offset="100%" stop-color="#f97316" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Grid Lines -->
+          <line x1="0" y1="50" x2="500" y2="50" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
+          <line x1="0" y1="100" x2="500" y2="100" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
+          <line x1="0" y1="150" x2="500" y2="150" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
+
+          <!-- Filled area under line -->
+          <path d="M 0 160 Q 80 120 160 140 T 320 80 T 480 50 L 500 50 L 500 200 L 0 200 Z" fill="url(#chartGradient)" />
+          
+          <!-- Plot Line -->
+          <path d="M 0 160 Q 80 120 160 140 T 320 80 T 480 50 L 500 50" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" />
+
+          <!-- Interactive Dots -->
+          <circle cx="80" cy="135" r="4.5" fill="#f97316" stroke="#161b22" stroke-width="2" />
+          <circle cx="240" cy="110" r="4.5" fill="#f97316" stroke="#161b22" stroke-width="2" />
+          <circle cx="400" cy="65" r="4.5" fill="#f97316" stroke="#161b22" stroke-width="2" />
+        </svg>
+        
+        <!-- X Axis Labels -->
+        <div class="chart-labels">
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+          <span>Sun</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Logs Column -->
+    <div class="logs-card card">
+      <div class="card-header">
+        <h3 class="card-title">Live System Logs</h3>
+        <span class="status-indicator">
+          <span class="ping-dot"></span>
+          Operational
+        </span>
+      </div>
+      <div class="logs-console">
+        <div *ngFor="let log of systemLogs" class="log-item" [ngClass]="log.level.toLowerCase()">
+          <span class="log-time">[{{ log.timestamp }}]</span>
+          <span class="log-level">{{ log.level }}</span>
+          <span class="log-service">[{{ log.service }}]</span>
+          <span class="log-message">{{ log.message }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

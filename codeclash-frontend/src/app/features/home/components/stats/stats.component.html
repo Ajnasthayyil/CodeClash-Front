@@ -1,0 +1,12 @@
+<div class="relative bg-[#0d1117] text-slate-100 py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div *ngFor="let stat of stats" class="group relative rounded-2xl bg-[#161b22] p-8 border border-slate-800 hover:border-orange-500/20 transition-all duration-300">
+        <div class="absolute -top-12 -right-12 w-24 h-24 bg-orange-500/5 rounded-full blur-xl group-hover:bg-orange-500/10 transition-all duration-300"></div>
+        <div class="text-4xl lg:text-5xl font-black text-orange-500 mb-2 tracking-tight">{{ stat.value }}</div>
+        <div class="text-sm font-bold text-white mb-2">{{ stat.label }}</div>
+        <p class="text-xs text-slate-400 leading-relaxed">{{ stat.desc }}</p>
+      </div>
+    </div>
+  </div>
+</div>

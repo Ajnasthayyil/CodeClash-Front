@@ -1,1 +1,224 @@
-<p>coding-arena works!</p>
+<!-- CODING ARENA — Full-screen battle layout -->
+<div class="arena-shell">
+
+  <!-- Mobile Tab Switcher (Visible on mobile/tablet only) -->
+  <div class="mobile-tabs-header">
+    <button (click)="mobileActiveTab = 'description'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'description'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <span>Problem</span>
+    </button>
+    <button (click)="mobileActiveTab = 'editor'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'editor'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+      <span>Editor</span>
+    </button>
+    <button (click)="mobileActiveTab = 'info'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'info'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      <span>Match Info</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════ 3-PANEL BODY ══════════════════ -->
+  <div class="arena-body" style="height: 100%;">
+
+    <!-- ─── LEFT: Problem Description ─── -->
+    <aside class="panel panel-left" [class.panel-visible]="mobileActiveTab === 'description'">
+      <div class="panel-tabs">
+        <button (click)="activePanel = 'problem'" class="panel-tab" [class.tab-active]="activePanel === 'problem'">Description</button>
+        <button (click)="activePanel = 'hints'"   class="panel-tab" [class.tab-active]="activePanel === 'hints'">Hints</button>
+      </div>
+
+      <div class="panel-scroll">
+        <!-- Title + Difficulty -->
+        <div class="problem-header">
+          <h2 class="problem-title">{{ problem.title }}</h2>
+          <span class="diff-badge" [class]="getDifficultyClass(problem.difficulty)">{{ problem.difficulty }}</span>
+        </div>
+
+        <!-- Tags -->
+        <div class="tag-row">
+          <span *ngFor="let tag of problem.tags" class="tag-chip">{{ tag }}</span>
+        </div>
+
+        <!-- Description -->
+        <div class="problem-body">
+          Given an array of integers <code class="inline-code">nums</code> and an integer
+          <code class="inline-code">target</code>, return indices of the two numbers such that
+          they add up to target. You may not use the same element twice.
+        </div>
+
+        <!-- Examples -->
+        <div *ngFor="let ex of problem.examples; let i = index" class="example-box">
+          <div class="example-label">Example {{ i + 1 }}</div>
+          <div class="example-body">
+            <p><span class="ex-key">Input: </span><code class="ex-val">{{ ex.input }}</code></p>
+            <p><span class="ex-key">Output: </span><code class="ex-val">{{ ex.output }}</code></p>
+            <p *ngIf="ex.explanation" class="ex-explain">{{ ex.explanation }}</p>
+          </div>
+        </div>
+
+        <!-- Constraints -->
+        <div class="constraints-section">
+          <p class="constraints-title">Constraints</p>
+          <ul class="constraints-list">
+            <li *ngFor="let c of problem.constraints">{{ c }}</li>
+          </ul>
+        </div>
+
+        <!-- Hints (shown only when hints tab active) -->
+        <div *ngIf="activePanel === 'hints'" class="hints-wrap">
+          <div class="hint-card">
+            <div class="hint-label">Hint 1</div>
+            <p>A brute-force approach would be to search for all possible pairs, but that is O(n²).</p>
+          </div>
+          <div class="hint-card">
+            <div class="hint-label">Hint 2</div>
+            <p>Fix one number <code class="inline-code">x</code>, then search for <code class="inline-code">target - x</code> in the rest of the array.</p>
+          </div>
+          <div class="hint-card">
+            <div class="hint-label">Hint 3</div>
+            <p>Use a hash map so the lookup for the complement is O(1), making the whole solution O(n).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- My progress (pinned to bottom) -->
+      <div class="my-progress">
+        <div class="progress-row">
+          <span class="progress-label">My Progress</span>
+          <span class="progress-frac">{{ myTestsPassed }} / {{ totalTests }} tests</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill prog-fill-blue" [style.width.%]="myFillPercent"></div></div>
+      </div>
+    </aside>
+
+    <!-- ─── CENTER: Code Editor ─── -->
+    <main class="panel panel-center" [class.panel-visible]="mobileActiveTab === 'editor'">
+
+      <!-- Editor top bar: language + autosave -->
+      <div class="editor-topbar">
+        <div class="lang-tabs">
+          <button *ngFor="let lang of languages"
+                  (click)="selectLanguage(lang)"
+                  class="lang-tab"
+                  [class.lang-active]="selectedLanguage === lang">
+            {{ lang }}
+          </button>
+        </div>
+        <div class="autosave-wrap">
+          <span class="autosave-text" [class.saved]="autoSaveIndicator">
+            <span *ngIf="autoSaveIndicator" class="save-dot"></span>
+            {{ autoSaveIndicator ? 'saved' : 'auto-save' }}
+          </span>
+          <button class="toggle" [class.toggle-on]="autoSave" (click)="autoSave = !autoSave">
+            <span class="toggle-knob"></span>
+          </button>
+          <svg class="check-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+
+      <!-- Code editor: line numbers + textarea -->
+      <div class="editor-area">
+        <div class="line-nums" aria-hidden="true">
+          <div *ngFor="let ln of codeLines; let i = index" class="ln">{{ i + 1 }}</div>
+        </div>
+        <textarea
+          #codeEditor
+          class="code-area"
+          [(ngModel)]="currentCode"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        ></textarea>
+      </div>
+
+      <!-- Terminal output -->
+      <div class="terminal-wrap">
+        <div class="terminal-bar">
+          <div class="mac-dots">
+            <span class="mac-dot mac-red"></span>
+            <span class="mac-dot mac-yellow"></span>
+            <span class="mac-dot mac-green"></span>
+          </div>
+          <span class="terminal-title">$ Test Suite Output</span>
+          <span class="sandbox-tag">Sandbox v3.1</span>
+        </div>
+        <pre class="terminal-out">{{ terminalOutput }}</pre>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button (click)="runCode()" [disabled]="isRunning || isSubmitting" class="btn-run">
+          <span *ngIf="isRunning" class="spin"></span>
+          <svg *ngIf="!isRunning" class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          {{ isRunning ? 'Running...' : 'Run Code' }}
+        </button>
+        <button (click)="submitSolution()" [disabled]="isRunning || isSubmitting" class="btn-submit">
+          <span *ngIf="isSubmitting" class="spin spin-white"></span>
+          {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+        </button>
+      </div>
+    </main>
+
+    <!-- ─── RIGHT: AI + Opponent + Timer ─── -->
+    <aside class="panel panel-right" [class.panel-visible]="mobileActiveTab === 'info'">
+
+
+      <!-- Opponent card -->
+      <div class="opp-card">
+        <div class="opp-row">
+          <div class="player-avatar avatar-purple-sm">{{ opponentName[0] }}</div>
+          <div class="opp-info">
+            <span class="opp-name">{{ opponentName }}</span>
+            <span class="opp-elo">{{ opponentRating }} ELO</span>
+          </div>
+          <div *ngIf="opponentIsTyping" class="opp-typing">
+            <span class="typing-dots-sm"><span></span><span></span><span></span></span>
+            coding...
+          </div>
+        </div>
+        <div class="opp-progress">
+          <div class="prog-row-sm">
+            <span class="prog-lbl">Tests Passed</span>
+            <span class="prog-val">{{ opponentTestsPassed }} / {{ totalTests }}</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill prog-fill-green" [style.width.%]="opponentFillPercent"></div></div>
+        </div>
+      </div>
+
+      <!-- Timer card -->
+      <div class="timer-card" [class.timer-card-red]="isLowTime">
+        <p class="timer-lbl">Time Remaining</p>
+        <p class="timer-num" [class.timer-blink]="isLowTime">{{ timeDisplay }}</p>
+      </div>
+
+      <!-- Success toast -->
+      <div *ngIf="showSubmitSuccess" class="toast-success">
+        🎉 All {{ totalTests }}/{{ totalTests }} tests passed — You win!
+      </div>
+
+      <!-- Surrender -->
+      <button (click)="showSurrenderModal = true" class="btn-surrender">Surrender</button>
+    </aside>
+  </div>
+
+  <!-- ══════════════════ SURRENDER MODAL ══════════════════ -->
+  <div *ngIf="showSurrenderModal" class="modal-bg" (click)="showSurrenderModal = false">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-icon">🏳️</div>
+      <h3 class="modal-title">Surrender Battle?</h3>
+      <p class="modal-body">You will forfeit this match and lose ELO rating. This cannot be undone.</p>
+      <div class="modal-btns">
+        <button (click)="showSurrenderModal = false" class="btn-keep">Keep Fighting</button>
+        <button (click)="confirmSurrender()" class="btn-give-up">Yes, Surrender</button>
+      </div>
+    </div>
+  </div>
+
+</div>
