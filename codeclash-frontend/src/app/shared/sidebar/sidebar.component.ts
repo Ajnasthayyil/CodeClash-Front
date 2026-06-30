@@ -13,6 +13,11 @@ export class SidebarComponent {
     private authService: AuthService
   ) {}
 
+  get isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user && user.role === 'Admin';
+  }
+
   isActive(route: string): boolean {
     return this.router.url === route;
   }

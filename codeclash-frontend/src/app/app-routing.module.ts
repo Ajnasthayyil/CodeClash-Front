@@ -25,6 +25,8 @@ import { SubmissionMonitorComponent } from './features/admin/submission-monitor/
 import { AdminProfileComponent } from './features/admin/profile/admin-profile.component';
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.component';
+import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 const routes: Routes = [
   {
@@ -32,20 +34,21 @@ const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: '', component: HomeComponent },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'profile', component: ProfileComponent },
-      { path: 'leaderboard', component: LeaderboardComponent },
-      { path: 'problems', component: ProblemsComponent },
-      { path: 'market', component: MarketComponent },
-      { path: 'arena', component: MatchmakingComponent },
-      { path: 'arena/battle', component: CodingArenaComponent },
-      { path: 'arena/result', component: MatchResultComponent },
-      { path: 'arena/analysis', component: AiAnalysisComponent },
-      { path: 'problems/solve/:id', component: PracticeArenaComponent },
-      { path: 'tournament', component: TournamentComponent },
+      { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+      { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+      { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard] },
+      { path: 'problems', component: ProblemsComponent, canActivate: [authGuard] },
+      { path: 'market', component: MarketComponent, canActivate: [authGuard] },
+      { path: 'arena', component: MatchmakingComponent, canActivate: [authGuard] },
+      { path: 'arena/battle', component: CodingArenaComponent, canActivate: [authGuard] },
+      { path: 'arena/result', component: MatchResultComponent, canActivate: [authGuard] },
+      { path: 'arena/analysis', component: AiAnalysisComponent, canActivate: [authGuard] },
+      { path: 'problems/solve/:id', component: PracticeArenaComponent, canActivate: [authGuard] },
+      { path: 'tournament', component: TournamentComponent, canActivate: [authGuard] },
       {
         path: 'admin',
         component: AdminComponent,
+        canActivate: [authGuard, adminGuard],
         children: [
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
           { path: 'dashboard', component: DashboardAnalyticsComponent },

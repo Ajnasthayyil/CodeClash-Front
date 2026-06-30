@@ -87,6 +87,20 @@ export class AuthService {
     );
   }
 
+  refresh(): Observable<ApiResponse<AuthResponseDto>> {
+    const refreshToken = localStorage.getItem('refreshToken') || '';
+    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {
+      refreshToken: refreshToken
+    }).pipe(
+      tap(res => {
+        if (res && res.success && res.data) {
+          localStorage.setItem('accessToken', res.data.accessToken);
+          localStorage.setItem('refreshToken', res.data.refreshToken);
+        }
+      })
+    );
+  }
+
   logout(): Observable<ApiResponse<any>> {
     const refreshToken = localStorage.getItem('refreshToken') || '';
     const accessToken = localStorage.getItem('accessToken') || '';

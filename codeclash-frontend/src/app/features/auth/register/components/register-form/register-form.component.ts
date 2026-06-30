@@ -42,9 +42,9 @@ export class RegisterFormComponent {
       this.errorMessage = 'Please enter your email.';
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
     if (!emailRegex.test(this.email)) {
-      this.errorMessage = 'Please enter a valid email address.';
+      this.errorMessage = 'Please enter a valid email address containing only lowercase letters.';
       return;
     }
 
