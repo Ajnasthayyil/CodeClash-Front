@@ -1,0 +1,10 @@
+{
+  "outputDirectory": "codeclash-frontend/codeclash-frontend/dist/codeclash-frontend",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

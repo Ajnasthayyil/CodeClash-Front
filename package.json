@@ -1,0 +1,7 @@
+{
+  "name": "codeclash-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd codeclash-frontend/codeclash-frontend && npm install && npm run build"
+  }
+}
