@@ -5,6 +5,9 @@
 # Build output
 bin/
 obj/
+node_modules/
+.angular/
+dist/
 
 # User files
 *.user
