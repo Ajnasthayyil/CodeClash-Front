@@ -29,7 +29,7 @@ export interface AuthResponseDto {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5126/api/v1/auth';
+  private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth';
 
   constructor(private http: HttpClient) {}
 
@@ -51,12 +51,11 @@ export class AuthService {
     return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/login`, {
       emailOrUsername: payload.email,
       password: payload.password
-    }).pipe(
+    }, { withCredentials: true }).pipe(
       tap(res => {
         if (res && res.success && res.data) {
           const authData = res.data;
           localStorage.setItem('accessToken', authData.accessToken);
-          localStorage.setItem('refreshToken', authData.refreshToken);
 
           // Build initials
           const parts = authData.user.fullName.trim().split(/\s+/);
@@ -88,28 +87,23 @@ export class AuthService {
   }
 
   refresh(): Observable<ApiResponse<AuthResponseDto>> {
-    const refreshToken = localStorage.getItem('refreshToken') || '';
-    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {
-      refreshToken: refreshToken
-    }).pipe(
+    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
       tap(res => {
         if (res && res.success && res.data) {
           localStorage.setItem('accessToken', res.data.accessToken);
-          localStorage.setItem('refreshToken', res.data.refreshToken);
         }
       })
     );
   }
 
   logout(): Observable<ApiResponse<any>> {
-    const refreshToken = localStorage.getItem('refreshToken') || '';
     const accessToken = localStorage.getItem('accessToken') || '';
     
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${accessToken}`
     });
 
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/logout`, { refreshToken }, { headers }).pipe(
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/logout`, {}, { headers, withCredentials: true }).pipe(
       tap(() => {
         this.clearSession();
       })

@@ -14,6 +14,7 @@ export class LoginFormComponent {
   
   errorMessage = '';
   isLoading = false;
+  showPassword = false;
 
   constructor(
     private router: Router,
@@ -50,7 +51,7 @@ export class LoginFormComponent {
       error: (err) => {
         this.isLoading = false;
         if (err.status === 0) {
-          this.errorMessage = 'Could not connect to the API server. Please ensure the backend is running at http://localhost:5126.';
+          this.errorMessage = 'Could not connect to the API server. Please ensure the backend is running.';
         } else if (err.error && err.error.errors && err.error.errors.length > 0) {
           this.errorMessage = err.error.errors.join(' ');
         } else if (err.error && err.error.message) {
@@ -70,5 +71,14 @@ export class LoginFormComponent {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);
     }, 1200);
+  }
+
+  loginWithGithub() {
+    window.location.href =
+      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/auth/github-login";
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 }

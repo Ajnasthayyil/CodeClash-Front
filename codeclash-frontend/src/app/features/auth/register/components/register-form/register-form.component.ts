@@ -14,11 +14,12 @@ export class RegisterFormComponent {
   designation = '';
   password = '';
   confirmPassword = '';
-  agreeTerms = false;
 
   errorMessage = '';
   successMessage = '';
   isLoading = false;
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private router: Router,
@@ -48,14 +49,12 @@ export class RegisterFormComponent {
       return;
     }
 
-    if (!this.phoneNumber) {
-      this.errorMessage = 'Please enter your phone number.';
-      return;
-    }
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(this.phoneNumber)) {
-      this.errorMessage = 'Phone number must be exactly 10 digits and contain only numbers.';
-      return;
+    if (this.phoneNumber) {
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(this.phoneNumber)) {
+        this.errorMessage = 'Phone number must be exactly 10 digits and contain only numbers.';
+        return;
+      }
     }
 
     if (!this.designation) {
@@ -81,10 +80,6 @@ export class RegisterFormComponent {
       return;
     }
 
-    if (!this.agreeTerms) {
-      this.errorMessage = 'You must agree to the Terms and Conditions.';
-      return;
-    }
 
     this.isLoading = true;
     this.successMessage = '';
@@ -94,7 +89,7 @@ export class RegisterFormComponent {
       email: this.email,
       password: this.password,
       confirmPassword: this.confirmPassword,
-      phoneNumber: this.phoneNumber,
+      phoneNumber: this.phoneNumber || null,
       designation: this.designation
     };
 
@@ -110,7 +105,6 @@ export class RegisterFormComponent {
           this.designation = '';
           this.password = '';
           this.confirmPassword = '';
-          this.agreeTerms = false;
         } else {
           this.errorMessage = res.message || 'Registration failed.';
         }
@@ -118,7 +112,7 @@ export class RegisterFormComponent {
       error: (err) => {
         this.isLoading = false;
         if (err.status === 0) {
-          this.errorMessage = 'Could not connect to the API server. Please ensure the backend is running at http://localhost:5126.';
+          this.errorMessage = 'Could not connect to the API server. Please ensure the backend is running.';
         } else if (err.error && err.error.errors && err.error.errors.length > 0) {
           this.errorMessage = err.error.errors.join(' ');
         } else if (err.error && err.error.message) {
@@ -138,5 +132,18 @@ export class RegisterFormComponent {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);
     }, 1200);
+  }
+
+  registerWithGithub() {
+    window.location.href =
+      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/auth/github-login";
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }
