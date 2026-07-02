@@ -1,12 +1,9 @@
-<div class="profile-root min-h-[calc(100vh-80px)] py-12 px-6 flex items-center justify-center bg-[#07090e]">
-  <!-- Profile Details Card -->
-  <div class="max-w-2xl w-full">
-    <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-md rounded-2xl p-8 shadow-2xl relative">
-      
-      <!-- Top Section: Avatar and Edit Actions -->
-      <div class="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-slate-800">
-        
-        <!-- Avatar with Cloudinary support & click to upload -->
+<div class="profile-root">
+  <!-- Profile Hero Banner -->
+  <section class="profile-hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <!-- Avatar -->
         <div class="avatar-wrap" (click)="triggerFileInput()" style="cursor: pointer;" title="Change Profile Picture">
           <div class="avatar-box overflow-hidden relative group">
             <img *ngIf="user.profileImageUrl" [src]="user.profileImageUrl" alt="Avatar" class="w-full h-full object-cover rounded-[18px]">
@@ -20,43 +17,165 @@
               </svg>
             </div>
           </div>
+          <span class="tier-badge">{{ user.tier }}</span>
           <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
         </div>
 
-        <!-- Name, Handle and Action Buttons -->
-        <div class="flex-1 text-center sm:text-left">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 class="text-2xl font-extrabold text-white tracking-tight">{{ user.name }}</h1>
-              <p class="text-sm font-semibold text-orange-500 mt-1">@{{ user.handle }}</p>
-            </div>
-            
-            <!-- Buttons Group -->
-            <div class="flex items-center justify-center sm:justify-end gap-3">
-              <button (click)="openEditModal()" class="px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800/40 hover:bg-slate-700 text-sm font-bold text-white transition duration-200 flex items-center gap-2">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-slate-400">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        <!-- Info -->
+        <div class="hero-info">
+          <div class="name-edit-row flex items-center gap-3">
+            <h1 class="hero-name">{{ user.name }}</h1>
+            <button (click)="openEditModal()" class="btn-edit-profile" title="Edit Profile Details">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>Edit Details</span>
+            </button>
+
+            <!-- 3 Dots Options Dropdown -->
+            <div class="relative inline-block text-left">
+              <button (click)="toggleDropdown($event)" class="flex items-center justify-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white transition duration-200" title="More options">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                 </svg>
-                Edit Details
               </button>
 
-              <!-- 3 Dots Options Dropdown -->
-              <div class="relative">
-                <button (click)="toggleDropdown($event)" class="flex items-center justify-center p-2.5 rounded-xl border border-slate-700 bg-slate-800/40 hover:bg-slate-700 text-slate-400 hover:text-white transition duration-200">
+              <!-- Dropdown Panel -->
+              <div *ngIf="isDropdownOpen" class="absolute left-0 mt-2 w-48 rounded-xl bg-slate-950 border border-slate-850 shadow-2xl z-50 py-1.5 backdrop-blur-md">
+                <button (click)="openConfirmDeleteModal()" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 transition duration-150">
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
+                  Delete Account
                 </button>
+              </div>
+            </div>
+          </div>
+          <p class="hero-bio">{{ user.bio }}</p>
+          <div class="hero-meta">
+            <!-- Phone Number -->
+            <span class="meta-chip" *ngIf="user.phoneNumber">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span>{{ user.phoneNumber }}</span>
+            </span>
+            <!-- Email -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>{{ user.email }}</span>
+            </span>
+            <!-- Joined Date -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Joined {{ user.joined }}</span>
+            </span>
+            <!-- Handle -->
+            <span class="meta-chip">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+              </svg>
+              <span>@{{ user.handle }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
 
-                <!-- Dropdown Panel -->
-                <div *ngIf="isDropdownOpen" class="absolute right-0 mt-2 w-48 rounded-xl bg-slate-950 border border-slate-800 shadow-2xl z-50 py-1.5 backdrop-blur-md">
-                  <button (click)="openConfirmDeleteModal()" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 transition duration-150 text-left">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Delete Account
-                  </button>
+      <!-- ELO Status -->
+      <div class="hero-elo">
+        <span class="elo-label">ELO Rating</span>
+        <span class="elo-value">{{ user.eloRatingDisplay }}</span>
+        <div class="elo-track">
+          <div class="elo-fill"></div>
+        </div>
+        <span class="elo-rank">Rank #422</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Strip -->
+  <section class="stats-strip">
+    <div class="stats-inner">
+      <div *ngFor="let item of stats; let last = last" class="stat-item" [class.stat-accent]="item.accent">
+        <span class="stat-num">{{ item.value }}</span>
+        <span class="stat-lbl">{{ item.label }}</span>
+        <div *ngIf="!last" class="stat-divider"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Wrap -->
+  <div class="content-wrap">
+    <!-- Tabs Navigation Bar -->
+    <div class="tabs-bar">
+      <div class="tabs-group">
+        <button (click)="setTab('overview')" class="tab" [class.tab-on]="activeTab === 'overview'">Overview</button>
+        <button (click)="setTab('history')" class="tab" [class.tab-on]="activeTab === 'history'">Match History</button>
+        <button (click)="setTab('achievements')" class="tab" [class.tab-on]="activeTab === 'achievements'">Achievements</button>
+        <button (click)="setTab('stats')" class="tab" [class.tab-on]="activeTab === 'stats'">Detailed Stats</button>
+      </div>
+    </div>
+
+    <!-- Tab View Container -->
+    <div class="tab-body" [ngSwitch]="activeTab">
+      
+      <!-- Overview Tab -->
+      <div *ngSwitchCase="'overview'" class="overview-grid">
+        
+        <!-- Left Column: Language Preference & ELO chart -->
+        <div class="flex flex-col gap-4">
+          <!-- Card: Languages Preference -->
+          <div class="card">
+            <h2 class="card-title">Language Preference</h2>
+            <div class="donut-layout">
+              <canvas #donutCanvas class="donut-canvas"></canvas>
+              <ul class="lang-list">
+                <li *ngFor="let lang of languages" class="lang-row">
+                  <span class="lang-dot" [style.backgroundColor]="lang.color"></span>
+                  <span class="lang-name">{{ lang.name }}</span>
+                  <span class="lang-pct">{{ lang.pct }}%</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card: ELO progress chart -->
+          <div class="card mt-16">
+            <h2 class="card-title">ELO Progress</h2>
+            <div class="elo-wrap">
+              <canvas #eloCanvas class="elo-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Recent Battles list -->
+        <div class="card">
+          <div class="card-header-row">
+            <h2 class="card-title mb-0">Recent Activity</h2>
+            <span class="record-tag">Recent Battles</span>
+          </div>
+
+          <div class="recent-list">
+            <div *ngFor="let match of matchHistory" class="recent-row">
+              <div class="recent-left">
+                <span class="result-dot" [class.dot-win]="match.result === 'Win'" [class.dot-loss]="match.result === 'Loss'"></span>
+                <div class="recent-vs">
+                  <span class="recent-opp">vs {{ match.opponent }}</span>
+                  <span class="recent-prob">{{ match.problem }}</span>
                 </div>
+              </div>
+
+              <div class="recent-right">
+                <span class="recent-lang">{{ match.language }}</span>
+                <span class="recent-time">{{ match.duration }}</span>
+                <span class="recent-date">{{ match.date }}</span>
+                <span class="recent-elo" [class.pos]="match.eloChange > 0" [class.neg]="match.eloChange < 0">
+                  {{ match.eloChange > 0 ? '+' : '' }}{{ match.eloChange }}
+                </span>
               </div>
             </div>
           </div>
@@ -64,64 +183,129 @@
 
       </div>
 
-      <!-- Account Info Fields List -->
-      <div class="mt-8 space-y-6">
-        <h2 class="text-lg font-bold text-slate-100 border-b border-slate-800 pb-2">Profile Information</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Email Field -->
-          <div class="flex items-center gap-3 bg-slate-950/40 p-4 rounded-xl border border-slate-850">
-            <div class="p-2.5 rounded-lg bg-orange-500/10 text-orange-500">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+      <!-- Match History Tab -->
+      <div *ngSwitchCase="'history'" class="card card-wide">
+        <h2 class="card-title">Battle Records</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Opponent</th>
+                <th>Problem</th>
+                <th class="tc">Result</th>
+                <th class="tc">Score</th>
+                <th>Language</th>
+                <th class="tr">Duration</th>
+                <th class="tr">ELO Change</th>
+                <th class="tr">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let match of matchHistory" class="data-row">
+                <td>
+                  <div class="opp-cell">
+                    <span class="mini-avatar">{{ match.opponent.charAt(0) }}</span>
+                    <span>{{ match.opponent }}</span>
+                  </div>
+                </td>
+                <td class="prob-td" [title]="match.problem">{{ match.problem }}</td>
+                <td class="tc">
+                  <span class="badge-result" [class.badge-win]="match.result === 'Win'" [class.badge-loss]="match.result === 'Loss'">
+                    {{ match.result | uppercase }}
+                  </span>
+                </td>
+                <td class="tc mono" [class.score-hi]="match.score === 100">{{ match.score }}/100</td>
+                <td class="lang-td">{{ match.language }}</td>
+                <td class="tr mono">{{ match.duration }}</td>
+                <td class="tr mono" [class.elo-p]="match.eloChange > 0" [class.elo-n]="match.eloChange < 0">
+                  {{ match.eloChange > 0 ? '+' : '' }}{{ match.eloChange }}
+                </td>
+                <td class="tr muted-td">{{ match.date }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Achievements Tab -->
+      <div *ngSwitchCase="'achievements'">
+        <div class="ach-header-row">
+          <h2 class="section-title">Unlocked Accomplishments</h2>
+          <span class="ach-earned">Earned: {{ earnedCount }}/{{ achievements.length }}</span>
+        </div>
+
+        <div class="ach-grid">
+          <div *ngFor="let ach of achievements" class="ach-card" [class.ach-locked]="!ach.earned">
+            <span class="ach-icon">{{ ach.earned ? ach.icon : '🔒' }}</span>
+            <div class="ach-content">
+              <div class="ach-top">
+                <span class="ach-name">{{ ach.title }}</span>
+                <span class="rarity" [class]="getRarityClass(ach.rarity)">{{ ach.rarity }}</span>
+              </div>
+              <p class="ach-desc">{{ ach.desc }}</p>
             </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email Address</p>
-              <p class="text-sm font-medium text-white mt-0.5">{{ user.email }}</p>
+            <div *ngIf="!ach.earned" class="lock-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Phone Number Field -->
-          <div class="flex items-center gap-3 bg-slate-950/40 p-4 rounded-xl border border-slate-850">
-            <div class="p-2.5 rounded-lg bg-orange-500/10 text-orange-500">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone Number</p>
-              <p class="text-sm font-medium text-white mt-0.5">{{ user.phoneNumber || 'Not provided' }}</p>
-            </div>
-          </div>
-
-          <!-- Joined Date Field -->
-          <div class="flex items-center gap-3 bg-slate-950/40 p-4 rounded-xl border border-slate-850">
-            <div class="p-2.5 rounded-lg bg-orange-500/10 text-orange-500">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Member Since</p>
-              <p class="text-sm font-medium text-white mt-0.5">{{ user.joined }}</p>
-            </div>
-          </div>
-
-          <!-- Role Field -->
-          <div class="flex items-center gap-3 bg-slate-950/40 p-4 rounded-xl border border-slate-850">
-            <div class="p-2.5 rounded-lg bg-orange-500/10 text-orange-500">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Account Role</p>
-              <p class="text-sm font-medium text-white mt-0.5 text-capitalize">{{ user.role || 'User' }}</p>
+      <!-- Detailed Stats Tab -->
+      <div *ngSwitchCase="'stats'" class="stats-grid">
+        <!-- Solving progress -->
+        <div class="card">
+          <h2 class="card-title">Problem Solving Breakdown</h2>
+          <div class="bars">
+            <div *ngFor="let stat of detailedStats" class="bar-row">
+              <div class="bar-top">
+                <span class="bar-lbl">
+                  <span class="bar-dot" [style.backgroundColor]="stat.color"></span>
+                  {{ stat.label }}
+                </span>
+                <span class="bar-val">
+                  {{ stat.value }} <span class="bar-max">/ {{ stat.max }}</span>
+                </span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" [style.backgroundColor]="stat.color" [style.width.%]="(stat.value / stat.max) * 100"></div>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Quick Summary Stats Grid -->
+        <div class="card quick-card flex flex-col justify-between">
+          <h2 class="card-title">Quick Stats Summary</h2>
+          <div class="quick-grid">
+            <div class="quick-item">
+              <span class="q-num">124</span>
+              <span class="q-lbl">Win Count</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">62</span>
+              <span class="q-lbl">Loss Count</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">98%</span>
+              <span class="q-lbl">Max Accuracy</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">5.5m</span>
+              <span class="q-lbl">Avg Duration</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">14</span>
+              <span class="q-lbl">Trophies</span>
+            </div>
+            <div class="quick-item">
+              <span class="q-num">99.2%</span>
+              <span class="q-lbl">Percentile</span>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
