@@ -149,6 +149,11 @@ export class AuthService {
     return this.http.post<ApiResponse<string>>(uploadUrl, formData);
   }
 
+  deleteAccount(): Observable<ApiResponse<any>> {
+    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    return this.http.delete<ApiResponse<any>>(profileUrl);
+  }
+
   // ─── Token and Cookie Helpers ──────────────────────────────────────────
 
   setAuthTokens(token: string, refreshToken: string): void {

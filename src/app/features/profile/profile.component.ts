@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 
 type Tab = 'overview' | 'history' | 'achievements' | 'stats';
@@ -58,6 +58,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   };
 
   isEditModalOpen = false;
+  isDropdownOpen = false;
+  isConfirmDeleteModalOpen = false;
   editUser = { name: '', username: '', phoneNumber: '' };
   errorMessage = '';
   successMessage = '';
@@ -417,5 +419,45 @@ export class ProfileComponent implements OnInit, AfterViewInit {
         }
       });
     }
+  }
+
+  toggleDropdown(event: Event): void {
+    event.stopPropagation();
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  @HostListener('document:click')
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+  openConfirmDeleteModal(): void {
+    this.isDropdownOpen = false;
+    this.isConfirmDeleteModalOpen = true;
+  }
+
+  closeConfirmDeleteModal(): void {
+    this.isConfirmDeleteModalOpen = false;
+  }
+
+  deleteAccount(): void {
+    this.isLoading = true;
+    this.authService.deleteAccount().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success) {
+          this.authService.clearSession();
+          this.closeConfirmDeleteModal();
+          window.location.href = '/';
+        } else {
+          this.errorMessage = res.message || 'Failed to delete account.';
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Account deletion error:', err);
+        this.errorMessage = 'An error occurred while deleting your account.';
+      }
+    });
   }
 }
