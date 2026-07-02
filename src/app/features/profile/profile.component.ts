@@ -319,6 +319,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   }
 
   openEditModal(): void {
+    this.isDropdownOpen = false;
     this.editUser = {
       name: this.user.name,
       username: this.user.handle,
