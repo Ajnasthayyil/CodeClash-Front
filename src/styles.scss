@@ -87,6 +87,16 @@ body.light-mode {
       }
     }
 
+    /* Log Out button in header overrides */
+    button.btn-logout-header {
+      color: #ffffff !important;
+      background-color: #1e293b !important;
+      &:hover {
+        color: #ffffff !important;
+        background-color: #ea580c !important;
+      }
+    }
+
     a, span {
       color: #0f172a !important;
       &:hover {
