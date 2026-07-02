@@ -1,0 +1,41 @@
+<div class="min-h-screen flex items-center justify-center bg-[#0d1117] px-4">
+  <div class="w-full max-w-md bg-[#161b22]/60 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center backdrop-blur-md">
+    
+    <!-- Branding -->
+    <div class="flex justify-center items-center gap-3 mb-8">
+      <div class="w-12 h-12 rounded-xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center text-orange-500 font-mono font-bold text-xl">
+        &lt;/&gt;
+      </div>
+      <div class="text-left">
+        <h2 class="text-xl font-black text-white">CodeClash</h2>
+        <p class="text-xs text-slate-400 font-semibold">Competitive coding arena</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex flex-col items-center gap-5 py-6">
+      <div class="relative w-16 h-16">
+        <!-- Spinner Ring -->
+        <div class="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <div class="flex flex-col gap-1.5 mt-2">
+        <h3 class="text-lg font-bold text-white">Authenticating</h3>
+        <p class="text-sm text-slate-400">Logging you in, please wait...</p>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!isLoading && errorMessage" class="flex flex-col items-center gap-4 py-4">
+      <div class="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-2xl">
+        ✕
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <h3 class="text-lg font-bold text-white">Authentication Failed</h3>
+        <p class="text-sm text-red-400 font-medium px-4">{{ errorMessage }}</p>
+      </div>
+      <p class="text-xs text-slate-500 mt-4">Redirecting you back to login page...</p>
+    </div>
+
+  </div>
+</div>

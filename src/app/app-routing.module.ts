@@ -25,6 +25,7 @@ import { SubmissionMonitorComponent } from './features/admin/submission-monitor/
 import { AdminProfileComponent } from './features/admin/profile/admin-profile.component';
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.component';
+import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 
@@ -71,6 +72,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
+  { path: 'auth-success', component: AuthSuccessComponent },
   { path: '**', component: PageNotFoundComponent }
 ];
 

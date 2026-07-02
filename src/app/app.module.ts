@@ -48,6 +48,18 @@ import { AdminProfileComponent } from './features/admin/profile/admin-profile.co
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.component';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
+import { APP_INITIALIZER } from '@angular/core';
+import { AuthService } from './core/services/auth.service';
+import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
+
+export function initializeApp(authService: AuthService) {
+  return () => new Promise<void>((resolve) => {
+    authService.refresh().subscribe({
+      next: () => resolve(),
+      error: () => resolve()
+    });
+  });
+}
 
 @NgModule({
   declarations: [
@@ -93,7 +105,8 @@ import { TokenInterceptor } from './core/interceptors/token.interceptor';
     SubmissionMonitorComponent,
     AdminProfileComponent,
     PageNotFoundComponent,
-    AiAnalysisComponent
+    AiAnalysisComponent,
+    AuthSuccessComponent
   ],
   imports: [
     BrowserModule,
@@ -103,7 +116,13 @@ import { TokenInterceptor } from './core/interceptors/token.interceptor';
     HttpClientModule
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [AuthService],
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

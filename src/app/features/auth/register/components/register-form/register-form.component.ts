@@ -11,7 +11,6 @@ export class RegisterFormComponent {
   name = '';
   email = '';
   phoneNumber = '';
-  designation = '';
   password = '';
   confirmPassword = '';
 
@@ -57,10 +56,6 @@ export class RegisterFormComponent {
       }
     }
 
-    if (!this.designation) {
-      this.errorMessage = 'Please enter your designation.';
-      return;
-    }
 
     if (!this.password) {
       this.errorMessage = 'Please set a secure password.';
@@ -89,8 +84,7 @@ export class RegisterFormComponent {
       email: this.email,
       password: this.password,
       confirmPassword: this.confirmPassword,
-      phoneNumber: this.phoneNumber || null,
-      designation: this.designation
+      phoneNumber: this.phoneNumber || null
     };
 
     this.authService.register(payload).subscribe({
@@ -102,7 +96,6 @@ export class RegisterFormComponent {
           this.name = '';
           this.email = '';
           this.phoneNumber = '';
-          this.designation = '';
           this.password = '';
           this.confirmPassword = '';
         } else {
@@ -136,7 +129,7 @@ export class RegisterFormComponent {
 
   registerWithGithub() {
     window.location.href =
-      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/auth/github-login";
+      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth/github-login";
   }
 
   togglePasswordVisibility() {

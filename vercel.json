@@ -1,5 +1,5 @@
 {
-  "outputDirectory": "codeclash-frontend/codeclash-frontend/dist/codeclash-frontend",
+  "outputDirectory": "dist/codeclash-frontend",
   "cleanUrls": true,
   "rewrites": [
     {
