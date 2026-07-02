@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
 
 type Tab = 'overview' | 'history' | 'achievements' | 'stats';
 
@@ -44,7 +45,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     initials: 'NC',
     name: 'NovaCoder',
     email: 'nova.coder@codeclash.com',
-    designation: 'Senior Software Engineer',
+    phoneNumber: '',
     bio: 'Full-stack dev by day, algo grinder by night',
     location: 'United States',
     joined: 'Jan 2025',
@@ -55,7 +56,10 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   };
 
   isEditModalOpen = false;
-  editUser = { name: '', email: '', designation: '' };
+  editUser = { name: '', username: '', phoneNumber: '' };
+  errorMessage = '';
+  successMessage = '';
+  isLoading = false;
 
   // ─── Stats ───────────────────────────────────────────────────────────────
   stats = [
@@ -116,25 +120,64 @@ export class ProfileComponent implements OnInit, AfterViewInit {
 
   topLanguages = this.languages;
 
+  constructor(private authService: AuthService) {}
+
   ngOnInit(): void {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
       this.user.name = parsed.name || this.user.name;
       this.user.email = parsed.email || this.user.email;
-      this.user.designation = parsed.designation || this.user.designation;
+      this.user.phoneNumber = parsed.phoneNumber || this.user.phoneNumber;
+      this.user.handle = parsed.username || this.user.handle;
       this.user.eloRating = parsed.rating || this.user.eloRating;
       this.user.eloRatingDisplay = this.user.eloRating.toLocaleString();
       if (parsed.initials) {
         this.user.initials = parsed.initials;
       } else {
-        const parts = this.user.name.trim().split(/\s+/);
-        if (parts.length >= 2) {
-          this.user.initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-        } else if (parts.length === 1 && parts[0].length > 0) {
-          this.user.initials = parts[0][0].toUpperCase();
-        }
+        this.updateInitials();
       }
+    }
+
+    // Load fresh data from the server
+    this.authService.getProfile().subscribe({
+      next: (res) => {
+        if (res && res.success && res.data) {
+          const profile = res.data;
+          this.user.name = profile.fullName || this.user.name;
+          this.user.email = profile.email || this.user.email;
+          this.user.phoneNumber = profile.phoneNumber || '';
+          this.user.handle = profile.username || this.user.handle;
+          
+          this.updateInitials();
+
+          // Sync back to localStorage
+          const existing = savedUser ? JSON.parse(savedUser) : {};
+          const updatedUser = {
+            ...existing,
+            name: this.user.name,
+            email: this.user.email,
+            phoneNumber: this.user.phoneNumber,
+            username: this.user.handle,
+            initials: this.user.initials
+          };
+          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load profile from server:', err);
+      }
+    });
+  }
+
+  private updateInitials(): void {
+    const parts = this.user.name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      this.user.initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    } else if (parts.length === 1 && parts[0].length > 0) {
+      this.user.initials = parts[0][0].toUpperCase();
+    } else {
+      this.user.initials = 'NC';
     }
   }
 
@@ -261,9 +304,11 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   openEditModal(): void {
     this.editUser = {
       name: this.user.name,
-      email: this.user.email,
-      designation: this.user.designation
+      username: this.user.handle,
+      phoneNumber: this.user.phoneNumber
     };
+    this.errorMessage = '';
+    this.successMessage = '';
     this.isEditModalOpen = true;
   }
 
@@ -272,32 +317,59 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   }
 
   saveProfile(): void {
-    this.user.name = this.editUser.name;
-    this.user.email = this.editUser.email;
-    this.user.designation = this.editUser.designation;
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    // Update initials automatically
-    const parts = this.editUser.name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      this.user.initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    } else if (parts.length === 1 && parts[0].length > 0) {
-      this.user.initials = parts[0][0].toUpperCase();
-    } else {
-      this.user.initials = 'NC';
-    }
-
-    // Save back to localStorage
-    const savedUser = localStorage.getItem('currentUser');
-    const existing = savedUser ? JSON.parse(savedUser) : {};
-    const updatedUser = {
-      ...existing,
-      name: this.user.name,
-      email: this.user.email,
-      designation: this.user.designation,
-      initials: this.user.initials
+    const payload = {
+      fullName: this.editUser.name,
+      username: this.editUser.username,
+      phoneNumber: this.editUser.phoneNumber || ''
     };
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
 
-    this.closeEditModal();
+    this.authService.updateProfile(payload).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success && res.data) {
+          this.user.name = res.data.fullName || this.user.name;
+          this.user.handle = res.data.username || this.user.handle;
+          this.user.phoneNumber = res.data.phoneNumber || '';
+          this.user.email = res.data.email || this.user.email;
+
+          this.updateInitials();
+
+          // Save back to localStorage
+          const savedUser = localStorage.getItem('currentUser');
+          const existing = savedUser ? JSON.parse(savedUser) : {};
+          const updatedUser = {
+            ...existing,
+            name: this.user.name,
+            email: this.user.email,
+            phoneNumber: this.user.phoneNumber,
+            username: this.user.handle,
+            initials: this.user.initials
+          };
+          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+          this.successMessage = 'Profile updated successfully!';
+          setTimeout(() => {
+            this.successMessage = '';
+            this.closeEditModal();
+          }, 1500);
+        } else {
+          this.errorMessage = res.message || 'Failed to update profile.';
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.error && err.error.errors && err.error.errors.length > 0) {
+          this.errorMessage = err.error.errors.join(' ');
+        } else if (err.error && err.error.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = 'An error occurred while updating the profile.';
+        }
+      }
+    });
   }
 }

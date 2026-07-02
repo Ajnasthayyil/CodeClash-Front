@@ -1,4 +1,6 @@
 {
+  "outputDirectory": "dist/codeclash-frontend",
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/(.*)",
