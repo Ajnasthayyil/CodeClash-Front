@@ -37,6 +37,7 @@ interface StatBar {
 export class ProfileComponent implements OnInit, AfterViewInit {
   @ViewChild('eloCanvas') eloCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   activeTab: Tab = 'overview';
 
@@ -46,6 +47,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     name: 'NovaCoder',
     email: 'nova.coder@codeclash.com',
     phoneNumber: '',
+    profileImageUrl: '',
     bio: 'Full-stack dev by day, algo grinder by night',
     location: 'United States',
     joined: 'Jan 2025',
@@ -148,6 +150,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
           this.user.email = profile.email || this.user.email;
           this.user.phoneNumber = profile.phoneNumber || '';
           this.user.handle = profile.username || this.user.handle;
+          this.user.profileImageUrl = profile.profileImageUrl || '';
           
           this.updateInitials();
 
@@ -159,7 +162,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
             email: this.user.email,
             phoneNumber: this.user.phoneNumber,
             username: this.user.handle,
-            initials: this.user.initials
+            initials: this.user.initials,
+            profileImageUrl: this.user.profileImageUrl
           };
           localStorage.setItem('currentUser', JSON.stringify(updatedUser));
         }
@@ -371,5 +375,47 @@ export class ProfileComponent implements OnInit, AfterViewInit {
         }
       }
     });
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.isLoading = true;
+      this.authService.uploadProfileImage(file).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          if (res && res.success && res.data) {
+            const newUrl = res.data;
+            this.user.profileImageUrl = newUrl;
+            
+            // Sync to localStorage
+            const savedUser = localStorage.getItem('currentUser');
+            const existing = savedUser ? JSON.parse(savedUser) : {};
+            const updatedUser = {
+              ...existing,
+              profileImageUrl: newUrl
+            };
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            
+            this.successMessage = 'Profile picture updated successfully!';
+            this.errorMessage = '';
+            setTimeout(() => {
+              this.successMessage = '';
+            }, 3000);
+          } else {
+            this.errorMessage = res.message || 'Failed to upload profile picture.';
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('File upload error:', err);
+          this.errorMessage = 'An error occurred while uploading the file.';
+        }
+      });
+    }
   }
 }

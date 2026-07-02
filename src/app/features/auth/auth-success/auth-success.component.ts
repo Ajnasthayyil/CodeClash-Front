@@ -47,7 +47,8 @@ export class AuthSuccessComponent implements OnInit {
                 email: profile.email,
                 phoneNumber: profile.phoneNumber || '',
                 username: profile.username,
-                initials: initials
+                initials: initials,
+                profileImageUrl: profile.profileImageUrl || ''
               };
 
               // Store user details in localStorage

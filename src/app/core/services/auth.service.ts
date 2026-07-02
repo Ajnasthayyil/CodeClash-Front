@@ -142,6 +142,13 @@ export class AuthService {
     return this.http.put<ApiResponse<any>>(profileUrl, payload);
   }
 
+  uploadProfileImage(file: File): Observable<ApiResponse<string>> {
+    const uploadUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/image';
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ApiResponse<string>>(uploadUrl, formData);
+  }
+
   // ─── Token and Cookie Helpers ──────────────────────────────────────────
 
   setAuthTokens(token: string, refreshToken: string): void {
