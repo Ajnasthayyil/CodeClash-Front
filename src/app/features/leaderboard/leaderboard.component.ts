@@ -1,4 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { LeaderboardService } from '../../core/services/leaderboard.service';
 
 interface LeaderboardEntry {
   rank: number;
@@ -52,41 +53,62 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     { day: 30, elo: 1842 }
   ];
 
-  // Raw mock database
-  private allPlayers: LeaderboardEntry[] = [
-    { rank: 1, name: 'NexusGod', elo: 2589, wl: '341/92', battles: 433, streak: 12, lang: 'Python', initial: 'N', avatarColor: '#22c55e', country: 'US' },
-    { rank: 2, name: 'ByteWizard', elo: 2341, wl: '284/99', battles: 383, streak: 8, lang: 'C++', initial: 'B', avatarColor: '#3b82f6', country: 'DE' },
-    { rank: 3, name: 'CodePhantom', elo: 2187, wl: '212/88', battles: 300, streak: 4, lang: 'Java', initial: 'C', avatarColor: '#a855f7', country: 'UK' },
-    { rank: 4, name: 'QuantumDev', elo: 2102, wl: '81/34', battles: 115, streak: 9, lang: 'Go', initial: 'Q', avatarColor: '#14b8a6', country: 'FR' },
-    { rank: 5, name: 'AlgoKing99', elo: 2087, wl: '234/98', battles: 332, streak: 14, lang: 'Python', initial: 'A', avatarColor: '#ec4899', country: 'IN' },
-    { rank: 6, name: 'GhostCoder', elo: 1998, wl: '145/67', battles: 212, streak: 5, lang: 'Rust', initial: 'G', avatarColor: '#f59e0b', country: 'US' },
-    { rank: 7, name: 'NovaCoder', elo: 1842, wl: '134/62', battles: 196, streak: 7, lang: 'Python', initial: 'N', avatarColor: '#f97316', isCurrentUser: true, country: 'IN' },
-    { rank: 8, name: 'DevMaster', elo: 1798, wl: '120/60', battles: 180, streak: 3, lang: 'JavaScript', initial: 'D', avatarColor: '#64748b', country: 'DE' },
-    { rank: 9, name: 'CodeGeek', elo: 1752, wl: '105/52', battles: 157, streak: 0, lang: 'TypeScript', initial: 'C', avatarColor: '#ef4444', country: 'UK' }
-  ];
+  // Raw database
+  private allPlayers: LeaderboardEntry[] = [];
+  isLoading = false;
 
   // Filtered view data
   filteredPlayers: LeaderboardEntry[] = [];
   topThree: LeaderboardEntry[] = [];
   remainingPlayers: LeaderboardEntry[] = [];
 
+  constructor(private leaderboardService: LeaderboardService) {}
+
   ngOnInit() {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      // Find our player in allPlayers and update details
-      const me = this.allPlayers.find(p => p.isCurrentUser);
-      if (me) {
-        me.name = parsed.name || me.name;
-        me.elo = parsed.rating || me.elo;
-        me.initial = me.name.charAt(0).toUpperCase();
-        // Update elo history last item
-        if (this.eloHistory.length > 0) {
-          this.eloHistory[this.eloHistory.length - 1].elo = me.elo;
+    this.fetchLeaderboard();
+  }
+
+  fetchLeaderboard() {
+    this.isLoading = true;
+    this.leaderboardService.getLeaderboard().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success && res.data) {
+          // Map DB users to leaderboard entries
+          // Rank is assigned sequentially since the backend already sorts them alphabetically
+          this.allPlayers = res.data.map((user, index) => {
+            const initial = user.username ? user.username.charAt(0).toUpperCase() : '?';
+            
+            // Assign deterministic color based on username
+            const colors = ['#22c55e', '#3b82f6', '#a855f7', '#14b8a6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
+            let colorIndex = 0;
+            if (user.username) {
+              colorIndex = user.username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+            }
+            
+            return {
+              rank: index + 1,
+              name: user.username,
+              elo: 0, // 0 points for now
+              wl: '0/0',
+              battles: 0,
+              streak: 0,
+              lang: 'Any',
+              initial: initial,
+              avatarColor: colors[colorIndex],
+              country: user.country || 'US'
+            };
+          });
+          this.applyFilters();
         }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Failed to fetch leaderboard', err);
+        this.allPlayers = [];
+        this.applyFilters();
       }
-    }
-    this.applyFilters();
+    });
   }
 
   ngAfterViewInit() {
