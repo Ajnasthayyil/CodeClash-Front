@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { ApiResponse } from './auth.service';
 
 export interface ProblemSummaryDto {
-  id: string;
+  problemId: string;
   title: string;
   slug: string;
   difficulty: string;

@@ -40,14 +40,14 @@ export class ProblemsComponent implements OnInit {
       next: (res) => {
         this.isLoading = false;
         if (res && res.success && res.data) {
-          this.problems = res.data.items.map((p) => {
+          this.problems = res.data.items.map((p: any) => {
             const difficulty = p.difficulty as 'Easy' | 'Medium' | 'Hard';
             const xp = difficulty === 'Easy' ? 100 : difficulty === 'Medium' ? 200 : 400;
-            const hash = p.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const hash = p.title.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
             const acceptanceRate = `${(45 + (hash % 40)).toFixed(1)}%`;
             
             return {
-              id: p.id,
+              id: p.problemId,
               title: p.title,
               skill: p.category,
               difficulty,
