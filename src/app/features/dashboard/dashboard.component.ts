@@ -1,4 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 interface Candidate {
   name: string;
@@ -90,7 +92,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return Math.round((lobby.players / lobby.maxPlayers) * 100);
   }
 
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
   ngOnInit() {
+    // Prevent Admins from landing on standard user dashboard view
+    const user = this.authService.getCurrentUser();
+    if (user && user.role === 'Admin') {
+      this.router.navigate(['/admin']);
+      return;
+    }
+
     this.intervalId = setInterval(() => {
       this.totalAssessments += Math.floor(Math.random() * 2);
       if (Math.random() > 0.7) {

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NotificationService } from '../../../shared/notifications/notification.service';
+import { AdminUserService, AdminUserRecordDto } from '../../../core/services/admin-user.service';
 
 interface UserRecord {
   id: string;
@@ -16,15 +17,8 @@ interface UserRecord {
   styleUrls: ['./user-management.component.scss']
 })
 export class UserManagementComponent implements OnInit {
-  users: UserRecord[] = [
-    { id: '1', username: 'NovaCoder', elo: 1842, role: 'User', status: 'Active', joinDate: '2025-11-12' },
-    { id: '2', username: 'ByteWizard', elo: 1756, role: 'User', status: 'Active', joinDate: '2025-12-05' },
-    { id: '3', username: 'HexMaster', elo: 2105, role: 'Admin', status: 'Active', joinDate: '2025-08-20' },
-    { id: '4', username: 'Cheater404', elo: 1420, role: 'User', status: 'Suspended', joinDate: '2026-02-14' },
-    { id: '5', username: 'StackOverlord', elo: 1980, role: 'User', status: 'Active', joinDate: '2026-01-03' },
-    { id: '6', username: 'Algorist', elo: 1675, role: 'User', status: 'Active', joinDate: '2026-03-22' }
-  ];
-
+  users: UserRecord[] = [];
+  isLoading = false;
   searchQuery = '';
 
   // Notification Modal state
@@ -34,7 +28,10 @@ export class UserManagementComponent implements OnInit {
   notificationMsg = '';
   notificationType: 'info' | 'success' | 'warning' | 'error' = 'info';
 
-  constructor(private notificationService: NotificationService) { }
+  constructor(
+    private notificationService: NotificationService,
+    private adminUserService: AdminUserService
+  ) { }
 
   get filteredUsers(): UserRecord[] {
     const q = this.searchQuery.trim().toLowerCase();
@@ -43,24 +40,61 @@ export class UserManagementComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      // Update first mock user record
-      const me = this.users.find(u => u.id === '1');
-      if (me) {
-        me.username = parsed.username || parsed.name || me.username;
-        me.elo = parsed.rating || me.elo;
-      }
-    }
+    this.loadUsers();
   }
 
-  toggleRole(user: UserRecord): void {
-    user.role = user.role === 'Admin' ? 'User' : 'Admin';
+  loadUsers(): void {
+    this.isLoading = true;
+    this.adminUserService.getUsers().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success && res.data) {
+          this.users = res.data.map(u => ({
+            id: u.id,
+            username: u.username,
+            elo: u.elo,
+            role: u.role as 'Admin' | 'User',
+            status: u.status as 'Active' | 'Suspended',
+            joinDate: u.joinDate
+          }));
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error loading users:', err);
+        const msg = err.error?.message || 'An error occurred while loading system users.';
+        this.notificationService.showToast(msg, 'error');
+      }
+    });
   }
 
   toggleStatus(user: UserRecord): void {
-    user.status = user.status === 'Active' ? 'Suspended' : 'Active';
+    if (user.role === 'Admin') {
+      this.notificationService.showToast('Administrator accounts cannot be suspended or deactivated.', 'error');
+      return;
+    }
+
+    const actionText = user.status === 'Active' ? 'suspend' : 'activate';
+    if (confirm(`Are you sure you want to ${actionText} the user account "${user.username}"?`)) {
+      this.isLoading = true;
+      this.adminUserService.toggleUserStatus(user.id).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          if (res && res.success) {
+            user.status = user.status === 'Active' ? 'Suspended' : 'Active';
+            this.notificationService.showToast(res.message || `User status updated successfully.`, 'success');
+          } else {
+            this.notificationService.showToast(res.message || 'Failed to update user status.', 'error');
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('Error toggling user status:', err);
+          const msg = err.error?.message || 'An error occurred while updating user status.';
+          this.notificationService.showToast(msg, 'error');
+        }
+      });
+    }
   }
 
   openNotificationModal(user: UserRecord): void {
@@ -81,17 +115,30 @@ export class UserManagementComponent implements OnInit {
       return;
     }
 
-    this.notificationService.addNotification(
-      this.notificationTitle,
-      this.notificationMsg,
-      this.notificationType
-    );
+    this.isLoading = true;
+    const payload = {
+      userId: this.selectedUser.id,
+      title: this.notificationTitle.trim(),
+      message: this.notificationMsg.trim(),
+      type: this.notificationType
+    };
 
-    this.notificationService.showToast(
-      `Notification sent to ${this.selectedUser.username}!`,
-      'success'
-    );
-
-    this.closeNotificationModal();
+    this.adminUserService.sendNotification(payload).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success) {
+          this.notificationService.showToast(`Notification sent to ${this.selectedUser?.username}!`, 'success');
+          this.closeNotificationModal();
+        } else {
+          this.notificationService.showToast(res.message || 'Failed to send notification.', 'error');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error sending notification:', err);
+        const msg = err.error?.message || 'An error occurred while sending the notification.';
+        this.notificationService.showToast(msg, 'error');
+      }
+    });
   }
 }

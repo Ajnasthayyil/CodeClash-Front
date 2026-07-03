@@ -183,6 +183,14 @@ $orange:   #f97316;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.15);
   }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.04) !important;
+    color: #8b949e !important;
+  }
   
   &.btn-suspend {
     color: #ef4444;
@@ -301,6 +309,14 @@ $orange:   #f97316;
     &:hover {
       background: #e2e8f0;
       border-color: #94a3b8;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #94a3b8 !important;
     }
     
     &.btn-suspend {

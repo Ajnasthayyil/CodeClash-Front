@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 
 type Tab = 'overview' | 'history' | 'achievements' | 'stats';
@@ -37,6 +37,7 @@ interface StatBar {
 export class ProfileComponent implements OnInit, AfterViewInit {
   @ViewChild('eloCanvas') eloCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   activeTab: Tab = 'overview';
 
@@ -46,16 +47,20 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     name: 'NovaCoder',
     email: 'nova.coder@codeclash.com',
     phoneNumber: '',
+    profileImageUrl: '',
     bio: 'Full-stack dev by day, algo grinder by night',
     location: 'United States',
     joined: 'Jan 2025',
     handle: 'novacoder',
     tier: 'Plat',
     eloRating: 1544,
-    eloRatingDisplay: '1,544'
+    eloRatingDisplay: '1,544',
+    role: 'User'
   };
 
   isEditModalOpen = false;
+  isDropdownOpen = false;
+  isConfirmDeleteModalOpen = false;
   editUser = { name: '', username: '', phoneNumber: '' };
   errorMessage = '';
   successMessage = '';
@@ -132,6 +137,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
       this.user.handle = parsed.username || this.user.handle;
       this.user.eloRating = parsed.rating || this.user.eloRating;
       this.user.eloRatingDisplay = this.user.eloRating.toLocaleString();
+      this.user.role = parsed.role || 'User';
+      this.user.joined = parsed.joined || this.user.joined;
       if (parsed.initials) {
         this.user.initials = parsed.initials;
       } else {
@@ -148,7 +155,14 @@ export class ProfileComponent implements OnInit, AfterViewInit {
           this.user.email = profile.email || this.user.email;
           this.user.phoneNumber = profile.phoneNumber || '';
           this.user.handle = profile.username || this.user.handle;
+          this.user.profileImageUrl = profile.profileImageUrl || '';
           
+          if (profile.createdAt) {
+            const joinedDate = new Date(profile.createdAt);
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            this.user.joined = `${monthNames[joinedDate.getMonth()]} ${joinedDate.getFullYear()}`;
+          }
+
           this.updateInitials();
 
           // Sync back to localStorage
@@ -159,7 +173,10 @@ export class ProfileComponent implements OnInit, AfterViewInit {
             email: this.user.email,
             phoneNumber: this.user.phoneNumber,
             username: this.user.handle,
-            initials: this.user.initials
+            initials: this.user.initials,
+            profileImageUrl: this.user.profileImageUrl,
+            joined: this.user.joined,
+            role: this.user.role
           };
           localStorage.setItem('currentUser', JSON.stringify(updatedUser));
         }
@@ -302,6 +319,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
   }
 
   openEditModal(): void {
+    this.isDropdownOpen = false;
     this.editUser = {
       name: this.user.name,
       username: this.user.handle,
@@ -369,6 +387,88 @@ export class ProfileComponent implements OnInit, AfterViewInit {
         } else {
           this.errorMessage = 'An error occurred while updating the profile.';
         }
+      }
+    });
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.isLoading = true;
+      this.authService.uploadProfileImage(file).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          if (res && res.success && res.data) {
+            const newUrl = res.data;
+            this.user.profileImageUrl = newUrl;
+            
+            // Sync to localStorage
+            const savedUser = localStorage.getItem('currentUser');
+            const existing = savedUser ? JSON.parse(savedUser) : {};
+            const updatedUser = {
+              ...existing,
+              profileImageUrl: newUrl
+            };
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            
+            this.successMessage = 'Profile picture updated successfully!';
+            this.errorMessage = '';
+            setTimeout(() => {
+              this.successMessage = '';
+            }, 3000);
+          } else {
+            this.errorMessage = res.message || 'Failed to upload profile picture.';
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('File upload error:', err);
+          this.errorMessage = 'An error occurred while uploading the file.';
+        }
+      });
+    }
+  }
+
+  toggleDropdown(event: Event): void {
+    event.stopPropagation();
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  @HostListener('document:click')
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+  openConfirmDeleteModal(): void {
+    this.isDropdownOpen = false;
+    this.isConfirmDeleteModalOpen = true;
+  }
+
+  closeConfirmDeleteModal(): void {
+    this.isConfirmDeleteModalOpen = false;
+  }
+
+  deleteAccount(): void {
+    this.isLoading = true;
+    this.authService.deleteAccount().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success) {
+          this.authService.clearSession();
+          this.closeConfirmDeleteModal();
+          window.location.href = '/';
+        } else {
+          this.errorMessage = res.message || 'Failed to delete account.';
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Account deletion error:', err);
+        this.errorMessage = 'An error occurred while deleting your account.';
       }
     });
   }
