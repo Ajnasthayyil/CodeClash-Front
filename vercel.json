@@ -1,9 +1,8 @@
 {
-  "outputDirectory": "dist/codeclash-frontend",
-  "cleanUrls": true,
+  "version": 2,
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
