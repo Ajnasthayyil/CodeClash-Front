@@ -16,6 +16,8 @@ export class ProblemManagementComponent implements OnInit {
   problems: ProblemSummaryDto[] = [];
   isLoading = false;
   isCreateModalOpen = false;
+  isEditMode = false;
+  editingProblemId: string | null = null;
 
   // New Problem Form Data
   newTitle = '';
@@ -73,6 +75,8 @@ export class ProblemManagementComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    this.isEditMode = false;
+    this.editingProblemId = null;
     this.newTitle = '';
     this.newDifficulty = 'Easy';
     this.newCategory = 'Arrays';
@@ -96,6 +100,53 @@ export class ProblemManagementComponent implements OnInit {
     this.isCreateModalOpen = true;
   }
 
+  openEditModal(problem: ProblemSummaryDto): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.problemService.getProblemById(problem.id).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success && res.data) {
+          const detail = res.data;
+          this.isEditMode = true;
+          this.editingProblemId = problem.id;
+          
+          this.newTitle = detail.title;
+          this.newDifficulty = detail.difficulty;
+          this.newCategory = detail.category;
+          this.newStatementMarkdown = detail.statementMarkdown;
+          this.newConstraints = detail.constraints && detail.constraints.length > 0 ? [...detail.constraints] : [''];
+          this.newTimeLimitMs = detail.timeLimitMs;
+          this.newMemoryLimitMb = detail.memoryLimitMb;
+          this.newTestCases = detail.testCases.map(tc => ({
+            input: tc.input || '',
+            expectedOutput: tc.expectedOutput || '',
+            isHidden: tc.isHidden
+          }));
+          
+          const langs = detail.allowedLanguages.map(l => l.toLowerCase());
+          this.allowedLangs = {
+            csharp: langs.includes('csharp'),
+            javascript: langs.includes('javascript') || langs.includes('js'),
+            python: langs.includes('python'),
+            cpp: langs.includes('cpp') || langs.includes('c++'),
+            java: langs.includes('java')
+          };
+          
+          this.isCreateModalOpen = true;
+        } else {
+          this.errorMessage = res.message || 'Failed to load problem details.';
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error loading problem by ID:', err);
+        this.errorMessage = err.error?.message || 'An error occurred while loading problem details.';
+      }
+    });
+  }
+
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
   }
@@ -117,6 +168,14 @@ export class ProblemManagementComponent implements OnInit {
   removeTestCase(index: number): void {
     if (this.newTestCases.length > 1) {
       this.newTestCases.splice(index, 1);
+    }
+  }
+
+  submitForm(): void {
+    if (this.isEditMode) {
+      this.updateProblemSubmit();
+    } else {
+      this.createProblem();
     }
   }
 
@@ -183,6 +242,73 @@ export class ProblemManagementComponent implements OnInit {
           this.errorMessage = err.error.errors.join(' ');
         } else {
           this.errorMessage = err.error?.message || 'An error occurred while creating the problem.';
+        }
+      }
+    });
+  }
+
+  updateProblemSubmit(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (!this.newTitle.trim()) {
+      this.errorMessage = 'Title is required.';
+      this.isLoading = false;
+      return;
+    }
+    if (!this.newStatementMarkdown.trim()) {
+      this.errorMessage = 'Statement is required.';
+      this.isLoading = false;
+      return;
+    }
+
+    const selectedLanguages = Object.keys(this.allowedLangs).filter(k => this.allowedLangs[k]);
+    if (selectedLanguages.length === 0) {
+      this.errorMessage = 'At least one allowed language is required.';
+      this.isLoading = false;
+      return;
+    }
+
+    const cleanedConstraints = this.newConstraints.filter(c => c.trim() !== '');
+
+    const payload = {
+      title: this.newTitle.trim(),
+      difficulty: this.newDifficulty,
+      category: this.newCategory,
+      statementMarkdown: this.newStatementMarkdown.trim(),
+      constraints: cleanedConstraints,
+      allowedLanguages: selectedLanguages,
+      timeLimitMs: this.newTimeLimitMs,
+      memoryLimitMb: this.newMemoryLimitMb,
+      testCases: this.newTestCases.map(tc => ({
+        input: tc.input.trim(),
+        expectedOutput: tc.expectedOutput.trim(),
+        isHidden: tc.isHidden
+      })),
+      isActive: null
+    };
+
+    this.problemService.updateProblem(this.editingProblemId!, payload).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success) {
+          this.successMessage = 'Problem updated successfully!';
+          setTimeout(() => {
+            this.closeCreateModal();
+            this.loadProblems();
+          }, 1500);
+        } else {
+          this.errorMessage = res.message || 'Failed to update problem.';
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error updating problem:', err);
+        if (err.error && err.error.errors && err.error.errors.length > 0) {
+          this.errorMessage = err.error.errors.join(' ');
+        } else {
+          this.errorMessage = err.error?.message || 'An error occurred while updating the problem.';
         }
       }
     });
