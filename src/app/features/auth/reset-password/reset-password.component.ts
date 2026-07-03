@@ -113,7 +113,4 @@ export class ResetPasswordComponent implements OnInit {
     });
   }
 
-  togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
-  }
 }
