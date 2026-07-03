@@ -79,6 +79,11 @@ export class NotificationService implements OnDestroy {
       this.addNotification(data.title, data.message, data.type);
       this.showToast(`New Notification: ${data.title}`, data.type);
     });
+
+    this.hubConnection.on('ForceLogout', () => {
+      this.authService.logout();
+      window.location.href = '/login?error=blocked';
+    });
   }
 
   private loadNotifications(token: string): void {
