@@ -93,6 +93,10 @@ export class ProblemService {
     return this.http.put<ApiResponse<string>>(`${this.apiUrl}/${problemId}`, payload);
   }
 
+  toggleProblemStatus(problemId: string): Observable<ApiResponse<boolean>> {
+    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/${problemId}/toggle-status`, {});
+  }
+
   deleteProblem(problemId: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${problemId}`);
   }

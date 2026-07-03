@@ -319,52 +319,24 @@ export class ProblemManagementComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    // First load full details to get current constraints, languages, testcases
-    this.problemService.getProblemById(problem.problemId).subscribe({
+    this.problemService.toggleProblemStatus(problem.problemId).subscribe({
       next: (res) => {
-        if (res && res.success && res.data) {
-          const detail = res.data;
-          const updatedPayload = {
-            title: detail.title,
-            difficulty: detail.difficulty,
-            category: detail.category,
-            statementMarkdown: detail.statementMarkdown,
-            constraints: detail.constraints,
-            allowedLanguages: detail.allowedLanguages,
-            timeLimitMs: detail.timeLimitMs,
-            memoryLimitMb: detail.memoryLimitMb,
-            testCases: detail.testCases.map(tc => ({
-              input: tc.input || '',
-              expectedOutput: tc.expectedOutput || '',
-              isHidden: tc.isHidden
-            })),
-            isActive: !problem.isActive // Toggle active state
-          };
-
-          this.problemService.updateProblem(problem.problemId, updatedPayload).subscribe({
-            next: (updateRes) => {
-              this.isLoading = false;
-              if (updateRes && updateRes.success) {
-                problem.isActive = !problem.isActive;
-                this.successMessage = `Problem ${problem.isActive ? 'published' : 'unpublished'} successfully!`;
-                setTimeout(() => this.successMessage = '', 3000);
-              } else {
-                this.errorMessage = updateRes.message || 'Failed to update problem.';
-              }
-            },
-            error: (err) => {
-              this.isLoading = false;
-              this.errorMessage = err.error?.message || 'An error occurred while updating the problem.';
-            }
-          });
+        this.isLoading = false;
+        if (res && res.success) {
+          problem.isActive = res.data ?? !problem.isActive;
+          this.successMessage = `Problem ${problem.isActive ? 'published' : 'unpublished'} successfully!`;
+          setTimeout(() => this.successMessage = '', 3000);
         } else {
-          this.isLoading = false;
-          this.errorMessage = 'Failed to load problem details.';
+          // Revert visual state since API failed
+          problem.isActive = !problem.isActive;
+          this.errorMessage = res.message || 'Failed to update problem status.';
         }
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = 'An error occurred while loading problem details.';
+        // Revert visual state
+        problem.isActive = !problem.isActive;
+        this.errorMessage = err.error?.message || 'An error occurred while updating the problem status.';
       }
     });
   }
