@@ -109,6 +109,18 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(payload: { email: string, otp: string, password: string }): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/reset-password`, {
+      email: payload.email,
+      otp: payload.otp,
+      newPassword: payload.password
+    });
+  }
+
   clearSession(): void {
     this.accessToken = null;
     this.deleteCookie('token');
