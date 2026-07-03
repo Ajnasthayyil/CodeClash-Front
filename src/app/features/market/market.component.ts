@@ -132,16 +132,23 @@ export class MarketComponent implements OnInit, AfterViewInit {
     if (!ctx) return;
 
     this.chartInstance = new Chart(ctx, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: this.filteredStacks.map(s => s.name),
         datasets: [{
           label: 'Active Developers',
           data: this.filteredStacks.map(s => s.activeDevs),
-          backgroundColor: this.filteredStacks.map(s => s.color + 'cc'),
+          backgroundColor: this.filteredStacks.map(s => s.color + '40'), // 25% opacity for fill
           borderColor: this.filteredStacks.map(s => s.color),
-          borderWidth: 1,
-          borderRadius: 4
+          borderWidth: 2,
+          pointBackgroundColor: this.filteredStacks.map(s => s.color),
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: this.filteredStacks.map(s => s.color),
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.4
         }]
       },
       options: {
@@ -200,8 +207,10 @@ export class MarketComponent implements OnInit, AfterViewInit {
 
     this.chartInstance.data.labels = this.filteredStacks.map(s => s.name);
     this.chartInstance.data.datasets[0].data = this.filteredStacks.map(s => s.activeDevs);
-    this.chartInstance.data.datasets[0].backgroundColor = this.filteredStacks.map(s => s.color + 'cc');
+    this.chartInstance.data.datasets[0].backgroundColor = this.filteredStacks.map(s => s.color + '40');
     this.chartInstance.data.datasets[0].borderColor = this.filteredStacks.map(s => s.color);
+    (this.chartInstance.data.datasets[0] as any).pointBackgroundColor = this.filteredStacks.map(s => s.color);
+    (this.chartInstance.data.datasets[0] as any).pointHoverBorderColor = this.filteredStacks.map(s => s.color);
     
     this.chartInstance.update();
   }
