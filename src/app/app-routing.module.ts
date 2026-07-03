@@ -30,6 +30,7 @@ import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.componen
 import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { userGuard } from './core/guards/user.guard';
 
 const routes: Routes = [
   {
@@ -37,17 +38,17 @@ const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: '', component: HomeComponent },
-      { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-      { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
-      { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard] },
-      { path: 'problems', component: ProblemsComponent, canActivate: [authGuard] },
-      { path: 'market', component: MarketComponent, canActivate: [authGuard] },
-      { path: 'arena', component: MatchmakingComponent, canActivate: [authGuard] },
-      { path: 'arena/battle', component: CodingArenaComponent, canActivate: [authGuard] },
-      { path: 'arena/result', component: MatchResultComponent, canActivate: [authGuard] },
-      { path: 'arena/analysis', component: AiAnalysisComponent, canActivate: [authGuard] },
-      { path: 'problems/solve/:id', component: PracticeArenaComponent, canActivate: [authGuard] },
-      { path: 'tournament', component: TournamentComponent, canActivate: [authGuard] },
+      { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard, userGuard] },
+      { path: 'profile', component: ProfileComponent, canActivate: [authGuard, userGuard] },
+      { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard, userGuard] },
+      { path: 'problems', component: ProblemsComponent, canActivate: [authGuard, userGuard] },
+      { path: 'market', component: MarketComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena', component: MatchmakingComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena/battle', component: CodingArenaComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena/result', component: MatchResultComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena/analysis', component: AiAnalysisComponent, canActivate: [authGuard, userGuard] },
+      { path: 'problems/solve/:id', component: PracticeArenaComponent, canActivate: [authGuard, userGuard] },
+      { path: 'tournament', component: TournamentComponent, canActivate: [authGuard, userGuard] },
       {
         path: 'admin',
         component: AdminComponent,
