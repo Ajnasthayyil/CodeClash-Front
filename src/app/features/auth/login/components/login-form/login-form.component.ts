@@ -43,7 +43,12 @@ export class LoginFormComponent {
       next: (res) => {
         this.isLoading = false;
         if (res.success) {
-          this.router.navigate(['/dashboard']);
+          const user = this.authService.getCurrentUser();
+          if (user && user.role === 'Admin') {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         } else {
           this.errorMessage = res.message || 'Login failed.';
         }

@@ -47,6 +47,7 @@ export class AuthSuccessComponent implements OnInit {
                 email: profile.email,
                 phoneNumber: profile.phoneNumber || '',
                 username: profile.username,
+                role: profile.role,
                 initials: initials,
                 profileImageUrl: profile.profileImageUrl || ''
               };
@@ -54,8 +55,12 @@ export class AuthSuccessComponent implements OnInit {
               // Store user details in localStorage
               localStorage.setItem('currentUser', JSON.stringify(currentUser));
               
-              // 3. Redirect to dashboard
-              this.router.navigate(['/dashboard']);
+              // 3. Redirect to dashboard or admin panel based on role
+              if (currentUser.role === 'Admin') {
+                this.router.navigate(['/admin']);
+              } else {
+                this.router.navigate(['/dashboard']);
+              }
             } else {
               this.handleError('Failed to retrieve user profile.');
             }
