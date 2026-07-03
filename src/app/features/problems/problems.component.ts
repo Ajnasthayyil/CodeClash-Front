@@ -4,6 +4,7 @@ import { ProblemService } from '../../core/services/problem.service';
 
 interface Problem {
   id: string;
+  displayId: number;
   title: string;
   skill: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
@@ -40,7 +41,7 @@ export class ProblemsComponent implements OnInit {
       next: (res) => {
         this.isLoading = false;
         if (res && res.success && res.data) {
-          this.problems = res.data.items.map((p: any) => {
+          this.problems = res.data.items.map((p: any, index: number) => {
             const difficulty = p.difficulty as 'Easy' | 'Medium' | 'Hard';
             const xp = difficulty === 'Easy' ? 100 : difficulty === 'Medium' ? 200 : 400;
             const hash = p.title.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
@@ -48,6 +49,7 @@ export class ProblemsComponent implements OnInit {
             
             return {
               id: p.problemId,
+              displayId: index + 1,
               title: p.title,
               skill: p.category,
               difficulty,
