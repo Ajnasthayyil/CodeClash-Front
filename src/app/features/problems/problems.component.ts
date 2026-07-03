@@ -46,8 +46,11 @@ export class ProblemsComponent implements OnInit {
             const hash = p.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const acceptanceRate = `${(45 + (hash % 40)).toFixed(1)}%`;
             
+            // Map the problem to an integer ID (1-8) so the PracticeArena can find it in its mock DB
+            const mockId = (hash % 8) + 1;
+            
             return {
-              id: p.id,
+              id: mockId.toString(),
               title: p.title,
               skill: p.category,
               difficulty,
