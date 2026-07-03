@@ -104,13 +104,13 @@ export class ProblemManagementComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
-    this.problemService.getProblemById(problem.id).subscribe({
+    this.problemService.getProblemById(problem.problemId).subscribe({
       next: (res) => {
         this.isLoading = false;
         if (res && res.success && res.data) {
           const detail = res.data;
           this.isEditMode = true;
-          this.editingProblemId = problem.id;
+          this.editingProblemId = problem.problemId;
           
           this.newTitle = detail.title;
           this.newDifficulty = detail.difficulty;
@@ -320,7 +320,7 @@ export class ProblemManagementComponent implements OnInit {
     this.successMessage = '';
 
     // First load full details to get current constraints, languages, testcases
-    this.problemService.getProblemById(problem.id).subscribe({
+    this.problemService.getProblemById(problem.problemId).subscribe({
       next: (res) => {
         if (res && res.success && res.data) {
           const detail = res.data;
@@ -341,7 +341,7 @@ export class ProblemManagementComponent implements OnInit {
             isActive: !problem.isActive // Toggle active state
           };
 
-          this.problemService.updateProblem(problem.id, updatedPayload).subscribe({
+          this.problemService.updateProblem(problem.problemId, updatedPayload).subscribe({
             next: (updateRes) => {
               this.isLoading = false;
               if (updateRes && updateRes.success) {
