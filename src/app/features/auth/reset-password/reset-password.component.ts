@@ -11,7 +11,9 @@ export class ResetPasswordComponent implements OnInit {
   email = '';
   otp = '';
   password = '';
+  confirmPassword = '';
   showPassword = false;
+  showConfirmPassword = false;
   
   errorMessage = '';
   successMessage = '';
@@ -20,11 +22,9 @@ export class ResetPasswordComponent implements OnInit {
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Read the email from the router navigation state
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras.state as { email: string };
     
-    // If we missed it on currentNavigation (e.g., page refresh or back/forward), check history.state
     if (state && state.email) {
       this.email = state.email;
     } else if (history.state && history.state.email) {
@@ -32,9 +32,16 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     if (!this.email) {
-      // Redirect back to forgot password if email is missing
       this.router.navigate(['/auth/forgot-password']);
     }
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   onSubmit() {
@@ -47,6 +54,10 @@ export class ResetPasswordComponent implements OnInit {
     }
     if (!this.password || this.password.length < 8) {
       this.errorMessage = 'Password must be at least 8 characters long.';
+      return;
+    }
+    if (this.password !== this.confirmPassword) {
+      this.errorMessage = 'Passwords do not match.';
       return;
     }
 
