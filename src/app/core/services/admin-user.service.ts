@@ -28,4 +28,8 @@ export class AdminUserService {
   toggleUserStatus(userId: string): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${userId}/toggle-status`, {});
   }
+
+  sendNotification(payload: { userId?: string, title: string, message: string, type?: string }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/notify`, payload);
+  }
 }

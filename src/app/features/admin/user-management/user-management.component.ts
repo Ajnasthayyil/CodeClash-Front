@@ -115,17 +115,30 @@ export class UserManagementComponent implements OnInit {
       return;
     }
 
-    this.notificationService.addNotification(
-      this.notificationTitle,
-      this.notificationMsg,
-      this.notificationType
-    );
+    this.isLoading = true;
+    const payload = {
+      userId: this.selectedUser.id,
+      title: this.notificationTitle.trim(),
+      message: this.notificationMsg.trim(),
+      type: this.notificationType
+    };
 
-    this.notificationService.showToast(
-      `Notification sent to ${this.selectedUser.username}!`,
-      'success'
-    );
-
-    this.closeNotificationModal();
+    this.adminUserService.sendNotification(payload).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res && res.success) {
+          this.notificationService.showToast(`Notification sent to ${this.selectedUser?.username}!`, 'success');
+          this.closeNotificationModal();
+        } else {
+          this.notificationService.showToast(res.message || 'Failed to send notification.', 'error');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error sending notification:', err);
+        const msg = err.error?.message || 'An error occurred while sending the notification.';
+        this.notificationService.showToast(msg, 'error');
+      }
+    });
   }
 }

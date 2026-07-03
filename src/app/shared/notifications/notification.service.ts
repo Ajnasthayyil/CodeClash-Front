@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import * as signalR from '@microsoft/signalr';
+import { AuthService } from '../../core/services/auth.service';
 
 export interface AppNotification {
   id: string;
@@ -21,7 +23,7 @@ export interface Toast {
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationService {
+export class NotificationService implements OnDestroy {
   private notificationsSubject = new BehaviorSubject<AppNotification[]>([
     {
       id: 'notif-1',
@@ -30,22 +32,6 @@ export class NotificationService {
       time: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
       read: false,
       type: 'info'
-    },
-    {
-      id: 'notif-2',
-      title: 'Match Won! 🎉',
-      message: 'You defeated ByteWizard (+18 ELO). Excellent solution to "Two Sum".',
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      read: true,
-      type: 'success'
-    },
-    {
-      id: 'notif-3',
-      title: 'System Update ⚙️',
-      message: 'Compilers upgraded to support C++23 and TypeScript 5.',
-      time: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      read: true,
-      type: 'warning'
     }
   ]);
 
@@ -58,7 +44,47 @@ export class NotificationService {
     map(notifs => notifs.filter(n => !n.read).length)
   );
 
-  constructor() {}
+  private hubConnection: signalR.HubConnection | null = null;
+  private connectionInterval: any;
+
+  constructor(private authService: AuthService) {
+    this.startSignalRConnection();
+  }
+
+  ngOnDestroy(): void {
+    if (this.hubConnection) {
+      this.hubConnection.stop();
+    }
+    if (this.connectionInterval) {
+      clearInterval(this.connectionInterval);
+    }
+  }
+
+  private startSignalRConnection(): void {
+    // Only connect if user is logged in
+    const token = this.authService.getAccessToken();
+    if (!token) {
+      // Periodically check if token becomes available (e.g. after login)
+      this.connectionInterval = setTimeout(() => this.startSignalRConnection(), 5000);
+      return;
+    }
+
+    this.hubConnection = new signalR.HubConnectionBuilder()
+      .withUrl('https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/hubs/notifications', {
+        accessTokenFactory: () => this.authService.getAccessToken() || ''
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.hubConnection.start()
+      .then(() => console.log('SignalR Notification Hub connected.'))
+      .catch(err => console.error('Error while starting connection: ' + err));
+
+    this.hubConnection.on('ReceiveNotification', (data: { title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' }) => {
+      this.addNotification(data.title, data.message, data.type);
+      this.showToast(`New Notification: ${data.title}`, data.type);
+    });
+  }
 
   // ─── Notification Management ────────────────────────────────────────────────
   addNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info'): void {
