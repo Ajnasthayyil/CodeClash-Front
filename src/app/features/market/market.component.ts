@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import Chart from 'chart.js/auto';
 
 interface Stack {
   id: number;
@@ -17,7 +18,7 @@ interface Stack {
   templateUrl: './market.component.html',
   styleUrls: ['./market.component.scss']
 })
-export class MarketComponent {
+export class MarketComponent implements OnInit, AfterViewInit {
   stacks: Stack[] = [
     {
       id: 1,
@@ -99,19 +100,109 @@ export class MarketComponent {
   ];
 
   filteredStacks: Stack[] = [];
-  selectedCategory: string = 'All';
-  searchQuery: string = '';
+  selectedCategory = 'All';
+  searchQuery = '';
 
-  constructor() {
+  @ViewChild('marketChart') marketChart!: ElementRef<HTMLCanvasElement>;
+  chartInstance: Chart | null = null;
+
+  ngOnInit() {
     this.filteredStacks = [...this.stacks];
+  }
+
+  ngAfterViewInit() {
+    this.initChart();
   }
 
   applyFilters() {
     this.filteredStacks = this.stacks.filter(s => {
       const matchCat = this.selectedCategory === 'All' || s.category === this.selectedCategory;
-      const matchSearch = s.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      const matchSearch = s.name.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
                           s.description.toLowerCase().includes(this.searchQuery.toLowerCase());
       return matchCat && matchSearch;
     });
+
+    this.updateChart();
+  }
+
+  initChart() {
+    if (!this.marketChart) return;
+    
+    const ctx = this.marketChart.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    this.chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: this.filteredStacks.map(s => s.name),
+        datasets: [{
+          label: 'Active Developers',
+          data: this.filteredStacks.map(s => s.activeDevs),
+          backgroundColor: this.filteredStacks.map(s => s.color + 'cc'),
+          borderColor: this.filteredStacks.map(s => s.color),
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#fff',
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 4,
+            usePointStyle: true
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)',
+            },
+            ticks: {
+              color: '#94a3b8',
+              font: {
+                family: "'Inter', sans-serif"
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#94a3b8',
+              font: {
+                family: "'Inter', sans-serif",
+                weight: 'bold'
+              }
+            }
+          }
+        },
+        animation: {
+          duration: 400
+        }
+      }
+    });
+  }
+
+  updateChart() {
+    if (!this.chartInstance) return;
+
+    this.chartInstance.data.labels = this.filteredStacks.map(s => s.name);
+    this.chartInstance.data.datasets[0].data = this.filteredStacks.map(s => s.activeDevs);
+    this.chartInstance.data.datasets[0].backgroundColor = this.filteredStacks.map(s => s.color + 'cc');
+    this.chartInstance.data.datasets[0].borderColor = this.filteredStacks.map(s => s.color);
+    
+    this.chartInstance.update();
   }
 }

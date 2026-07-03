@@ -131,6 +131,44 @@ $text-light: #f0f6fc;
   }
 }
 
+// Chart Section
+.chart-section {
+  background: linear-gradient(145deg, $surface, darken($surface, 2%));
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.4s ease-out forwards;
+
+  &.hidden {
+    display: none;
+  }
+
+  .chart-header {
+    margin-bottom: 20px;
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-light;
+      margin: 0 0 4px 0;
+    }
+
+    .chart-subtitle {
+      font-size: 13px;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  .chart-container {
+    height: 300px;
+    width: 100%;
+    position: relative;
+  }
+}
+
 // Cards Grid Layout
 .cards-grid {
   display: grid;
