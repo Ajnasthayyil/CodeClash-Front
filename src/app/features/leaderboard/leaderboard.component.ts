@@ -1,5 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { LeaderboardService } from '../../core/services/leaderboard.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface LeaderboardEntry {
   rank: number;
@@ -67,7 +68,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
 
   constructor(
     private leaderboardService: LeaderboardService,
-    private authService: import('../../core/services/auth.service').AuthService
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
