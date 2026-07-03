@@ -61,8 +61,14 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
   filteredPlayers: LeaderboardEntry[] = [];
   topThree: LeaderboardEntry[] = [];
   remainingPlayers: LeaderboardEntry[] = [];
+  currentUserRank: number | null = null;
+  totalPlayers: number = 0;
+  Math = Math;
 
-  constructor(private leaderboardService: LeaderboardService) {}
+  constructor(
+    private leaderboardService: LeaderboardService,
+    private authService: import('../../core/services/auth.service').AuthService
+  ) {}
 
   ngOnInit() {
     this.fetchLeaderboard();
@@ -152,11 +158,25 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
 
     // Re-rank items according to filters
     result = result.sort((a, b) => b.elo - a.elo);
+    
+    const currentUsername = this.authService.getCurrentUser()?.username;
+
     result.forEach((p, idx) => {
       p.rank = idx + 1;
+      if (currentUsername && p.name.toLowerCase() === currentUsername.toLowerCase()) {
+        p.isCurrentUser = true;
+      } else {
+        p.isCurrentUser = false;
+      }
     });
 
     this.filteredPlayers = result;
+    this.totalPlayers = result.length;
+    
+    // Find current user rank
+    const currentUserIndex = result.findIndex(p => p.isCurrentUser);
+    this.currentUserRank = currentUserIndex !== -1 ? result[currentUserIndex].rank : null;
+
     this.topThree = result.slice(0, 3);
     this.remainingPlayers = result.slice(3);
   }

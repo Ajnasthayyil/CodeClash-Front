@@ -166,10 +166,10 @@
       <div class="card rank-card">
         <h3 class="card-title">Your Rank</h3>
         <div class="rank-summary">
-          <div class="rank-large">#7</div>
+          <div class="rank-large">#{{ currentUserRank !== null ? currentUserRank : '-' }}</div>
           <div class="rank-details">
-            <span class="rank-total">of 48,293 players</span>
-            <span class="pct-badge">Top 5%</span>
+            <span class="rank-total">of {{ totalPlayers | number }} players</span>
+            <span class="pct-badge" *ngIf="currentUserRank !== null && totalPlayers > 0">Top {{ Math.ceil((currentUserRank / totalPlayers) * 100) }}%</span>
           </div>
         </div>
         
