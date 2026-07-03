@@ -80,7 +80,7 @@ export class LoginFormComponent {
 
   loginWithGithub() {
     window.location.href =
-      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/auth/github-login";
+      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth/github-login";
   }
 
   togglePasswordVisibility() {
