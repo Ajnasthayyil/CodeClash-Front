@@ -1,0 +1,345 @@
+$bg:       #0d1117;
+$surface:  #161b22;
+$border:   rgba(48, 54, 61, 0.6);
+$orange:   #f97316;
+$orange2:  #ea580c;
+$text:     #e6edf3;
+$muted:    #7d8590;
+$red:      #f85149;
+
+.problem-management-root {
+  box-sizing: border-box;
+}
+
+.card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.problems-table {
+  th {
+    padding: 12px 16px;
+    border-bottom: 2px solid #21262d;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+  }
+}
+
+.btn-status-active {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  
+  &:hover {
+    background: #10b981;
+    color: #fff;
+  }
+}
+
+.btn-status-inactive {
+  background: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.25);
+  color: $orange;
+  
+  &:hover {
+    background: $orange;
+    color: #fff;
+  }
+}
+
+// Modal styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.modal-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: modalScaleUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid $border;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  .modal-title {
+    font-size: 18px;
+    font-weight: 850;
+    color: #fff;
+    margin: 0;
+  }
+  
+  .btn-close {
+    background: none;
+    border: none;
+    color: $muted;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: all 0.15s;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+  }
+}
+
+.modal-form {
+  padding: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(90vh - 72px);
+  box-sizing: border-box;
+}
+
+.form-scroll-container {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  
+  /* Scrollbar custom */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  
+  label {
+    font-size: 11.5px;
+    font-weight: 750;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0d1117;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s;
+  
+  &:focus {
+    border-color: $orange;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid $border;
+  padding-top: 18px;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: #c9d1d9;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: #8b949e;
+  }
+}
+
+.btn-save {
+  padding: 10px 22px;
+  background: linear-gradient(90deg, $orange, $orange2);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+  
+  &:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.35);
+  }
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleUp {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+// Light Mode Overrides for Problem Management Component
+:host-context(.light-mode) {
+  .btn-create {
+    background: $orange;
+    &:hover {
+      background: $orange2;
+    }
+  }
+
+  .card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+  }
+
+  .problems-table {
+    th {
+      border-bottom-color: #e2e8f0;
+      color: #475569;
+    }
+    td {
+      border-bottom-color: #f1f5f9;
+      color: #334155;
+    }
+    .problem-title {
+      color: #0f172a;
+    }
+  }
+
+  .category-tag {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #475569;
+  }
+
+  .modal-overlay {
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .modal-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  }
+
+  .modal-header {
+    border-bottom-color: #e2e8f0;
+    .modal-title {
+      color: #0f172a;
+    }
+    .btn-close {
+      color: #64748b;
+      &:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+    }
+  }
+
+  .form-input, .form-select, .form-textarea {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    &:focus {
+      border-color: $orange;
+      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
+    }
+  }
+
+  .btn-cancel {
+    border-color: #cbd5e1;
+    color: #475569;
+    &:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+  }
+}

@@ -23,6 +23,7 @@ import { UserManagementComponent } from './features/admin/user-management/user-m
 import { ContestManagementComponent } from './features/admin/contest-management/contest-management.component';
 import { SubmissionMonitorComponent } from './features/admin/submission-monitor/submission-monitor.component';
 import { AdminProfileComponent } from './features/admin/profile/admin-profile.component';
+import { ProblemManagementComponent } from './features/admin/problem-management/problem-management.component';
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.component';
 import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
@@ -56,6 +57,7 @@ const routes: Routes = [
           { path: 'users', component: UserManagementComponent },
           { path: 'contests', component: ContestManagementComponent },
           { path: 'submissions', component: SubmissionMonitorComponent },
+          { path: 'problems', component: ProblemManagementComponent },
           { path: 'profile', component: AdminProfileComponent }
         ]
       }
