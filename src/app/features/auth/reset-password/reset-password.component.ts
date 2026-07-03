@@ -63,7 +63,12 @@ export class ResetPasswordComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.authService.resetPassword({ email: this.email, otp: this.otp, password: this.password }).subscribe({
+    this.authService.resetPassword({ 
+      email: this.email, 
+      otp: this.otp, 
+      password: this.password,
+      confirmPassword: this.confirmPassword
+    }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
         if (res && res.success) {
