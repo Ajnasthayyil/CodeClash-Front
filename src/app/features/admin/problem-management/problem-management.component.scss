@@ -325,7 +325,7 @@ $red:      #f85149;
   }
 
   .form-input, .form-select, .form-textarea {
-    background: #f8fafc;
+    background: #ffffff;
     border-color: #cbd5e1;
     color: #0f172a;
     &:focus {
@@ -340,6 +340,56 @@ $red:      #f85149;
     &:hover {
       background: #f1f5f9;
       border-color: #94a3b8;
+    }
+  }
+
+  // Force labels to be dark grey in light mode
+  .form-group {
+    label {
+      color: #475569 !important;
+    }
+  }
+
+  // Scrollbar light mode overrides
+  .form-scroll-container {
+    &::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1 !important;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8 !important;
+    }
+  }
+
+  // Override dark-themed testcase items and allowed languages wrapper to look light-mode friendly
+  .bg-slate-950 {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  .border-slate-900 {
+    border-color: #cbd5e1 !important;
+  }
+
+  .checkbox-label {
+    color: #1e293b !important;
+  }
+
+  // Inputs inside test cases should have clean white background
+  .testcase-item {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    
+    .form-textarea {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    
+    label {
+      color: #64748b !important;
     }
   }
 }
