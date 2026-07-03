@@ -71,11 +71,10 @@
               </span>
             </td>
             <td class="py-3.5 px-4 text-center">
-              <button (click)="togglePublishProblem(problem)" 
-                      [ngClass]="problem.isActive ? 'btn-status-active' : 'btn-status-inactive'" 
-                      class="px-2.5 py-1 rounded-md text-xs font-bold border transition duration-150 hover:opacity-80">
-                {{ problem.isActive ? 'Active' : 'Draft' }}
-              </button>
+              <label class="relative inline-flex items-center cursor-pointer" title="Toggle Status">
+                <input type="checkbox" class="sr-only peer" [checked]="problem.isActive" (change)="togglePublishProblem(problem)">
+                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#22c55e]"></div>
+              </label>
             </td>
             <td class="py-3.5 px-4 text-right">
               <div class="flex items-center justify-end gap-2">
