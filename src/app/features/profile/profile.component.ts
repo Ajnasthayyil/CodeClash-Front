@@ -149,8 +149,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     // Load fresh data from the server
     this.authService.getProfile().subscribe({
       next: (res) => {
-        if (res && res.success && res.data) {
-          const profile = res.data;
+        if (res) {
+          const profile = res;
           this.user.name = profile.fullName || this.user.name;
           this.user.email = profile.email || this.user.email;
           this.user.phoneNumber = profile.phoneNumber || '';
@@ -348,11 +348,11 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     this.authService.updateProfile(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
-          this.user.name = res.data.fullName || this.user.name;
-          this.user.handle = res.data.username || this.user.handle;
-          this.user.phoneNumber = res.data.phoneNumber || '';
-          this.user.email = res.data.email || this.user.email;
+        if (res) {
+          this.user.name = res.fullName || this.user.name;
+          this.user.handle = res.username || this.user.handle;
+          this.user.phoneNumber = res.phoneNumber || '';
+          this.user.email = res.email || this.user.email;
 
           this.updateInitials();
 
@@ -375,7 +375,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
             this.closeEditModal();
           }, 1500);
         } else {
-          this.errorMessage = res.message || 'Failed to update profile.';
+          this.errorMessage = (res as any)?.message || 'Failed to update profile.';
         }
       },
       error: (err) => {
@@ -402,8 +402,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
       this.authService.uploadProfileImage(file).subscribe({
         next: (res) => {
           this.isLoading = false;
-          if (res && res.success && res.data) {
-            const newUrl = res.data;
+          if (res) {
+            const newUrl = res;
             this.user.profileImageUrl = newUrl;
             
             // Sync to localStorage
@@ -421,7 +421,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
               this.successMessage = '';
             }, 3000);
           } else {
-            this.errorMessage = res.message || 'Failed to upload profile picture.';
+            this.errorMessage = (res as any)?.message || 'Failed to upload profile picture.';
           }
         },
         error: (err) => {
@@ -457,12 +457,12 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     this.authService.deleteAccount().subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success) {
+        if (res) {
           this.authService.clearSession();
           this.closeConfirmDeleteModal();
           window.location.href = '/';
         } else {
-          this.errorMessage = res.message || 'Failed to delete account.';
+          this.errorMessage = (res as any)?.message || 'Failed to delete account.';
         }
       },
       error: (err) => {

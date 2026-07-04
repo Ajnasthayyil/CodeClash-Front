@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse } from './auth.service';
+
 
 export interface ProblemSummaryDto {
   problemId: string;
@@ -63,7 +63,7 @@ export class ProblemService {
     difficulty?: string,
     category?: string,
     search?: string
-  ): Observable<ApiResponse<PaginatedList<ProblemSummaryDto>>> {
+  ): Observable<PaginatedList<ProblemSummaryDto>> {
     let params = new HttpParams()
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
@@ -78,26 +78,26 @@ export class ProblemService {
       params = params.set('search', search.trim());
     }
 
-    return this.http.get<ApiResponse<PaginatedList<ProblemSummaryDto>>>(this.apiUrl, { params });
+    return this.http.get<PaginatedList<ProblemSummaryDto>>(this.apiUrl, { params });
   }
 
-  getProblemById(problemId: string): Observable<ApiResponse<ProblemDetailDto>> {
-    return this.http.get<ApiResponse<ProblemDetailDto>>(`${this.apiUrl}/${problemId}`);
+  getProblemById(problemId: string): Observable<ProblemDetailDto> {
+    return this.http.get<ProblemDetailDto>(`${this.apiUrl}/${problemId}`);
   }
 
-  createProblem(payload: any): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(this.apiUrl, payload);
+  createProblem(payload: any): Observable<string> {
+    return this.http.post<string>(this.apiUrl, payload);
   }
 
-  updateProblem(problemId: string, payload: any): Observable<ApiResponse<string>> {
-    return this.http.put<ApiResponse<string>>(`${this.apiUrl}/${problemId}`, payload);
+  updateProblem(problemId: string, payload: any): Observable<string> {
+    return this.http.put<string>(`${this.apiUrl}/${problemId}`, payload);
   }
 
-  toggleProblemStatus(problemId: string): Observable<ApiResponse<boolean>> {
-    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/${problemId}/toggle-status`, {});
+  toggleProblemStatus(problemId: string): Observable<boolean> {
+    return this.http.put<boolean>(`${this.apiUrl}/${problemId}/toggle-status`, {});
   }
 
-  deleteProblem(problemId: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${problemId}`);
+  deleteProblem(problemId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${problemId}`);
   }
 }

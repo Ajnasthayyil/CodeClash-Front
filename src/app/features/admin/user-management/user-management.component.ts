@@ -48,8 +48,8 @@ export class UserManagementComponent implements OnInit {
     this.adminUserService.getUsers().subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
-          this.users = res.data.map(u => ({
+        if (res) {
+          this.users = res.map(u => ({
             id: u.id,
             username: u.username,
             elo: u.elo,
@@ -80,11 +80,11 @@ export class UserManagementComponent implements OnInit {
       this.adminUserService.toggleUserStatus(user.id).subscribe({
         next: (res) => {
           this.isLoading = false;
-          if (res && res.success) {
+          if (res) {
             user.status = user.status === 'Active' ? 'Suspended' : 'Active';
-            this.notificationService.showToast(res.message || `User status updated successfully.`, 'success');
+            this.notificationService.showToast((res as any)?.message || `User status updated successfully.`, 'success');
           } else {
-            this.notificationService.showToast(res.message || 'Failed to update user status.', 'error');
+            this.notificationService.showToast((res as any)?.message || 'Failed to update user status.', 'error');
           }
         },
         error: (err) => {
@@ -126,11 +126,11 @@ export class UserManagementComponent implements OnInit {
     this.adminUserService.sendNotification(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success) {
+        if (res) {
           this.notificationService.showToast(`Notification sent to ${this.selectedUser?.username}!`, 'success');
           this.closeNotificationModal();
         } else {
-          this.notificationService.showToast(res.message || 'Failed to send notification.', 'error');
+          this.notificationService.showToast((res as any)?.message || 'Failed to send notification.', 'error');
         }
       },
       error: (err) => {

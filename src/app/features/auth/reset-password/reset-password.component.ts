@@ -71,13 +71,13 @@ export class ResetPasswordComponent implements OnInit {
     }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        if (res && res.success) {
-          this.successMessage = res.message || 'Password reset successfully. Redirecting to login...';
+        if (res) {
+          this.successMessage = (res as any)?.message || 'Password reset successfully. Redirecting to login...';
           setTimeout(() => {
             this.router.navigate(['/auth/login']);
           }, 2000);
         } else {
-          this.errorMessage = res.message || 'Failed to reset password.';
+          this.errorMessage = (res as any)?.message || 'Failed to reset password.';
         }
       },
       error: (err: any) => {
@@ -101,10 +101,10 @@ export class ResetPasswordComponent implements OnInit {
     this.authService.forgotPassword(this.email).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        if (res && res.success) {
+        if (res) {
           this.successMessage = 'A new OTP has been sent to your email.';
         } else {
-          this.errorMessage = res.message || 'Failed to resend OTP.';
+          this.errorMessage = (res as any)?.message || 'Failed to resend OTP.';
         }
       },
       error: (err: any) => {

@@ -93,8 +93,8 @@ export class NotificationService implements OnDestroy {
     this.http.get<any>('https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications', { headers })
       .subscribe({
         next: (res) => {
-          if (res && res.success && res.data) {
-            this.notificationsSubject.next(res.data);
+          if (res) {
+            this.notificationsSubject.next(res);
           }
         },
         error: (err) => console.error('Failed to load notifications', err)

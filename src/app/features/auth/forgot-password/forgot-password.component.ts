@@ -29,15 +29,15 @@ export class ForgotPasswordComponent {
     this.authService.forgotPassword(this.email).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        if (res && res.success) {
-          this.successMessage = res.message || 'A verification link and OTP code have been sent to your email.';
+        if (res) {
+          this.successMessage = (res as any)?.message || 'A verification link and OTP code have been sent to your email.';
           
           // Redirect to reset password page after short delay
           setTimeout(() => {
             this.router.navigate(['/auth/reset-password'], { state: { email: this.email } });
           }, 2000);
         } else {
-          this.errorMessage = res.message || 'Failed to send reset link.';
+          this.errorMessage = (res as any)?.message || 'Failed to send reset link.';
         }
       },
       error: (err: any) => {

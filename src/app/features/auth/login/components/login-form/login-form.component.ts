@@ -51,7 +51,7 @@ export class LoginFormComponent implements OnInit {
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res.success) {
+        if (res) {
           const user = this.authService.getCurrentUser();
           if (user && user.role === 'Admin') {
             this.router.navigate(['/admin']);
@@ -59,7 +59,7 @@ export class LoginFormComponent implements OnInit {
             this.router.navigate(['/dashboard']);
           }
         } else {
-          this.errorMessage = res.message || 'Login failed.';
+          this.errorMessage = (res as any)?.message || 'Login failed.';
         }
       },
       error: (err) => {

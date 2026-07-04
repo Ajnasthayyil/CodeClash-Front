@@ -35,8 +35,8 @@ export class DashboardAnalyticsComponent implements OnInit {
   ngOnInit(): void {
     this.dashboardService.getStats().subscribe({
       next: (res) => {
-        if (res && res.success && res.data) {
-          const data = res.data;
+        if (res) {
+          const data = res;
           
           this.stats = [
             { 

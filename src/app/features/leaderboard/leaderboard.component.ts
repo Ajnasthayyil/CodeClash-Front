@@ -80,10 +80,10 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     this.leaderboardService.getLeaderboard().subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
+        if (res) {
           // Map DB users to leaderboard entries
           // Rank is assigned sequentially since the backend already sorts them alphabetically
-          this.allPlayers = res.data.map((user, index) => {
+          this.allPlayers = res.map((user, index) => {
             const initial = user.username ? user.username.charAt(0).toUpperCase() : '?';
             
             // Assign deterministic color based on username

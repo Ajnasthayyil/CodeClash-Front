@@ -91,8 +91,8 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.problemService.getProblemById(problemId).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res.success && res.data) {
-          const dto = res.data;
+        if (res) {
+          const dto = res;
           
           // Filter test cases that aren't hidden to use as examples
           const visibleTestCases = dto.testCases
@@ -125,7 +125,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
           this.generateBoilerplate(this.problem.title);
         } else {
-          this.errorMessage = res.message || 'Failed to load problem details.';
+          this.errorMessage = (res as any)?.message || 'Failed to load problem details.';
         }
       },
       error: (err) => {

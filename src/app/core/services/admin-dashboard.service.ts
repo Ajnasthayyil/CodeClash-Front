@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse } from './auth.service';
+
 
 export interface DashboardStatsDto {
   totalUsers: number;
@@ -18,7 +18,7 @@ export class AdminDashboardService {
 
   constructor(private http: HttpClient) {}
 
-  getStats(): Observable<ApiResponse<DashboardStatsDto>> {
-    return this.http.get<ApiResponse<DashboardStatsDto>>(`${this.apiUrl}/stats`, { withCredentials: true });
+  getStats(): Observable<DashboardStatsDto> {
+    return this.http.get<DashboardStatsDto>(`${this.apiUrl}/stats`, { withCredentials: true });
   }
 }

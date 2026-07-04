@@ -40,8 +40,8 @@ export class ProblemsComponent implements OnInit {
     this.problemService.getProblems(1, 100, this.selectedDifficulty, undefined, this.searchQuery).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
-          this.problems = res.data.items.map((p: any, index: number) => {
+        if (res) {
+          this.problems = res.items.map((p: any, index: number) => {
             const difficulty = p.difficulty as 'Easy' | 'Medium' | 'Hard';
             const xp = difficulty === 'Easy' ? 100 : difficulty === 'Medium' ? 200 : 400;
             const hash = p.title.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);

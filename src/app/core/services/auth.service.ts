@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-export interface ApiResponse<T> {
+export interface T {
   success: boolean;
   message: string;
   data: T | null;
@@ -34,8 +34,8 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  register(payload: any): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/register`, {
+  register(payload: any): Observable<string> {
+    return this.http.post<string>(`${this.apiUrl}/register`, {
       fullName: payload.fullName,
       email: payload.email,
       password: payload.password,
@@ -44,14 +44,14 @@ export class AuthService {
     });
   }
 
-  login(payload: any): Observable<ApiResponse<AuthResponseDto>> {
-    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/login`, {
+  login(payload: any): Observable<AuthResponseDto> {
+    return this.http.post<AuthResponseDto>(`${this.apiUrl}/login`, {
       emailOrUsername: payload.email,
       password: payload.password
     }, { withCredentials: true }).pipe(
       tap(res => {
-        if (res && res.success && res.data) {
-          const authData = res.data;
+        if (res) {
+          const authData = res;
           this.accessToken = authData.accessToken;
 
           // Build initials
@@ -83,38 +83,38 @@ export class AuthService {
     );
   }
 
-  refresh(): Observable<ApiResponse<AuthResponseDto>> {
-    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
+  refresh(): Observable<AuthResponseDto> {
+    return this.http.post<AuthResponseDto>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
       tap(res => {
-        if (res && res.success && res.data) {
-          this.accessToken = res.data.accessToken;
-          this.setCookie('token', res.data.accessToken, 7);
-          this.setCookie('refreshToken', res.data.refreshToken, 7);
+        if (res) {
+          this.accessToken = res.accessToken;
+          this.setCookie('token', res.accessToken, 7);
+          this.setCookie('refreshToken', res.refreshToken, 7);
         }
       })
     );
   }
 
-  logout(): Observable<ApiResponse<any>> {
+  logout(): Observable<any> {
     const accessToken = this.accessToken || '';
     
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${accessToken}`
     });
 
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/logout`, {}, { headers, withCredentials: true }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/logout`, {}, { headers, withCredentials: true }).pipe(
       tap(() => {
         this.clearSession();
       })
     );
   }
 
-  forgotPassword(email: string): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/forgot-password`, { email });
+  forgotPassword(email: string): Observable<string> {
+    return this.http.post<string>(`${this.apiUrl}/forgot-password`, { email });
   }
 
-  resetPassword(payload: { email: string, otp: string, password: string, confirmPassword: string }): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/reset-password`, {
+  resetPassword(payload: { email: string, otp: string, password: string, confirmPassword: string }): Observable<string> {
+    return this.http.post<string>(`${this.apiUrl}/reset-password`, {
       email: payload.email,
       otp: payload.otp,
       newPassword: payload.password,
@@ -145,26 +145,26 @@ export class AuthService {
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  getProfile(): Observable<ApiResponse<any>> {
+  getProfile(): Observable<any> {
     const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
-    return this.http.get<ApiResponse<any>>(profileUrl);
+    return this.http.get<any>(profileUrl);
   }
 
-  updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<ApiResponse<any>> {
+  updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<any> {
     const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
-    return this.http.put<ApiResponse<any>>(profileUrl, payload);
+    return this.http.put<any>(profileUrl, payload);
   }
 
-  uploadProfileImage(file: File): Observable<ApiResponse<string>> {
+  uploadProfileImage(file: File): Observable<string> {
     const uploadUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/image';
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<ApiResponse<string>>(uploadUrl, formData);
+    return this.http.post<string>(uploadUrl, formData);
   }
 
-  deleteAccount(): Observable<ApiResponse<any>> {
+  deleteAccount(): Observable<any> {
     const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
-    return this.http.delete<ApiResponse<any>>(profileUrl);
+    return this.http.delete<any>(profileUrl);
   }
 
   // ─── Token and Cookie Helpers ──────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse } from './auth.service';
+
 
 export interface LeaderboardUserDto {
   id: string;
@@ -19,7 +19,7 @@ export class LeaderboardService {
 
   constructor(private http: HttpClient) {}
 
-  getLeaderboard(): Observable<ApiResponse<LeaderboardUserDto[]>> {
-    return this.http.get<ApiResponse<LeaderboardUserDto[]>>(this.apiUrl);
+  getLeaderboard(): Observable<LeaderboardUserDto[]> {
+    return this.http.get<LeaderboardUserDto[]>(this.apiUrl);
   }
 }
