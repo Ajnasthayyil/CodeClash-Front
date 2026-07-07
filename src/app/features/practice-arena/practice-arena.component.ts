@@ -57,6 +57,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   // ─── Modals / UI State ─────────────────────────────────────────────────────
   showSubmitSuccess = false;
   activePanel: 'problem' | 'hints' = 'problem';
+  latestSubmissionId: string | null = null;
 
   // ─── Intervals ─────────────────────────────────────────────────────────────
   private autoSaveInterval: any;
@@ -196,6 +197,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
       next: (response: Result<SubmissionResponseDto>) => {
         this.isSubmitting = false;
         if (response.isSuccess) {
+          this.latestSubmissionId = response.data.submissionId;
           this.handleExecutionResult(response.data);
           if (response.data.status === 'Accepted') {
             this.showSubmitSuccess = true;
@@ -255,5 +257,11 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   getDifficultyClass(diff: string): string {
     return diff === 'Easy' ? 'difficulty-easy' : diff === 'Medium' ? 'difficulty-medium' : 'difficulty-hard';
+  }
+
+  analyzeWithAI(): void {
+    if (this.latestSubmissionId) {
+      this.router.navigate(['/arena/analysis'], { queryParams: { submissionId: this.latestSubmissionId } });
+    }
   }
 }
