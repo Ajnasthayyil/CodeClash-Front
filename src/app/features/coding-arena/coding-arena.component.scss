@@ -224,6 +224,8 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
 
 .panel-tabs {
   display: flex;
+  height: 50px;
+  align-items: center;
   border-bottom: 1px solid $border;
   flex-shrink: 0;
 }
@@ -237,6 +239,9 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
+  height: 100%;
+  display: flex;
+  align-items: center;
   transition: all 0.18s;
 
   &:hover { color: $text; }
@@ -448,7 +453,7 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  height: 40px;
+  height: 50px;
   background: $elevated;
   border-bottom: 1px solid $border;
   flex-shrink: 0;
