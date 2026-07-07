@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProblemService, ProblemDetailDto } from '../../core/services/problem.service';
+import { SubmissionsService, SubmissionResponseDto, Result } from '../../core/services/submissions.service';
 
 interface ProblemDetails {
   id: string;
@@ -63,7 +64,8 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
-    private problemService: ProblemService
+    private problemService: ProblemService,
+    private submissionsService: SubmissionsService
   ) {}
 
   ngOnInit(): void {
@@ -163,18 +165,25 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
   runCode(): void {
-    if (this.isRunning) return;
+    if (this.isRunning || !this.problem) return;
     this.isRunning = true;
-    this.terminalOutput = '$ Running sample test cases...\n';
+    this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
-    setTimeout(() => {
-      this.terminalOutput = `$ Running sample test cases...\n\n`;
-      this.terminalOutput += `✓ Test 1 passed: output matches expectation\n`;
-      this.terminalOutput += `✓ Test 2 passed: output matches expectation\n\n`;
-      this.terminalOutput += `All sample tests passed! Runtime: 42ms | Memory: 14.8 MB`;
-      this.myTestsPassed = Math.min(this.myTestsPassed + 2, this.totalTests);
-      this.isRunning = false;
-    }, 1600);
+    this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+      next: (response: Result<SubmissionResponseDto>) => {
+        this.isRunning = false;
+        if (response.isSuccess) {
+          this.handleExecutionResult(response.data);
+        } else {
+          this.terminalOutput += `\nError: ${response.message}\n`;
+        }
+      },
+      error: (err) => {
+        this.isRunning = false;
+        this.terminalOutput += `\nHTTP Error: Could not connect to the execution server.\n`;
+        console.error(err);
+      }
+    });
   }
 
   // ─── Submit ────────────────────────────────────────────────────────────────
@@ -183,21 +192,60 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.isSubmitting = true;
     this.terminalOutput = '$ Submitting solution against test suite...\n';
 
-    setTimeout(() => {
-      this.myTestsPassed = this.totalTests;
-      this.terminalOutput = `$ Evaluating against all ${this.totalTests} test cases...\n\n`;
-      for (let i = 1; i <= this.totalTests; i++) {
-        this.terminalOutput += `✓ Test ${i} passed\n`;
+    this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+      next: (response: Result<SubmissionResponseDto>) => {
+        this.isSubmitting = false;
+        if (response.isSuccess) {
+          this.handleExecutionResult(response.data);
+          if (response.data.status === 'Accepted') {
+            this.showSubmitSuccess = true;
+            if (!this.problem!.title.includes('(Solved)')) {
+              this.problem!.title = `${this.problem!.title} (Solved)`;
+            }
+            setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
+          }
+        } else {
+          this.terminalOutput += `\nError: ${response.message}\n`;
+        }
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.terminalOutput += `\nHTTP Error: Could not connect to the execution server.\n`;
+        console.error(err);
       }
-      this.terminalOutput += `\n🎉 All ${this.totalTests}/${this.totalTests} tests passed!\nRuntime: 36ms (beats 96.5%) | Memory: 14.2 MB (beats 92.1%)`;
-      this.isSubmitting = false;
-      this.showSubmitSuccess = true;
-      
-      // Update problem status locally (just for UX feedback)
-      this.problem!.title = `${this.problem!.title} (Solved)`;
-      
-      setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
-    }, 2500);
+    });
+  }
+
+  private handleExecutionResult(result: SubmissionResponseDto): void {
+    this.myTestsPassed = result.passed;
+    this.totalTests = result.total;
+    
+    this.terminalOutput += `\n$ Evaluating against all ${result.total} test cases...\n\n`;
+
+    if (result.status === 'CompileError') {
+      this.terminalOutput += `✗ Compilation Error:\n${result.compileOutput || 'Unknown error'}\n`;
+      return;
+    }
+
+    if (result.status === 'InternalError') {
+      this.terminalOutput += `✗ Internal Error: Could not execute code properly.\n${result.compileOutput || ''}\n`;
+      return;
+    }
+
+    if (result.status === 'Accepted') {
+      this.terminalOutput += `🎉 All ${result.passed}/${result.total} tests passed!\n`;
+      this.terminalOutput += `Runtime: ${result.executionTime}ms | Memory: ${(result.memory / (1024 * 1024)).toFixed(1)} MB\n`;
+    } else {
+      this.terminalOutput += `✗ ${this.formatStatus(result.status)}\n`;
+      this.terminalOutput += `Passed: ${result.passed}/${result.total} tests.\n`;
+      if (result.compileOutput) {
+        this.terminalOutput += `\nOutput logs:\n${result.compileOutput}\n`;
+      }
+    }
+  }
+
+  private formatStatus(status: string): string {
+    return status.replace(/([A-Z])/g, ' $1').trim();
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────

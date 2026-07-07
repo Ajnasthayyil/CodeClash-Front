@@ -23,6 +23,24 @@ export interface PaginatedList<T> {
   hasNextPage: boolean;
 }
 
+export interface SubmissionResponseDto {
+  submissionId: string;
+  status: string;
+  passed: number;
+  total: number;
+  executionTime: number;
+  memory: number;
+  testCases: any[];
+  compileOutput?: string;
+}
+
+export interface Result<T> {
+  isSuccess: boolean;
+  message: string;
+  data: T;
+  errors?: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -41,5 +59,14 @@ export class SubmissionsService {
     }
 
     return this.http.get<PaginatedList<SubmissionSummary>>(this.apiUrl, { params });
+  }
+
+  submitCode(problemId: string, language: string, sourceCode: string): Observable<Result<SubmissionResponseDto>> {
+    const payload = {
+      problemId,
+      language,
+      sourceCode
+    };
+    return this.http.post<Result<SubmissionResponseDto>>(this.apiUrl, payload, { withCredentials: true });
   }
 }
