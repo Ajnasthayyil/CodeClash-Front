@@ -4,11 +4,9 @@ import { Observable } from 'rxjs';
 
 
 export interface LeaderboardUserDto {
-  id: string;
   username: string;
-  email: string;
-  elo: number;
-  country: string;
+  profileImageUrl: string;
+  totalPoints: number;
 }
 
 @Injectable({

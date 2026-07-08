@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 interface LeaderboardEntry {
   rank: number;
   name: string;
-  elo: number;
+  points: number;
   wl: string;
   battles: number;
   streak: number;
@@ -96,7 +96,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
             return {
               rank: index + 1,
               name: user.username,
-              elo: 0, // 0 points for now
+              points: user.totalPoints || 0,
               wl: '0/0',
               battles: 0,
               streak: 0,
@@ -136,11 +136,11 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
       // Mock friends subset
       result = result.filter(p => ['NexusGod', 'AlgoKing99', 'NovaCoder', 'CodeGeek'].includes(p.name));
     } else if (this.activeTab === 'This Week') {
-      // Shuffled/slightly different ELO scores for week activity simulation
+      // Shuffled/slightly different scores for week activity simulation
       result = result.map(p => ({
         ...p,
-        elo: p.elo - Math.floor(Math.random() * 20)
-      })).sort((a, b) => b.elo - a.elo);
+        points: Math.max(0, p.points - Math.floor(Math.random() * 20))
+      })).sort((a, b) => b.points - a.points);
     } else if (this.activeTab === 'By Language') {
       // Grouped by current filter, or default list sorted by matching main language
       if (this.selectedLanguage !== 'All') {
@@ -158,7 +158,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     }
 
     // Re-rank items according to filters
-    result = result.sort((a, b) => b.elo - a.elo);
+    result = result.sort((a, b) => b.points - a.points);
     
     const currentUsername = this.authService.getCurrentUser()?.username;
 

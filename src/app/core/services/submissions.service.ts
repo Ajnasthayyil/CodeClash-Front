@@ -78,4 +78,12 @@ export class SubmissionsService {
     };
     return this.http.post<SubmissionResponseDto>(this.apiUrl, payload, { withCredentials: true });
   }
+  runCode(problemId: string, language: string, sourceCode: string): Observable<SubmissionResponseDto> {
+    const payload = {
+      problemId,
+      language,
+      sourceCode
+    };
+    return this.http.post<SubmissionResponseDto>(`${this.apiUrl}/run`, payload, { withCredentials: true });
+  }
 }

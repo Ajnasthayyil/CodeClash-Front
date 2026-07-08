@@ -173,7 +173,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
-    this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+    this.submissionsService.runCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
       next: (response: SubmissionResponseDto) => {
         this.isRunning = false;
         this.handleExecutionResult(response);
@@ -198,10 +198,12 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
         this.isSubmitting = false;
         this.latestSubmissionId = response.submissionId;
         this.handleExecutionResult(response);
-        if (response.status === 'Accepted') {
+        
+        if (response.passed === response.total && response.status === 'Accepted' && this.problem) {
           this.showSubmitSuccess = true;
-          if (!this.problem!.title.includes('(Solved)')) {
-            this.problem!.title = `${this.problem!.title} (Solved)`;
+          // Mark as solved in UI if not already
+          if (!this.problem.title.includes('(Solved)')) {
+            this.problem.title = `${this.problem.title} (Solved)`;
           }
           setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
         }
