@@ -1060,6 +1060,14 @@ body.light-mode {
     background-color: #ffffff !important;
     color: #334155 !important;
 
+    .chart-section {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+      .chart-title { color: #0f172a !important; }
+      .chart-subtitle { color: #64748b !important; }
+    }
+
     .page-title {
       color: #0f172a !important;
     }
