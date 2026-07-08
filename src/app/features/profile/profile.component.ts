@@ -185,6 +185,45 @@ export class ProfileComponent implements OnInit, AfterViewInit {
         console.error('Failed to load profile from server:', err);
       }
     });
+
+    // Load stats
+    this.authService.getProfileStats().subscribe({
+      next: (res) => {
+        if (res) {
+          this.stats[0].value = res.totalBattles.toString();
+          this.stats[1].value = res.wins.toString();
+          this.stats[2].value = res.winRate;
+          this.stats[3].value = res.problemsSolved.toString();
+          this.stats[4].value = res.bestStreak;
+
+          if (res.topLanguages && res.topLanguages.length > 0) {
+            this.languages = res.topLanguages.map((l: any) => ({
+              name: l.name,
+              pct: l.pct,
+              color: l.color
+            }));
+            this.topLanguages = this.languages;
+            this.drawDonut();
+          }
+
+          if (res.matchHistory && res.matchHistory.length > 0) {
+            this.matchHistory = res.matchHistory.map((m: any) => ({
+              opponent: m.opponent,
+              problem: m.problem,
+              result: m.result,
+              score: m.score,
+              language: m.language,
+              duration: m.duration,
+              date: m.date,
+              eloChange: m.eloChange
+            }));
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load profile stats:', err);
+      }
+    });
   }
 
   private updateInitials(): void {

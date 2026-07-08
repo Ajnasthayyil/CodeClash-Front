@@ -150,6 +150,11 @@ export class AuthService {
     return this.http.get<any>(profileUrl);
   }
 
+  getProfileStats(): Observable<any> {
+    const statsUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/stats';
+    return this.http.get<any>(statsUrl);
+  }
+
   updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<any> {
     const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
     return this.http.put<any>(profileUrl, payload);
