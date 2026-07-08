@@ -15,11 +15,27 @@
     <a routerLink="/problems" class="text-xs text-orange-500 hover:underline mt-2">Return to Problems Catalog</a>
   </div>
 
+  <!-- Mobile Tab Switcher (Visible on mobile/tablet only) -->
+  <div class="mobile-tabs-header">
+    <button (click)="mobileActiveTab = 'description'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'description'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <span>Problem</span>
+    </button>
+    <button (click)="mobileActiveTab = 'editor'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'editor'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+      <span>Editor</span>
+    </button>
+  </div>
+
   <!-- ══════════════════ 2-PANEL BODY ══════════════════ -->
   <div *ngIf="!isLoading && problem" class="arena-body practice-layout">
 
     <!-- ─── LEFT: Problem Description ─── -->
-    <aside class="panel panel-left">
+    <aside class="panel panel-left" [class.panel-visible]="mobileActiveTab === 'description'">
       <div class="panel-tabs">
         <button (click)="activePanel = 'problem'" class="panel-tab" [class.tab-active]="activePanel === 'problem'">Description</button>
         <button (click)="activePanel = 'hints'"   class="panel-tab" [class.tab-active]="activePanel === 'hints'">Hints</button>
@@ -83,7 +99,7 @@
     </aside>
 
     <!-- ─── CENTER: Code Editor ─── -->
-    <main class="panel panel-center">
+    <main class="panel panel-center" [class.panel-visible]="mobileActiveTab === 'editor'">
 
       <!-- Editor top bar: language + autosave -->
       <div class="editor-topbar">

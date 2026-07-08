@@ -57,6 +57,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   // ─── Modals / UI State ─────────────────────────────────────────────────────
   showSubmitSuccess = false;
   activePanel: 'problem' | 'hints' = 'problem';
+  mobileActiveTab: 'description' | 'editor' = 'description';
   latestSubmissionId: string | null = null;
 
   // ─── Intervals ─────────────────────────────────────────────────────────────
