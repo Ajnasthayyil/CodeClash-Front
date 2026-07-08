@@ -103,7 +103,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
               lang: 'Any',
               initial: initial,
               avatarColor: colors[colorIndex],
-              country: user.country || 'US'
+              country: 'US'
             };
           });
           this.applyFilters();

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { Router } from '@angular/router';
+import { SubmissionResponseDto } from '../../core/services/submissions.service';
 
 interface Problem {
   title: string;
