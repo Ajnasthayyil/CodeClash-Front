@@ -132,6 +132,13 @@ public:
   testResults: TestResult[] = [];
   myTestsPassed = 0;
   totalTests = 10;
+  lastExecutionResult: SubmissionResponseDto | null = null;
+
+  private handleExecutionResult(result: SubmissionResponseDto): void {
+    this.myTestsPassed = result.passed;
+    this.totalTests = result.total;
+    this.lastExecutionResult = result;
+  }
 
   // ─── Timer ─────────────────────────────────────────────────────────────────
   timeRemainingSeconds = 15 * 60; // 15 minutes
@@ -145,6 +152,7 @@ public:
   // ─── Opponent ──────────────────────────────────────────────────────────────
   opponentTestsPassed = 4;
   opponentIsTyping = false;
+  isPlayer2CodeExpanded = false;
 
   // ─── AI Assistant ──────────────────────────────────────────────────────────
   aiInput = '';
@@ -247,9 +255,10 @@ public:
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
   runCode(): void {
-    if (this.isRunning) return;
+    if (this.isRunning || !this.problem) return;
     this.isRunning = true;
-    this.terminalOutput = '$ Running test cases...\n';
+    this.lastExecutionResult = null;
+    this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
     setTimeout(() => {
       const passed = Math.random() > 0.3;
@@ -259,10 +268,19 @@ public:
       if (passed) {
         this.terminalOutput += `✓ Test 3 passed: [0,1]\n\n`;
         this.terminalOutput += `All sample tests passed! Runtime: 52ms | Memory: 16.2 MB`;
-        this.myTestsPassed = Math.min(this.myTestsPassed + 1, this.totalTests);
+        this.handleExecutionResult({ submissionId: 'mock', status: 'Accepted', passed: 3, total: 3, executionTime: 52, memory: 16, testCases: [
+          { id: '1', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
+          { id: '2', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
+          { id: '3', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false }
+        ] });
       } else {
         this.terminalOutput += `✗ Test 3 failed: expected [0,1], got [1,0]\n\n`;
         this.terminalOutput += `1/3 tests failed. Check your output order.`;
+        this.handleExecutionResult({ submissionId: 'mock', status: 'WrongAnswer', passed: 2, total: 3, executionTime: 52, memory: 16, testCases: [
+          { id: '1', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
+          { id: '2', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
+          { id: '3', status: 'Failed', input: 'mock', expectedOutput: '[0,1]', actualOutput: '[1,0]', isHidden: false }
+        ] });
       }
       this.isRunning = false;
     }, 1600);
@@ -270,9 +288,10 @@ public:
 
   // ─── Submit ────────────────────────────────────────────────────────────────
   submitSolution(): void {
-    if (this.isSubmitting) return;
+    if (this.isSubmitting || !this.problem) return;
     this.isSubmitting = true;
-    this.terminalOutput = '$ Submitting solution...\n';
+    this.lastExecutionResult = null;
+    this.terminalOutput = '$ Submitting solution against test suite...\n';
 
     setTimeout(() => {
       this.myTestsPassed = this.totalTests;

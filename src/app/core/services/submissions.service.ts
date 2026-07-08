@@ -23,6 +23,15 @@ export interface PaginatedList<T> {
   hasNextPage: boolean;
 }
 
+export interface SubmissionTestCaseResponseDto {
+  id: string;
+  status: string;
+  input?: string;
+  expectedOutput?: string;
+  actualOutput?: string;
+  isHidden: boolean;
+}
+
 export interface SubmissionResponseDto {
   submissionId: string;
   status: string;
@@ -30,7 +39,7 @@ export interface SubmissionResponseDto {
   total: number;
   executionTime: number;
   memory: number;
-  testCases: any[];
+  testCases: SubmissionTestCaseResponseDto[];
   compileOutput?: string;
 }
 

@@ -150,7 +150,37 @@
           <span class="terminal-title">$ Test Suite Output</span>
           <span class="sandbox-tag">Sandbox v3.1</span>
         </div>
-        <pre class="terminal-out">{{ terminalOutput }}</pre>
+        
+        <!-- Raw Text Output Mode -->
+        <pre *ngIf="!lastExecutionResult || lastExecutionResult.status === 'CompileError' || lastExecutionResult.status === 'CompilationError'" class="terminal-out">{{ terminalOutput }}</pre>
+        
+        <!-- Detailed Test Cases UI -->
+        <div *ngIf="lastExecutionResult && lastExecutionResult.status !== 'CompileError' && lastExecutionResult.status !== 'CompilationError'" class="terminal-out flex flex-col gap-3">
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-sm tracking-widest uppercase" [ngClass]="lastExecutionResult.passed === lastExecutionResult.total ? 'text-green-500' : 'text-red-500'">
+              {{ lastExecutionResult.passed === lastExecutionResult.total ? 'Accepted' : 'Failed' }}
+            </span>
+            <span class="text-xs text-slate-400 font-mono">{{ lastExecutionResult.passed }}/{{ lastExecutionResult.total }} testcases passed</span>
+          </div>
+          
+          <div class="flex flex-col gap-2 pb-4">
+            <div *ngFor="let tc of lastExecutionResult.testCases; let i = index" class="bg-[#161b22] border border-slate-800 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-2">
+                <svg *ngIf="tc.status === 'Passed'" class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                <svg *ngIf="tc.status !== 'Passed'" class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                <span class="text-xs font-bold font-mono" [ngClass]="tc.status === 'Passed' ? 'text-green-400' : 'text-red-400'">Case {{ i + 1 }}</span>
+                <span *ngIf="tc.isHidden" class="ml-auto text-[10px] text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded">Hidden Test</span>
+                <span *ngIf="!tc.isHidden && tc.status !== 'Passed'" class="ml-auto text-[10px] text-red-500/80 uppercase font-bold">{{ tc.status }}</span>
+              </div>
+              
+              <div *ngIf="!tc.isHidden" class="text-[11.5px] text-slate-400 font-mono space-y-2 ml-6">
+                <div><span class="text-slate-500 mr-2 font-bold uppercase text-[10px] tracking-wider">Input:</span><br/><span class="text-slate-300">{{ tc.input }}</span></div>
+                <div><span class="text-slate-500 mr-2 font-bold uppercase text-[10px] tracking-wider">Expected:</span><br/><span class="text-slate-300">{{ tc.expectedOutput }}</span></div>
+                <div *ngIf="tc.status !== 'Passed'"><span class="text-slate-500 mr-2 font-bold uppercase text-[10px] tracking-wider">Output:</span><br/><span class="text-red-400">{{ tc.actualOutput || 'No output' }}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Action bar -->

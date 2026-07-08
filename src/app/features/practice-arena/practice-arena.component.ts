@@ -59,6 +59,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   activePanel: 'problem' | 'hints' = 'problem';
   mobileActiveTab: 'description' | 'editor' = 'description';
   latestSubmissionId: string | null = null;
+  lastExecutionResult: SubmissionResponseDto | null = null;
 
   // ─── Intervals ─────────────────────────────────────────────────────────────
   private autoSaveInterval: any;
@@ -169,6 +170,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   runCode(): void {
     if (this.isRunning || !this.problem) return;
     this.isRunning = true;
+    this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
     this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
@@ -188,6 +190,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   submitSolution(): void {
     if (this.isSubmitting || !this.problem) return;
     this.isSubmitting = true;
+    this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting solution against test suite...\n';
 
     this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
@@ -214,6 +217,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   private handleExecutionResult(result: SubmissionResponseDto): void {
     this.myTestsPassed = result.passed;
     this.totalTests = result.total;
+    this.lastExecutionResult = result;
     
     this.terminalOutput += `\n$ Evaluating against all ${result.total} test cases...\n\n`;
 
