@@ -171,13 +171,9 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
     this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
-      next: (response: Result<SubmissionResponseDto>) => {
+      next: (response: SubmissionResponseDto) => {
         this.isRunning = false;
-        if (response.isSuccess) {
-          this.handleExecutionResult(response.data);
-        } else {
-          this.terminalOutput += `\nError: ${response.message}\n`;
-        }
+        this.handleExecutionResult(response);
       },
       error: (err) => {
         this.isRunning = false;
@@ -194,20 +190,16 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.terminalOutput = '$ Submitting solution against test suite...\n';
 
     this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
-      next: (response: Result<SubmissionResponseDto>) => {
+      next: (response: SubmissionResponseDto) => {
         this.isSubmitting = false;
-        if (response.isSuccess) {
-          this.latestSubmissionId = response.data.submissionId;
-          this.handleExecutionResult(response.data);
-          if (response.data.status === 'Accepted') {
-            this.showSubmitSuccess = true;
-            if (!this.problem!.title.includes('(Solved)')) {
-              this.problem!.title = `${this.problem!.title} (Solved)`;
-            }
-            setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
+        this.latestSubmissionId = response.submissionId;
+        this.handleExecutionResult(response);
+        if (response.status === 'Accepted') {
+          this.showSubmitSuccess = true;
+          if (!this.problem!.title.includes('(Solved)')) {
+            this.problem!.title = `${this.problem!.title} (Solved)`;
           }
-        } else {
-          this.terminalOutput += `\nError: ${response.message}\n`;
+          setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
         }
       },
       error: (err) => {
@@ -224,7 +216,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     
     this.terminalOutput += `\n$ Evaluating against all ${result.total} test cases...\n\n`;
 
-    if (result.status === 'CompileError') {
+    if (result.status === 'CompileError' || result.status === 'CompilationError') {
       this.terminalOutput += `✗ Compilation Error:\n${result.compileOutput || 'Unknown error'}\n`;
       return;
     }

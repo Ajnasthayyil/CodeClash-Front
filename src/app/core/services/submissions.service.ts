@@ -61,12 +61,12 @@ export class SubmissionsService {
     return this.http.get<PaginatedList<SubmissionSummary>>(this.apiUrl, { params });
   }
 
-  submitCode(problemId: string, language: string, sourceCode: string): Observable<Result<SubmissionResponseDto>> {
+  submitCode(problemId: string, language: string, sourceCode: string): Observable<SubmissionResponseDto> {
     const payload = {
       problemId,
       language,
       sourceCode
     };
-    return this.http.post<Result<SubmissionResponseDto>>(this.apiUrl, payload, { withCredentials: true });
+    return this.http.post<SubmissionResponseDto>(this.apiUrl, payload, { withCredentials: true });
   }
 }
