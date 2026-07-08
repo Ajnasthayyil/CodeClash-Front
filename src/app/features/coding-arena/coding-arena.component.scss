@@ -542,11 +542,13 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
 // Editor
 .editor-area {
   display: flex;
-  flex: 1;
-  min-height: 0;
+  flex: none;
+  height: 55%;
+  min-height: 100px;
+  resize: vertical;
+  background: $bg;
   overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: $border transparent;
+  position: relative;
 
   &::-webkit-scrollbar { width: 5px; height: 5px; }
   &::-webkit-scrollbar-thumb { background: $border; border-radius: 4px; }
@@ -587,12 +589,13 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
 
 // Terminal
 .terminal-wrap {
-  flex-shrink: 0;
-  height: 155px;
+  flex: 1;
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   border-top: 1px solid $border;
   background: #0a0d13;
+  overflow: hidden;
 }
 
 .terminal-bar {
