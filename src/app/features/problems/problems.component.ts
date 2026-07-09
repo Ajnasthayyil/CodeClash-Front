@@ -53,7 +53,7 @@ export class ProblemsComponent implements OnInit {
               title: p.title,
               skill: p.category,
               difficulty,
-              status: 'Unsolved' as const,
+              status: (p.userStatus as 'Solved' | 'Attempted' | 'Unsolved') || 'Unsolved',
               xp,
               acceptanceRate
             };
