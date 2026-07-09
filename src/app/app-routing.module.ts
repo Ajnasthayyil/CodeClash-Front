@@ -25,6 +25,8 @@ import { ContestManagementComponent } from './features/admin/contest-management/
 import { SubmissionMonitorComponent } from './features/admin/submission-monitor/submission-monitor.component';
 import { AdminProfileComponent } from './features/admin/profile/admin-profile.component';
 import { ProblemManagementComponent } from './features/admin/problem-management/problem-management.component';
+import { TournamentMatchComponent } from './features/tournament/tournament-match/tournament-match.component';
+import { TournamentManagementComponent } from './features/admin/tournament-management/tournament-management.component';
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.component';
 import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
@@ -49,6 +51,7 @@ const routes: Routes = [
       { path: 'arena/analysis', component: AiAnalysisComponent, canActivate: [authGuard, userGuard] },
       { path: 'problems/solve/:id', component: PracticeArenaComponent, canActivate: [authGuard, userGuard] },
       { path: 'tournament', component: TournamentComponent, canActivate: [authGuard, userGuard] },
+      { path: 'tournament/:id/match/:matchId', component: TournamentMatchComponent, canActivate: [authGuard, userGuard] },
       {
         path: 'admin',
         component: AdminComponent,
@@ -58,6 +61,7 @@ const routes: Routes = [
           { path: 'dashboard', component: DashboardAnalyticsComponent },
           { path: 'users', component: UserManagementComponent },
           { path: 'contests', component: ContestManagementComponent },
+          { path: 'tournaments', component: TournamentManagementComponent },
           { path: 'submissions', component: SubmissionMonitorComponent },
           { path: 'problems', component: ProblemManagementComponent },
           { path: 'profile', component: AdminProfileComponent }

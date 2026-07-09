@@ -42,8 +42,13 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   codeSnippets: Partial<Record<Language, string>> = {};
 
+  runCodeSuccess = false;
+
   get currentCode(): string { return this.codeSnippets[this.selectedLanguage] || ''; }
-  set currentCode(val: string) { this.codeSnippets[this.selectedLanguage] = val; }
+  set currentCode(val: string) { 
+    this.codeSnippets[this.selectedLanguage] = val;
+    this.runCodeSuccess = false;
+  }
 
   get codeLines(): string[] { return this.currentCode.split('\n'); }
 
@@ -177,6 +182,9 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
       next: (response: SubmissionResponseDto) => {
         this.isRunning = false;
         this.handleExecutionResult(response);
+        if (response.status === 'Accepted') {
+          this.runCodeSuccess = true;
+        }
       },
       error: (err) => {
         this.isRunning = false;

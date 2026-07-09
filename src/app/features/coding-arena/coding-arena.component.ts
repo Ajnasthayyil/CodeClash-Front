@@ -121,8 +121,13 @@ public:
 }`
   };
 
+  runCodeSuccess = false;
+
   get currentCode(): string { return this.codeSnippets[this.selectedLanguage]; }
-  set currentCode(val: string) { this.codeSnippets[this.selectedLanguage] = val; }
+  set currentCode(val: string) { 
+    this.codeSnippets[this.selectedLanguage] = val; 
+    this.runCodeSuccess = false;
+  }
 
   get codeLines(): string[] { return this.currentCode.split('\n'); }
 
@@ -267,6 +272,7 @@ public:
       this.terminalOutput += `✓ Test 1 passed: [0,1]\n`;
       this.terminalOutput += `✓ Test 2 passed: [1,2]\n`;
       if (passed) {
+        this.runCodeSuccess = true;
         this.terminalOutput += `✓ Test 3 passed: [0,1]\n\n`;
         this.terminalOutput += `All sample tests passed! Runtime: 52ms | Memory: 16.2 MB`;
         this.handleExecutionResult({ submissionId: 'mock', status: 'Accepted', passed: 3, total: 3, executionTime: 52, memory: 16, testCases: [

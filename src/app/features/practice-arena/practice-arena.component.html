@@ -190,7 +190,7 @@
           <svg *ngIf="!isRunning" class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           {{ isRunning ? 'Running...' : 'Run Code' }}
         </button>
-        <button (click)="submitSolution()" [disabled]="isRunning || isSubmitting" class="btn-submit">
+        <button (click)="submitSolution()" [disabled]="!runCodeSuccess || isRunning || isSubmitting" class="btn-submit" title="Run Code successfully before submitting">
           <span *ngIf="isSubmitting" class="spin spin-white"></span>
           {{ isSubmitting ? 'Submitting...' : 'Submit Solution' }}
         </button>
