@@ -11,7 +11,7 @@ export class LoginFormComponent {
   email = '';
   password = '';
   rememberMe = false;
-  
+
   errorMessage = '';
   isLoading = false;
   showPassword = false;
@@ -19,11 +19,11 @@ export class LoginFormComponent {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   onSubmit() {
     this.errorMessage = '';
-    
+
     if (!this.email) {
       this.errorMessage = 'Please enter your email address.';
       return;
@@ -55,7 +55,6 @@ export class LoginFormComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Login error:', err);
         if (err.status === 0) {
           this.errorMessage = 'Could not connect to the API server. Please ensure the backend is running.';
         } else if (err.error && err.error.errors && err.error.errors.length > 0) {
@@ -72,7 +71,7 @@ export class LoginFormComponent {
   loginWithSocial(provider: string) {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     setTimeout(() => {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);

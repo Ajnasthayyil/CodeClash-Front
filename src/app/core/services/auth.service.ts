@@ -32,7 +32,7 @@ export class AuthService {
   private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth';
   private accessToken: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   register(payload: any): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.apiUrl}/register`, {
@@ -50,40 +50,34 @@ export class AuthService {
       password: payload.password
     }, { withCredentials: true }).pipe(
       tap(res => {
-        try {
-          if (res && res.success && res.data) {
-            const authData = res.data;
-            this.accessToken = authData.accessToken;
+        if (res && res.success && res.data) {
+          const authData = res.data;
+          this.accessToken = authData.accessToken;
 
-            // Build initials safely
-            const fullName = authData.user?.fullName || '';
-            const parts = fullName.trim().split(/\s+/).filter(p => p.length > 0);
-            let initials = 'NC';
-            if (parts.length >= 2) {
-              initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-            } else if (parts.length === 1) {
-              initials = parts[0][0].toUpperCase();
-            }
-
-            // Build the currentUser object and save to local storage
-            const currentUser = {
-              id: authData.user?.userId || '',
-              name: fullName,
-              email: authData.user?.email || '',
-              phoneNumber: payload?.phoneNumber || '',
-              username: authData.user?.username || '',
-              role: authData.user?.role || '',
-              initials: initials
-            };
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-            // Save tokens to browser cookies
-            this.setCookie('token', authData.accessToken, 7);
-            this.setCookie('refreshToken', authData.refreshToken, 7);
+          // Build initials
+          const parts = authData.user.fullName.trim().split(/\s+/);
+          let initials = 'NC';
+          if (parts.length >= 2) {
+            initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+          } else if (parts.length === 1 && parts[0].length > 0) {
+            initials = parts[0][0].toUpperCase();
           }
-        } catch (e) {
-          console.error('Error inside AuthService.login tap:', e);
-          throw e;
+
+          // Build the currentUser object and save to local storage
+          const currentUser = {
+            id: authData.user.userId,
+            name: authData.user.fullName,
+            email: authData.user.email,
+            phoneNumber: payload.phoneNumber || '',
+            username: authData.user.username,
+            role: authData.user.role,
+            initials: initials
+          };
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+          // Save tokens to browser cookies
+          this.setCookie('token', authData.accessToken, 7);
+          this.setCookie('refreshToken', authData.refreshToken, 7);
         }
       })
     );
@@ -103,7 +97,7 @@ export class AuthService {
 
   logout(): Observable<ApiResponse<any>> {
     const accessToken = this.accessToken || '';
-    
+
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${accessToken}`
     });

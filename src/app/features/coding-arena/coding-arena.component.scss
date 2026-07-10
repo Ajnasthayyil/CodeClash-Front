@@ -553,13 +553,18 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   text-align: right;
   font-family: $mono;
   font-size: 13px;
-  line-height: 1.72;
+  line-height: 22px;
   color: $dim;
   user-select: none;
   min-width: 38px;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-.ln { line-height: 22.36px; }
+.ln {
+  height: 22px;
+  line-height: 22px;
+}
 
 .code-area {
   flex: 1;
@@ -570,12 +575,14 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   resize: none;
   font-family: $mono;
   font-size: 13px;
-  line-height: 1.72;
+  line-height: 22px;
   color: $text;
   caret-color: $orange;
   white-space: pre;
   overflow: hidden;
   tab-size: 4;
+  margin: 0;
+  box-sizing: border-box;
 
   &::selection { background: rgba(249,115,22,0.18); }
 }
