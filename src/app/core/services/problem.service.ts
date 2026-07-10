@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 
 export interface ProblemSummaryDto {
@@ -53,7 +54,7 @@ export interface PaginatedList<T> {
   providedIn: 'root'
 })
 export class ProblemService {
-  private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/problems';
+  private apiUrl = `${environment.apiUrl}/problems`;
 
   constructor(private http: HttpClient) {}
 

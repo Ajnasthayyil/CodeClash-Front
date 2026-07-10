@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -54,7 +55,7 @@ export interface Result<T> {
   providedIn: 'root'
 })
 export class SubmissionsService {
-  private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/submissions';
+  private apiUrl = `${environment.apiUrl}/submissions`;
 
   constructor(private http: HttpClient) {}
 

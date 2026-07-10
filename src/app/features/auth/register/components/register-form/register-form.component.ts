@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '../../../../../../environments/environment';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../../core/services/auth.service';
 
@@ -19,6 +20,7 @@ export class RegisterFormComponent {
   isLoading = false;
   showPassword = false;
   showConfirmPassword = false;
+  githubLoginUrl = `${environment.apiUrl}/auth/github-login`;
 
   constructor(
     private router: Router,

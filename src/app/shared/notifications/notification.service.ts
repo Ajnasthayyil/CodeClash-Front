@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as signalR from '@microsoft/signalr';
@@ -65,7 +66,7 @@ export class NotificationService implements OnDestroy {
     this.loadNotifications(token);
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/hubs/notifications', {
+      .withUrl(`${environment.backendUrl}/hubs/notifications`, {
         accessTokenFactory: () => this.authService.getAccessToken() || ''
       })
       .withAutomaticReconnect()
@@ -90,7 +91,7 @@ export class NotificationService implements OnDestroy {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    this.http.get<any>('https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications', { headers })
+    this.http.get<any>(`${environment.apiUrl}/notifications`, { headers })
       .subscribe({
         next: (res) => {
           if (res) {
@@ -121,7 +122,7 @@ export class NotificationService implements OnDestroy {
     if (!token) return;
 
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    this.http.put(`https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications/${id}/read`, {}, { headers })
+    this.http.put(`${environment.apiUrl}/notifications/${id}/read`, {}, { headers })
       .subscribe({
         next: () => {
           const updated = this.notificationsSubject.value.map(n => 
@@ -138,7 +139,7 @@ export class NotificationService implements OnDestroy {
     if (!token) return;
 
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    this.http.put(`https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications/read-all`, {}, { headers })
+    this.http.put(`${environment.apiUrl}/notifications/read-all`, {}, { headers })
       .subscribe({
         next: () => {
           const updated = this.notificationsSubject.value.map(n => ({ ...n, read: true }));

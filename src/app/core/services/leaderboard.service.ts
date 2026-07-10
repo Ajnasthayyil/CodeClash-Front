@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 
 export interface LeaderboardUserDto {
@@ -13,7 +14,7 @@ export interface LeaderboardUserDto {
   providedIn: 'root'
 })
 export class LeaderboardService {
-  private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/leaderboard';
+  private apiUrl = `${environment.apiUrl}/leaderboard`;
 
   constructor(private http: HttpClient) {}
 
