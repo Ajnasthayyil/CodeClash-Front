@@ -65,8 +65,8 @@ export class AdminProfileComponent implements OnInit {
     // Call API to fetch fresh data
     this.authService.getProfile().subscribe({
       next: (res) => {
-        if (res && res.success && res.data) {
-          const profile = res.data;
+        if (res) {
+          const profile = res;
           this.adminInfo.username = profile.username;
           this.adminInfo.email = profile.email;
           this.adminInfo.role = profile.role === 'Admin' ? 'Root Administrator' : profile.role;
@@ -132,18 +132,18 @@ export class AdminProfileComponent implements OnInit {
     this.authService.updateProfile(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
+        if (res) {
           // Update details inside state
-          this.adminInfo.username = res.data.username;
-          this.adminInfo.email = res.data.email;
-          this.adminInfo.role = res.data.role === 'Admin' ? 'Root Administrator' : res.data.role;
+          this.adminInfo.username = res.username;
+          this.adminInfo.email = res.email;
+          this.adminInfo.role = res.role === 'Admin' ? 'Root Administrator' : res.role;
 
           // Save back to localStorage
           const savedUser = localStorage.getItem('currentUser');
           const existing = savedUser ? JSON.parse(savedUser) : {};
           
           // Compute initials
-          const parts = (res.data.fullName || '').trim().split(/\s+/);
+          const parts = (res.fullName || '').trim().split(/\s+/);
           let initials = 'SA';
           if (parts.length >= 2) {
             initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -153,11 +153,11 @@ export class AdminProfileComponent implements OnInit {
 
           const updatedUser = {
             ...existing,
-            name: res.data.fullName,
-            email: res.data.email,
-            phoneNumber: res.data.phoneNumber,
-            username: res.data.username,
-            role: res.data.role,
+            name: res.fullName,
+            email: res.email,
+            phoneNumber: res.phoneNumber,
+            username: res.username,
+            role: res.role,
             initials: initials
           };
           localStorage.setItem('currentUser', JSON.stringify(updatedUser));
@@ -169,7 +169,7 @@ export class AdminProfileComponent implements OnInit {
             this.loadAdminProfile();
           }, 1500);
         } else {
-          this.errorMessage = res.message || 'Failed to update admin profile.';
+          this.errorMessage = (res as any)?.message || 'Failed to update admin profile.';
         }
       },
       error: (err) => {

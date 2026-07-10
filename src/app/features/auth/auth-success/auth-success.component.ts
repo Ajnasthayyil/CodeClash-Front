@@ -29,8 +29,8 @@ export class AuthSuccessComponent implements OnInit {
         // 2. Fetch user profile to initialize the session
         this.authService.getProfile().subscribe({
           next: (res) => {
-            if (res && res.success && res.data) {
-              const profile = res.data;
+            if (res) {
+              const profile = res;
               
               // Compute user initials
               const parts = (profile.fullName || '').trim().split(/\s+/);

@@ -4,6 +4,7 @@ import { ProblemService } from '../../core/services/problem.service';
 
 interface Problem {
   id: string;
+  displayId: number;
   title: string;
   skill: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
@@ -39,19 +40,20 @@ export class ProblemsComponent implements OnInit {
     this.problemService.getProblems(1, 100, this.selectedDifficulty, undefined, this.searchQuery).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
-          this.problems = res.data.items.map((p) => {
+        if (res) {
+          this.problems = res.items.map((p: any, index: number) => {
             const difficulty = p.difficulty as 'Easy' | 'Medium' | 'Hard';
             const xp = difficulty === 'Easy' ? 100 : difficulty === 'Medium' ? 200 : 400;
-            const hash = p.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const hash = p.title.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
             const acceptanceRate = `${(45 + (hash % 40)).toFixed(1)}%`;
             
             return {
-              id: p.id,
+              id: p.problemId,
+              displayId: index + 1,
               title: p.title,
               skill: p.category,
               difficulty,
-              status: 'Unsolved' as const,
+              status: (p.userStatus as 'Solved' | 'Attempted' | 'Unsolved') || 'Unsolved',
               xp,
               acceptanceRate
             };

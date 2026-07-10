@@ -2,6 +2,10 @@
 
 .arena-body.practice-layout {
   grid-template-columns: 350px 1fr !important;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .toast-success {

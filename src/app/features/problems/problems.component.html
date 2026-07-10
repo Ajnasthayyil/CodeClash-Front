@@ -68,7 +68,7 @@
           <tr *ngFor="let p of filteredProblems" (click)="selectProblem(p.id)" class="data-row clickable-row">
             <!-- ID Column -->
             <td class="id-td">
-              <span class="id-badge">{{ p.id }}</span>
+              <span class="id-badge">{{ p.displayId }}</span>
             </td>
             <!-- Problem Title -->
             <td>

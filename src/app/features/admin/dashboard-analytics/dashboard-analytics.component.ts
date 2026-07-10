@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AdminDashboardService } from '../../../core/services/admin-dashboard.service';
 
 interface SystemLog {
   timestamp: string;
@@ -14,10 +15,10 @@ interface SystemLog {
 })
 export class DashboardAnalyticsComponent implements OnInit {
   stats = [
-    { label: 'Total Users', value: '1,248', change: '+12.4%', detail: 'from last week', icon: 'users', up: true },
-    { label: 'Active Matches', value: '42', change: '+8.1%', detail: 'simultaneous duels', icon: 'lightning', up: true },
-    { label: 'Submission Rate', value: '88.5%', change: '-0.3%', detail: 'pass/fail accuracy', icon: 'code', up: false },
-    { label: 'System Load', value: '38%', change: 'Normal', detail: 'sandbox average CPU', icon: 'server', up: true }
+    { label: 'Total Users', value: '...', change: '+0.0%', detail: 'from last week', icon: 'users', up: true },
+    { label: 'Active Matches', value: '...', change: '+0.0%', detail: 'simultaneous duels', icon: 'lightning', up: true },
+    { label: 'Submission Rate', value: '...', change: '0.0%', detail: 'pass/fail accuracy', icon: 'code', up: false },
+    { label: 'System Load', value: '...', change: 'Normal', detail: 'sandbox average CPU', icon: 'server', up: true }
   ];
 
   systemLogs: SystemLog[] = [
@@ -29,5 +30,51 @@ export class DashboardAnalyticsComponent implements OnInit {
     { timestamp: '15:50:33', level: 'ERROR', service: 'DATABASE', message: 'Timeout reconnecting to Postgres master. Retrying...' }
   ];
 
-  ngOnInit(): void {}
+  constructor(private dashboardService: AdminDashboardService) {}
+
+  ngOnInit(): void {
+    this.dashboardService.getStats().subscribe({
+      next: (res) => {
+        if (res) {
+          const data = res;
+          
+          this.stats = [
+            { 
+              label: 'Total Users', 
+              value: data.totalUsers.toLocaleString(), 
+              change: '+12.4%', // Placeholder for now
+              detail: 'from last week', 
+              icon: 'users', 
+              up: true 
+            },
+            { 
+              label: 'Active Matches', 
+              value: data.activeMatches.toLocaleString(), 
+              change: '+8.1%', 
+              detail: 'simultaneous duels', 
+              icon: 'lightning', 
+              up: true 
+            },
+            { 
+              label: 'Submission Rate', 
+              value: `${data.submissionRate.toFixed(1)}%`, 
+              change: '-0.3%', 
+              detail: 'pass/fail accuracy', 
+              icon: 'code', 
+              up: false 
+            },
+            { 
+              label: 'System Load', 
+              value: `${data.systemLoad}%`, 
+              change: 'Normal', 
+              detail: 'sandbox average CPU', 
+              icon: 'server', 
+              up: true 
+            }
+          ];
+        }
+      },
+      error: (err) => console.error('Failed to load dashboard stats', err)
+    });
+  }
 }

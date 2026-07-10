@@ -7,6 +7,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { OTPVerificationComponent } from './features/auth/otp/otp-verification.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CodingArenaComponent } from './features/coding-arena/coding-arena.component';
 import { ProfileComponent } from './features/profile/profile.component';
@@ -24,11 +25,14 @@ import { ContestManagementComponent } from './features/admin/contest-management/
 import { SubmissionMonitorComponent } from './features/admin/submission-monitor/submission-monitor.component';
 import { AdminProfileComponent } from './features/admin/profile/admin-profile.component';
 import { ProblemManagementComponent } from './features/admin/problem-management/problem-management.component';
+import { TournamentMatchComponent } from './features/tournament/tournament-match/tournament-match.component';
+import { TournamentManagementComponent } from './features/admin/tournament-management/tournament-management.component';
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { AiAnalysisComponent } from './features/ai-analysis/ai-analysis.component';
 import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { userGuard } from './core/guards/user.guard';
 
 const routes: Routes = [
   {
@@ -36,17 +40,18 @@ const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: '', component: HomeComponent },
-      { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-      { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
-      { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard] },
-      { path: 'problems', component: ProblemsComponent, canActivate: [authGuard] },
-      { path: 'market', component: MarketComponent, canActivate: [authGuard] },
-      { path: 'arena', component: MatchmakingComponent, canActivate: [authGuard] },
-      { path: 'arena/battle', component: CodingArenaComponent, canActivate: [authGuard] },
-      { path: 'arena/result', component: MatchResultComponent, canActivate: [authGuard] },
-      { path: 'arena/analysis', component: AiAnalysisComponent, canActivate: [authGuard] },
-      { path: 'problems/solve/:id', component: PracticeArenaComponent, canActivate: [authGuard] },
-      { path: 'tournament', component: TournamentComponent, canActivate: [authGuard] },
+      { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard, userGuard] },
+      { path: 'profile', component: ProfileComponent, canActivate: [authGuard, userGuard] },
+      { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard, userGuard] },
+      { path: 'problems', component: ProblemsComponent, canActivate: [authGuard, userGuard] },
+      { path: 'market', component: MarketComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena', component: MatchmakingComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena/battle', component: CodingArenaComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena/result', component: MatchResultComponent, canActivate: [authGuard, userGuard] },
+      { path: 'arena/analysis', component: AiAnalysisComponent, canActivate: [authGuard, userGuard] },
+      { path: 'problems/solve/:id', component: PracticeArenaComponent, canActivate: [authGuard, userGuard] },
+      { path: 'tournament', component: TournamentComponent, canActivate: [authGuard, userGuard] },
+      { path: 'tournament/:id/match/:matchId', component: TournamentMatchComponent, canActivate: [authGuard, userGuard] },
       {
         path: 'admin',
         component: AdminComponent,
@@ -56,6 +61,7 @@ const routes: Routes = [
           { path: 'dashboard', component: DashboardAnalyticsComponent },
           { path: 'users', component: UserManagementComponent },
           { path: 'contests', component: ContestManagementComponent },
+          { path: 'tournaments', component: TournamentManagementComponent },
           { path: 'submissions', component: SubmissionMonitorComponent },
           { path: 'problems', component: ProblemManagementComponent },
           { path: 'profile', component: AdminProfileComponent }
@@ -70,6 +76,7 @@ const routes: Routes = [
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
       { path: 'forgot-password', component: ForgotPasswordComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
       { path: 'otp', component: OTPVerificationComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]

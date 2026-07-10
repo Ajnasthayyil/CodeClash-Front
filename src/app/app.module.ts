@@ -25,6 +25,7 @@ import { LoginFormComponent } from './features/auth/login/components/login-form/
 import { RegisterComponent } from './features/auth/register/register.component';
 import { RegisterFormComponent } from './features/auth/register/components/register-form/register-form.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { OTPVerificationComponent } from './features/auth/otp/otp-verification.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { MatchmakingComponent } from './features/matchmaking/matchmaking.component';
@@ -85,6 +86,7 @@ export function initializeApp(authService: AuthService) {
     RegisterComponent,
     RegisterFormComponent,
     ForgotPasswordComponent,
+    ResetPasswordComponent,
     OTPVerificationComponent,
     DashboardComponent,
     MatchmakingComponent,

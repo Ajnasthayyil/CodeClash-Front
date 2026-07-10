@@ -1,11 +1,41 @@
 <!-- PRACTICE ARENA — 2-Panel practice workspace layout -->
 <div class="arena-shell">
 
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center h-full w-full text-slate-400 gap-3 mt-32">
+    <svg class="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <span class="text-sm font-semibold tracking-wider">LOADING ARENA...</span>
+  </div>
+
+  <div *ngIf="errorMessage" class="flex flex-col items-center justify-center h-full w-full text-red-400 gap-3 mt-32">
+    <span class="text-sm font-semibold tracking-wider">{{ errorMessage }}</span>
+    <a routerLink="/problems" class="text-xs text-orange-500 hover:underline mt-2">Return to Problems Catalog</a>
+  </div>
+
+  <!-- Mobile Tab Switcher (Visible on mobile/tablet only) -->
+  <div class="mobile-tabs-header">
+    <button (click)="mobileActiveTab = 'description'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'description'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <span>Problem</span>
+    </button>
+    <button (click)="mobileActiveTab = 'editor'" class="m-tab-btn" [class.m-tab-active]="mobileActiveTab === 'editor'">
+      <svg class="m-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+      <span>Editor</span>
+    </button>
+  </div>
+
   <!-- ══════════════════ 2-PANEL BODY ══════════════════ -->
-  <div class="arena-body practice-layout">
+  <div *ngIf="!isLoading && problem" class="arena-body practice-layout">
 
     <!-- ─── LEFT: Problem Description ─── -->
-    <aside class="panel panel-left">
+    <aside class="panel panel-left" [class.panel-visible]="mobileActiveTab === 'description'">
       <div class="panel-tabs">
         <button (click)="activePanel = 'problem'" class="panel-tab" [class.tab-active]="activePanel === 'problem'">Description</button>
         <button (click)="activePanel = 'hints'"   class="panel-tab" [class.tab-active]="activePanel === 'hints'">Hints</button>
@@ -69,7 +99,7 @@
     </aside>
 
     <!-- ─── CENTER: Code Editor ─── -->
-    <main class="panel panel-center">
+    <main class="panel panel-center" [class.panel-visible]="mobileActiveTab === 'editor'">
 
       <!-- Editor top bar: language + autosave -->
       <div class="editor-topbar">
@@ -120,7 +150,37 @@
           <span class="terminal-title">$ Test Suite Output</span>
           <span class="sandbox-tag">Sandbox v3.1</span>
         </div>
-        <pre class="terminal-out">{{ terminalOutput }}</pre>
+        
+        <!-- Raw Text Output Mode -->
+        <pre *ngIf="!lastExecutionResult || lastExecutionResult.status === 'CompileError' || lastExecutionResult.status === 'CompilationError'" class="terminal-out">{{ terminalOutput }}</pre>
+        
+        <!-- Detailed Test Cases UI -->
+        <div *ngIf="lastExecutionResult && lastExecutionResult.status !== 'CompileError' && lastExecutionResult.status !== 'CompilationError'" class="terminal-out flex flex-col gap-3">
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-sm tracking-widest uppercase" [ngClass]="lastExecutionResult.passed === lastExecutionResult.total ? 'text-green-500' : 'text-red-500'">
+              {{ lastExecutionResult.passed === lastExecutionResult.total ? 'Accepted' : 'Failed' }}
+            </span>
+            <span class="text-xs text-slate-400 font-mono">{{ lastExecutionResult.passed }}/{{ lastExecutionResult.total }} testcases passed</span>
+          </div>
+          
+          <div class="flex flex-col gap-2 pb-4">
+            <div *ngFor="let tc of lastExecutionResult.testCases; let i = index" class="bg-[#161b22] border border-slate-800 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-2">
+                <svg *ngIf="tc.status === 'Passed'" class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                <svg *ngIf="tc.status !== 'Passed'" class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                <span class="text-xs font-bold font-mono" [ngClass]="tc.status === 'Passed' ? 'text-green-400' : 'text-red-400'">Case {{ i + 1 }}</span>
+                <span *ngIf="tc.isHidden" class="ml-auto text-[10px] text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded">Hidden Test</span>
+                <span *ngIf="!tc.isHidden && tc.status !== 'Passed'" class="ml-auto text-[10px] text-red-500/80 uppercase font-bold">{{ tc.status }}</span>
+              </div>
+              
+              <div *ngIf="!tc.isHidden" class="text-[11.5px] text-slate-400 font-mono space-y-2 ml-6">
+                <div><span class="text-slate-500 mr-2 font-bold uppercase text-[10px] tracking-wider">Input:</span><br/><span class="text-slate-300">{{ tc.input }}</span></div>
+                <div><span class="text-slate-500 mr-2 font-bold uppercase text-[10px] tracking-wider">Expected:</span><br/><span class="text-slate-300">{{ tc.expectedOutput }}</span></div>
+                <div *ngIf="tc.status !== 'Passed'"><span class="text-slate-500 mr-2 font-bold uppercase text-[10px] tracking-wider">Output:</span><br/><span class="text-red-400">{{ tc.actualOutput || 'No output' }}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Action bar -->
@@ -130,9 +190,12 @@
           <svg *ngIf="!isRunning" class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           {{ isRunning ? 'Running...' : 'Run Code' }}
         </button>
-        <button (click)="submitSolution()" [disabled]="isRunning || isSubmitting" class="btn-submit">
+        <button (click)="submitSolution()" [disabled]="!runCodeSuccess || isRunning || isSubmitting" class="btn-submit" title="Run Code successfully before submitting">
           <span *ngIf="isSubmitting" class="spin spin-white"></span>
           {{ isSubmitting ? 'Submitting...' : 'Submit Solution' }}
+        </button>
+        <button *ngIf="latestSubmissionId" (click)="analyzeWithAI()" class="btn-ai bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity whitespace-nowrap ml-2 shadow-lg shadow-purple-500/30">
+          <span>🧠 Analyze with AI</span>
         </button>
       </div>
     </main>

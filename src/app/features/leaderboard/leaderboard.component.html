@@ -44,7 +44,7 @@
             <div class="medal-badge medal-silver">2nd</div>
           </div>
           <span class="podium-name">{{ topThree[1].name }}</span>
-          <span class="podium-elo">{{ topThree[1].elo }} ELO</span>
+          <span class="podium-elo">{{ topThree[1].points }} POINTS</span>
           <span class="podium-lang-badge">{{ topThree[1].lang }}</span>
           <div class="podium-box">
             <span class="rank-label">#2</span>
@@ -67,7 +67,7 @@
             <div class="medal-badge medal-gold">1st</div>
           </div>
           <span class="podium-name">{{ topThree[0].name }}</span>
-          <span class="podium-elo">{{ topThree[0].elo }} ELO</span>
+          <span class="podium-elo">{{ topThree[0].points }} POINTS</span>
           <span class="podium-lang-badge">{{ topThree[0].lang }}</span>
           <div class="podium-box highlight-box">
             <span class="rank-label">#1</span>
@@ -85,7 +85,7 @@
             <div class="medal-badge medal-bronze">3rd</div>
           </div>
           <span class="podium-name">{{ topThree[2].name }}</span>
-          <span class="podium-elo">{{ topThree[2].elo }} ELO</span>
+          <span class="podium-elo">{{ topThree[2].points }} POINTS</span>
           <span class="podium-lang-badge">{{ topThree[2].lang }}</span>
           <div class="podium-box">
             <span class="rank-label">#3</span>
@@ -101,7 +101,7 @@
             <tr>
               <th class="rank-th">#</th>
               <th>PLAYER</th>
-              <th class="text-right">ELO</th>
+              <th class="text-right">POINTS</th>
               <th class="text-right text-muted">W/L</th>
               <th class="text-right text-muted">BATTLES</th>
               <th class="text-center text-muted">STREAK</th>
@@ -128,7 +128,7 @@
                   </span>
                 </div>
               </td>
-              <td class="text-right font-bold elo-cell">{{ p.elo }}</td>
+              <td class="text-right font-bold elo-cell">{{ p.points }}</td>
               <td class="text-right text-muted">{{ p.wl }}</td>
               <td class="text-right text-muted">{{ p.battles }}</td>
               <td class="text-center streak-cell">
@@ -166,16 +166,16 @@
       <div class="card rank-card">
         <h3 class="card-title">Your Rank</h3>
         <div class="rank-summary">
-          <div class="rank-large">#7</div>
+          <div class="rank-large">#{{ currentUserRank !== null ? currentUserRank : '-' }}</div>
           <div class="rank-details">
-            <span class="rank-total">of 48,293 players</span>
-            <span class="pct-badge">Top 5%</span>
+            <span class="rank-total">of {{ totalPlayers | number }} players</span>
+            <span class="pct-badge" *ngIf="currentUserRank !== null && totalPlayers > 0">Top {{ Math.ceil((currentUserRank / totalPlayers) * 100) }}%</span>
           </div>
         </div>
         
         <!-- ELO Sparkline Section -->
         <div class="elo-spark-section">
-          <span class="spark-title">ELO History (30d)</span>
+          <span class="spark-title">Points History (30d)</span>
           <div class="canvas-wrap">
             <canvas #eloSparkline class="spark-canvas"></canvas>
           </div>

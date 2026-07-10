@@ -1,0 +1,10 @@
+@import "../../coding-arena/coding-arena.component.scss";
+
+.arena-body.practice-layout {
+  grid-template-columns: 350px 1fr !important;
+  height: calc(100vh - 56px); /* 56px is header height */
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr !important;
+  }
+}

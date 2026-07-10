@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AiAnalysisService, AiAnalysisResponse } from '../../core/services/ai-analysis.service';
 
 interface CodeLine {
   number: number;
@@ -34,18 +35,20 @@ export class AiAnalysisComponent implements OnInit, OnDestroy {
   private logTimer: any;
   private allLogs = [
     'Initializing CodeClash AI Code Analyzer...',
+    'Fetching submission details...',
     'Parsing abstract syntax tree (AST)...',
     'Analyzing code metrics and line structures...',
-    'Evaluating Time Complexity: O(n) average...',
-    'Evaluating Space Complexity: O(n) auxiliary...',
-    'Scanning readability index: 88/100...',
-    'Analysis complete! Generating interactive report...'
+    'Waiting for AI analysis generation...'
   ];
 
-  // Problem metadata
-  problemName = 'Two Sum';
-  language = 'Python';
-  submissionTime = 'Submitted 2 minutes ago';
+  // AI Response Data
+  analysisData: AiAnalysisResponse | null = null;
+  errorMessage: string | null = null;
+
+  // Problem metadata (can be fetched from API later, using generic for now)
+  problemName = 'Your Solution';
+  language = 'Code';
+  submissionTime = 'Just now';
 
   // Dynamic code snippet representation
   codeLines: CodeLine[] = [
@@ -94,15 +97,51 @@ export class AiAnalysisComponent implements OnInit, OnDestroy {
 
   suggestions = [
     'How can I optimize this?',
-    'What happens with duplicates?',
-    'Explain the space complexity',
-    'Rewrite in C++'
+    'What are the edge cases?',
+    'Explain the time complexity',
+    'Explain the space complexity'
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private aiService: AiAnalysisService
+  ) {}
 
   ngOnInit(): void {
-    this.simulateScanning();
+    this.startLoadingLogs();
+    
+    this.route.queryParams.subscribe(params => {
+      const submissionId = params['submissionId'];
+      if (submissionId) {
+        this.fetchAnalysis(submissionId);
+      } else {
+        this.errorMessage = 'No submission ID provided.';
+        this.finishLoading();
+      }
+    });
+  }
+
+  fetchAnalysis(submissionId: string) {
+    this.aiService.analyzeSubmission(submissionId).subscribe({
+      next: (response) => {
+        this.analysisData = response;
+        this.correctnessScore = response.codeQualityScore;
+        this.readabilityScore = response.readabilityScore;
+        this.timeComplexity = response.timeComplexity;
+        this.spaceComplexity = response.spaceComplexity;
+        
+        // Push final completion log
+        this.scanLogs.push('Analysis complete! Generating interactive report...');
+        
+        this.finishLoading();
+      },
+      error: (err) => {
+        console.error('Error fetching AI analysis', err);
+        this.errorMessage = 'Failed to analyze submission. The AI service may be unavailable.';
+        this.finishLoading();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -112,19 +151,23 @@ export class AiAnalysisComponent implements OnInit, OnDestroy {
   }
 
   // Scanning simulation log pipeline
-  private simulateScanning(): void {
+  private startLoadingLogs(): void {
     let logIndex = 0;
     this.logTimer = setInterval(() => {
       if (logIndex < this.allLogs.length) {
         this.scanLogs.push(this.allLogs[logIndex]);
         logIndex++;
-      } else {
-        clearInterval(this.logTimer);
-        setTimeout(() => {
-          this.isLoading = false;
-        }, 400);
       }
-    }, 280);
+    }, 400);
+  }
+
+  private finishLoading(): void {
+    if (this.logTimer) {
+      clearInterval(this.logTimer);
+    }
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 600);
   }
 
   // Toggles the chat side panel drawer
@@ -171,19 +214,19 @@ export class AiAnalysisComponent implements OnInit, OnDestroy {
     const text = userText.toLowerCase();
 
     if (text.includes('optimize')) {
-      return 'Your hash map approach is already optimal at O(n) time and O(n) space. You could make minor syntactic improvements (like adding type hints: "def two_sum(nums: List[int], target: int) -> List[int]:"), but algorithmically it cannot be faster.';
+      return this.analysisData?.optimization || 'There are no further optimizations needed at this point.';
     }
-    if (text.includes('duplicate')) {
-      return 'If there are duplicate values, "seen[n] = i" will overwrite the previous index. However, since we check "if comp in seen" before inserting, we will correctly find the complement pair if the duplicates sum to the target. For example, with nums = [3, 3] and target = 6, it matches correctly.';
+    if (text.includes('edge case')) {
+      return this.analysisData?.edgeCases ? 'Consider these edge cases: ' + this.analysisData.edgeCases.join(', ') : 'No edge cases specified.';
+    }
+    if (text.includes('time complexity')) {
+      return 'The time complexity is ' + this.timeComplexity;
     }
     if (text.includes('space complexity') || text.includes('space')) {
-      return 'The space complexity is O(n) because in the worst case (where the complement is only found at the very end of the array), you will store all n elements in the "seen" hash map.';
-    }
-    if (text.includes('c++') || text.includes('cpp')) {
-      return 'Here is the C++ equivalent using std::unordered_map:\n\n```cpp\n#include <vector>\n#include <unordered_map>\n\nstd::vector<int> twoSum(std::vector<int>& nums, int target) {\n    std::unordered_map<int, int> seen;\n    for (int i = 0; i < nums.size(); ++i) {\n        int comp = target - nums[i];\n        if (seen.count(comp)) {\n            return {seen[comp], i};\n        }\n        seen[nums[i]] = i;\n    }\n    return {};\n}\n```';
+      return 'The space complexity is ' + this.spaceComplexity;
     }
 
-    return 'That is a great question! For a production implementation, you should also verify constraints, verify input ranges, and add robust exception handling.';
+    return 'That is a great question! For a production implementation, you should always verify constraints, verify input ranges, and add robust exception handling.';
   }
 
   private getCurrentTime(): string {
@@ -197,6 +240,6 @@ export class AiAnalysisComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/arena/result']);
+    window.history.back();
   }
 }
