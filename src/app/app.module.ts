@@ -53,6 +53,7 @@ import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { APP_INITIALIZER } from '@angular/core';
 import { AuthService } from './core/services/auth.service';
 import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
+import { ChatbotWidgetComponent } from './shared/chatbot-widget/chatbot-widget.component';
 
 export function initializeApp(authService: AuthService) {
   return () => new Promise<void>((resolve) => {
@@ -110,7 +111,8 @@ export function initializeApp(authService: AuthService) {
     ProblemManagementComponent,
     PageNotFoundComponent,
     AiAnalysisComponent,
-    AuthSuccessComponent
+    AuthSuccessComponent,
+    ChatbotWidgetComponent
   ],
   imports: [
     BrowserModule,
