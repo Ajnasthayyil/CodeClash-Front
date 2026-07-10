@@ -55,23 +55,24 @@ export class AuthService {
             const authData = res.data;
             this.accessToken = authData.accessToken;
 
-            // Build initials
-            const parts = authData.user.fullName.trim().split(/\s+/);
+            // Build initials safely
+            const fullName = authData.user?.fullName || '';
+            const parts = fullName.trim().split(/\s+/).filter(p => p.length > 0);
             let initials = 'NC';
             if (parts.length >= 2) {
               initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-            } else if (parts.length === 1 && parts[0].length > 0) {
+            } else if (parts.length === 1) {
               initials = parts[0][0].toUpperCase();
             }
 
             // Build the currentUser object and save to local storage
             const currentUser = {
-              id: authData.user.userId,
-              name: authData.user.fullName,
-              email: authData.user.email,
-              phoneNumber: payload.phoneNumber || '',
-              username: authData.user.username,
-              role: authData.user.role,
+              id: authData.user?.userId || '',
+              name: fullName,
+              email: authData.user?.email || '',
+              phoneNumber: payload?.phoneNumber || '',
+              username: authData.user?.username || '',
+              role: authData.user?.role || '',
               initials: initials
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
