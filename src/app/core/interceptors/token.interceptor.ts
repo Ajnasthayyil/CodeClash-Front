@@ -51,9 +51,9 @@ export class TokenInterceptor implements HttpInterceptor {
         switchMap((res) => {
           this.isRefreshing = false;
           
-          if (res && res.accessToken) {
-            this.refreshTokenSubject.next(res.accessToken);
-            return next.handle(this.addTokenHeader(request, res.accessToken));
+          if (res && res.success && res.data && res.data.accessToken) {
+            this.refreshTokenSubject.next(res.data.accessToken);
+            return next.handle(this.addTokenHeader(request, res.data.accessToken));
           }
 
           // If refresh token fails to get new token
