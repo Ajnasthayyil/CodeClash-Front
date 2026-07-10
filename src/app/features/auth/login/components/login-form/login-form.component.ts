@@ -55,6 +55,7 @@ export class LoginFormComponent {
       },
       error: (err) => {
         this.isLoading = false;
+        console.error('Login error:', err);
         if (err.status === 0) {
           this.errorMessage = 'Could not connect to the API server. Please ensure the backend is running.';
         } else if (err.error && err.error.errors && err.error.errors.length > 0) {
