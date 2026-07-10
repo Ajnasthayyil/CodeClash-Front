@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class LoginFormComponent {
   errorMessage = '';
   isLoading = false;
   showPassword = false;
+  githubLoginUrl = `${environment.apiUrl}/auth/github-login`;
 
   constructor(
     private router: Router,
@@ -79,8 +81,7 @@ export class LoginFormComponent {
   }
 
   loginWithGithub() {
-    window.location.href =
-      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth/github-login";
+    window.location.href = `${environment.apiUrl}/auth/github-login`;
   }
 
   togglePasswordVisibility() {

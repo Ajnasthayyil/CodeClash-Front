@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -54,9 +55,10 @@ export class AuthService {
           const authData = res.data;
           this.accessToken = authData.accessToken;
 
-          // Build initials
-          const parts = authData.user.fullName.trim().split(/\s+/);
-          let initials = 'NC';
+          // Build initials safely (fullName can be null/empty for OAuth users)
+          const fullName = authData.user?.fullName || authData.user?.username || '';
+          const parts = fullName.trim().split(/\s+/).filter(p => p.length > 0);
+          let initials = 'CC';
           if (parts.length >= 2) {
             initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
           } else if (parts.length === 1 && parts[0].length > 0) {
@@ -65,12 +67,12 @@ export class AuthService {
 
           // Build the currentUser object and save to local storage
           const currentUser = {
-            id: authData.user.userId,
-            name: authData.user.fullName,
-            email: authData.user.email,
-            phoneNumber: payload.phoneNumber || '',
-            username: authData.user.username,
-            role: authData.user.role,
+            id: authData.user?.userId || '',
+            name: fullName,
+            email: authData.user?.email || '',
+            phoneNumber: payload?.phoneNumber || '',
+            username: authData.user?.username || '',
+            role: authData.user?.role || '',
             initials: initials
           };
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -83,13 +85,26 @@ export class AuthService {
     );
   }
 
-  refresh(): Observable<ApiResponse<AuthResponseDto>> {
+  forgotPassword(email: string): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(payload: { email: string, otp: string, password: string }): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/reset-password`, {
+      email: payload.email,
+      otp: payload.otp,
+      newPassword: payload.password
+    });
+  }
+
+  refresh(): Observable<AuthResponseDto | null> {
     return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
-      tap(res => {
-        if (res && res.success && res.data) {
-          this.accessToken = res.data.accessToken;
-          this.setCookie('token', res.data.accessToken, 7);
-          this.setCookie('refreshToken', res.data.refreshToken, 7);
+      map(res => res.data),
+      tap(authData => {
+        if (authData) {
+          this.accessToken = authData.accessToken;
+          this.setCookie('token', authData.accessToken, 7);
+          this.setCookie('refreshToken', authData.refreshToken, 7);
         }
       })
     );
@@ -132,25 +147,38 @@ export class AuthService {
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  getProfile(): Observable<ApiResponse<any>> {
-    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
-    return this.http.get<ApiResponse<any>>(profileUrl);
+  getProfile(): Observable<any> {
+    const profileUrl = `${environment.apiUrl}/profile`;
+    return this.http.get<ApiResponse<any>>(profileUrl).pipe(
+      map(res => res.data)
+    );
   }
 
-  updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<ApiResponse<any>> {
-    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
-    return this.http.put<ApiResponse<any>>(profileUrl, payload);
+  getProfileStats(): Observable<any> {
+    const statsUrl = `${environment.apiUrl}/profile/stats`;
+    return this.http.get<ApiResponse<any>>(statsUrl).pipe(
+      map(res => res.data)
+    );
   }
 
-  uploadProfileImage(file: File): Observable<ApiResponse<string>> {
-    const uploadUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/image';
+  updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<any> {
+    const profileUrl = `${environment.apiUrl}/profile`;
+    return this.http.put<ApiResponse<any>>(profileUrl, payload).pipe(
+      map(res => res.data)
+    );
+  }
+
+  uploadProfileImage(file: File): Observable<string> {
+    const uploadUrl = `${environment.apiUrl}/profile/image`;
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<ApiResponse<string>>(uploadUrl, formData);
+    return this.http.post<ApiResponse<string>>(uploadUrl, formData).pipe(
+      map(res => res.data!)
+    );
   }
 
   deleteAccount(): Observable<ApiResponse<any>> {
-    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    const profileUrl = `${environment.apiUrl}/profile`;
     return this.http.delete<ApiResponse<any>>(profileUrl);
   }
 
