@@ -201,8 +201,9 @@ export class AuthService {
       date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
       expires = '; expires=' + date.toUTCString();
     }
-    // Secure Cookie Flag integration (Secure, SameSite=Lax, Path=/)
-    document.cookie = `${name}=${value || ''}${expires}; path=/; SameSite=Lax; Secure`;
+    // Secure Cookie Flag integration (Secure only if HTTPS, SameSite=Lax, Path=/)
+    const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=${value || ''}${expires}; path=/; SameSite=Lax${secureFlag}`;
   }
 
   getCookie(name: string): string | null {
@@ -221,6 +222,7 @@ export class AuthService {
   }
 
   deleteCookie(name: string): void {
-    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure`;
+    const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax${secureFlag}`;
   }
 }
