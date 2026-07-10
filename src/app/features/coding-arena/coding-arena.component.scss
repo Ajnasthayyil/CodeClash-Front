@@ -27,8 +27,8 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   color: $text;
   font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
   overflow: hidden;
-  height: calc(100vh - 80px);
-  margin-top: 80px;
+  height: 100vh;
+  margin-top: 0;
 }
 
 // ─── TOP BAR ──────────────────────────────────────────────────────────────
@@ -224,6 +224,8 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
 
 .panel-tabs {
   display: flex;
+  height: 50px;
+  align-items: center;
   border-bottom: 1px solid $border;
   flex-shrink: 0;
 }
@@ -237,6 +239,9 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
+  height: 100%;
+  display: flex;
+  align-items: center;
   transition: all 0.18s;
 
   &:hover { color: $text; }
@@ -448,7 +453,7 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  height: 40px;
+  height: 50px;
   background: $elevated;
   border-bottom: 1px solid $border;
   flex-shrink: 0;
@@ -537,11 +542,13 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
 // Editor
 .editor-area {
   display: flex;
-  flex: 1;
-  min-height: 0;
+  flex: none;
+  height: 55%;
+  min-height: 100px;
+  resize: vertical;
+  background: $bg;
   overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: $border transparent;
+  position: relative;
 
   &::-webkit-scrollbar { width: 5px; height: 5px; }
   &::-webkit-scrollbar-thumb { background: $border; border-radius: 4px; }
@@ -582,12 +589,13 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
 
 // Terminal
 .terminal-wrap {
-  flex-shrink: 0;
-  height: 155px;
+  flex: 1;
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   border-top: 1px solid $border;
   background: #0a0d13;
+  overflow: hidden;
 }
 
 .terminal-bar {

@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ProblemService, ProblemDetailDto } from '../../core/services/problem.service';
+import { SubmissionsService, SubmissionResponseDto, Result } from '../../core/services/submissions.service';
 
 interface ProblemDetails {
-  id: number;
+  id: string;
   title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: string;
   description: string;
   examples: { input: string; output: string; explanation?: string }[];
   constraints: string[];
@@ -28,134 +30,9 @@ type Language = 'Python' | 'JavaScript' | 'C++' | 'Go';
 export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('codeEditor') codeEditor!: ElementRef;
 
-  // ─── List of Mock Problems to Load Dynamically ─────────────────────────────
-  private problemsDb: Record<number, ProblemDetails> = {
-    1: {
-      id: 1,
-      title: 'Sum of Two Prime Numbers',
-      difficulty: 'Easy',
-      description: 'Given an even integer <code>n</code> greater than 2, return two prime numbers such that they add up to <code>n</code>. If there are multiple pairs, return the one with the smallest first element.',
-      examples: [
-        { input: 'n = 10', output: '[3, 7]', explanation: '3 + 7 = 10. Both 3 and 7 are prime numbers.' },
-        { input: 'n = 4', output: '[2, 2]' }
-      ],
-      constraints: [
-        '4 ≤ n ≤ 10⁵',
-        'n is an even integer',
-        'Only prime numbers should be returned'
-      ],
-      tags: ['Math', 'Primes']
-    },
-    2: {
-      id: 2,
-      title: 'Debounce Execution Helper',
-      difficulty: 'Medium',
-      description: 'Implement a debounce helper function. Given a function <code>fn</code> and a delay in milliseconds <code>t</code>, return a debounced version of that function that delays execution until after <code>t</code> milliseconds have elapsed since the last call.',
-      examples: [
-        { input: 'fn = (...args) => console.log(args), t = 50', output: 'Delayed log output' }
-      ],
-      constraints: [
-        '0 ≤ t ≤ 1000',
-        'fn is a valid function'
-      ],
-      tags: ['Async', 'Debounce']
-    },
-    3: {
-      id: 3,
-      title: 'Lexical Closures Scope Builder',
-      difficulty: 'Medium',
-      description: 'Given a nested object representing lexical scopes and variable assignments, construct a lookup evaluator closure function that returns variable values by traversing scopes from child to root parent.',
-      examples: [
-        { input: 'scope = {x: 1, parent: {y: 2}}', output: 'Returns 1 for x, 2 for y' }
-      ],
-      constraints: [
-        'The scope object tree depth ≤ 100'
-      ],
-      tags: ['Closures', 'Lookup']
-    },
-    4: {
-      id: 4,
-      title: 'Merge Interval Intersection',
-      difficulty: 'Hard',
-      description: 'Given two lists of closed intervals, <code>firstList</code> and <code>secondList</code>, return the intersection of these two interval lists. Each list of intervals is pairwise disjoint and in sorted order.',
-      examples: [
-        { input: 'firstList = [[0,2],[5,10]], secondList = [[1,5]]', output: '[[1,2],[5,5]]' }
-      ],
-      constraints: [
-        '0 ≤ firstList.length, secondList.length ≤ 1000'
-      ],
-      tags: ['Arrays', 'Two Pointers']
-    },
-    5: {
-      id: 5,
-      title: 'K-way Merge Array Sorter',
-      difficulty: 'Hard',
-      description: 'You are given an array of <code>k</code> sorted integer arrays. Merge all the sorted arrays into one sorted array and return it.',
-      examples: [
-        { input: 'arrays = [[1,4,5],[1,3,4],[2,6]]', output: '[1,1,2,3,4,4,5,6]' }
-      ],
-      constraints: [
-        '0 ≤ k ≤ 10⁴',
-        '0 ≤ arrays[i].length ≤ 500'
-      ],
-      tags: ['Arrays', 'Heap', 'Divide and Conquer']
-    },
-    6: {
-      id: 6,
-      title: 'Palindromic Substring Parser',
-      difficulty: 'Medium',
-      description: 'Given a string <code>s</code>, return the longest palindromic substring in <code>s</code>.',
-      examples: [
-        { input: 's = "babad"', output: '"bab" or "aba"' }
-      ],
-      constraints: [
-        '1 ≤ s.length ≤ 1000'
-      ],
-      tags: ['String', 'Dynamic Programming']
-    },
-    7: {
-      id: 7,
-      title: 'Lazy Evaluation Stream Generator',
-      difficulty: 'Medium',
-      description: 'Implement a stream pipeline engine with lazy evaluation support. It should support <code>map</code>, <code>filter</code>, and <code>take</code> operations, executing them only when a terminal operation like <code>collect</code> is invoked.',
-      examples: [
-        { input: 'Stream.of([1,2,3]).map(x => x*2).collect()', output: '[2,4,6]' }
-      ],
-      constraints: [
-        'Stream length is infinite or finite'
-      ],
-      tags: ['Functions', 'Streams']
-    },
-    8: {
-      id: 8,
-      title: 'Custom Redux Dispatcher Store',
-      difficulty: 'Hard',
-      description: 'Create a custom state store constructor. It should take a reducer function and initial state, supporting <code>getState()</code>, <code>dispatch(action)</code>, and <code>subscribe(listener)</code>.',
-      examples: [
-        { input: 'store = createStore(reducer)', output: 'Functional dispatcher store' }
-      ],
-      constraints: [
-        'Reducer is a pure function'
-      ],
-      tags: ['Functions', 'Redux', 'State']
-    }
-  };
-
-  // Fallback default problem (Two Sum)
-  problem: ProblemDetails = {
-    id: 1,
-    title: 'Two Sum',
-    difficulty: 'Easy',
-    description: 'Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.',
-    examples: [
-      { input: 'nums = [2,7,11,15], target = 9', output: '[0,1]', explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].' }
-    ],
-    constraints: [
-      '2 ≤ nums.length ≤ 10⁴',
-      'Only one valid answer exists'
-    ],
-    tags: ['Array', 'Hash Table']
-  };
+  problem: ProblemDetails | null = null;
+  isLoading = true;
+  errorMessage = '';
 
   // ─── Code Editor ───────────────────────────────────────────────────────────
   languages: Language[] = ['Python', 'JavaScript', 'C++', 'Go'];
@@ -163,15 +40,15 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   autoSave = true;
   autoSaveIndicator = false;
 
-  codeSnippets: Record<Language, string> = {
-    'Python': `def solve_problem(*args, **kwargs):\n    # Write your solution here\n    pass`,
-    'JavaScript': `function solveProblem(...args) {\n    // Write your solution here\n}`,
-    'C++': `class Solution {\npublic:\n    // Write your solution here\n};`,
-    'Go': `func solveProblem() {\n    // Write your solution here\n}`
-  };
+  codeSnippets: Partial<Record<Language, string>> = {};
 
-  get currentCode(): string { return this.codeSnippets[this.selectedLanguage]; }
-  set currentCode(val: string) { this.codeSnippets[this.selectedLanguage] = val; }
+  runCodeSuccess = false;
+
+  get currentCode(): string { return this.codeSnippets[this.selectedLanguage] || ''; }
+  set currentCode(val: string) { 
+    this.codeSnippets[this.selectedLanguage] = val;
+    this.runCodeSuccess = false;
+  }
 
   get codeLines(): string[] { return this.currentCode.split('\n'); }
 
@@ -185,44 +62,101 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   // ─── Modals / UI State ─────────────────────────────────────────────────────
   showSubmitSuccess = false;
   activePanel: 'problem' | 'hints' = 'problem';
+  mobileActiveTab: 'description' | 'editor' = 'description';
+  latestSubmissionId: string | null = null;
+  lastExecutionResult: SubmissionResponseDto | null = null;
 
   // ─── Intervals ─────────────────────────────────────────────────────────────
   private autoSaveInterval: any;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private router: Router,
+    private problemService: ProblemService,
+    private submissionsService: SubmissionsService
+  ) {}
 
   ngOnInit(): void {
-    // Read route parameter 'id'
     this.route.paramMap.subscribe(params => {
       const problemIdStr = params.get('id');
       if (problemIdStr) {
-        const problemId = parseInt(problemIdStr, 10);
-        if (this.problemsDb[problemId]) {
-          this.problem = this.problemsDb[problemId];
-          // Pre-populate boilerplate with customized function names
-          this.generateBoilerplate(this.problem.title);
-        }
+        this.fetchProblemDetails(problemIdStr);
+      } else {
+        this.errorMessage = 'Invalid Problem ID';
+        this.isLoading = false;
       }
     });
 
     // Auto-save flash indicator
     this.autoSaveInterval = setInterval(() => {
-      if (this.autoSave) {
+      if (this.autoSave && !this.isLoading) {
         this.autoSaveIndicator = true;
         setTimeout(() => { this.autoSaveIndicator = false; }, 1500);
       }
     }, 30000);
   }
 
+  fetchProblemDetails(problemId: string): void {
+    this.isLoading = true;
+    this.problemService.getProblemById(problemId).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res) {
+          const dto = res;
+          
+          // Filter test cases that aren't hidden to use as examples
+          const visibleTestCases = dto.testCases
+            ?.filter(tc => !tc.isHidden)
+            .map(tc => ({
+              input: tc.input || '',
+              output: tc.expectedOutput || ''
+            })) || [];
+
+          this.problem = {
+            id: dto.problemId,
+            title: dto.title,
+            difficulty: dto.difficulty,
+            description: dto.statementMarkdown, // Assuming markdown or HTML is returned
+            constraints: dto.constraints || [],
+            tags: dto.category ? [dto.category] : [],
+            examples: visibleTestCases
+          };
+          
+          // Update total tests for the mock terminal progress
+          this.totalTests = dto.testCases?.length || 10;
+
+          // Update available languages if provided by backend
+          if (dto.allowedLanguages && dto.allowedLanguages.length > 0) {
+            this.languages = dto.allowedLanguages as Language[];
+            if (!this.languages.includes(this.selectedLanguage)) {
+              this.selectedLanguage = this.languages[0];
+            }
+          }
+
+          this.generateBoilerplate(this.problem.title);
+        } else {
+          this.errorMessage = (res as any)?.message || 'Failed to load problem details.';
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = 'An error occurred while fetching the problem.';
+        console.error(err);
+      }
+    });
+  }
+
   ngOnDestroy(): void {
-    clearInterval(this.autoSaveInterval);
+    if (this.autoSaveInterval) {
+      clearInterval(this.autoSaveInterval);
+    }
   }
 
   ngAfterViewChecked(): void {}
 
   private generateBoilerplate(title: string) {
     const cleanTitle = title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-    const camelTitle = cleanTitle.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+    const camelTitle = cleanTitle.replace(/_([a-z])/g, (g: string) => g[1].toUpperCase());
     
     this.codeSnippets = {
       'Python': `def ${cleanTitle}(*args, **kwargs):\n    # Write your Python solution for ${title} here\n    return None`,
@@ -239,49 +173,102 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
   runCode(): void {
-    if (this.isRunning) return;
+    if (this.isRunning || !this.problem) return;
     this.isRunning = true;
-    this.terminalOutput = '$ Running sample test cases...\n';
+    this.lastExecutionResult = null;
+    this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
-    setTimeout(() => {
-      this.terminalOutput = `$ Running sample test cases...\n\n`;
-      this.terminalOutput += `✓ Test 1 passed: output matches expectation\n`;
-      this.terminalOutput += `✓ Test 2 passed: output matches expectation\n\n`;
-      this.terminalOutput += `All sample tests passed! Runtime: 42ms | Memory: 14.8 MB`;
-      this.myTestsPassed = Math.min(this.myTestsPassed + 2, this.totalTests);
-      this.isRunning = false;
-    }, 1600);
+    this.submissionsService.runCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+      next: (response: SubmissionResponseDto) => {
+        this.isRunning = false;
+        this.handleExecutionResult(response);
+        if (response.status === 'Accepted') {
+          this.runCodeSuccess = true;
+        }
+      },
+      error: (err) => {
+        this.isRunning = false;
+        this.terminalOutput += `\nHTTP Error: Could not connect to the execution server.\n`;
+        console.error(err);
+      }
+    });
   }
 
   // ─── Submit ────────────────────────────────────────────────────────────────
   submitSolution(): void {
-    if (this.isSubmitting) return;
+    if (this.isSubmitting || !this.problem) return;
     this.isSubmitting = true;
+    this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting solution against test suite...\n';
 
-    setTimeout(() => {
-      this.myTestsPassed = this.totalTests;
-      this.terminalOutput = `$ Evaluating against all ${this.totalTests} test cases...\n\n`;
-      for (let i = 1; i <= this.totalTests; i++) {
-        this.terminalOutput += `✓ Test ${i} passed\n`;
+    this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+      next: (response: SubmissionResponseDto) => {
+        this.isSubmitting = false;
+        this.latestSubmissionId = response.submissionId;
+        this.handleExecutionResult(response);
+        
+        if (response.passed === response.total && response.status === 'Accepted' && this.problem) {
+          this.showSubmitSuccess = true;
+          // Mark as solved in UI if not already
+          if (!this.problem.title.includes('(Solved)')) {
+            this.problem.title = `${this.problem.title} (Solved)`;
+          }
+          setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
+        }
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.terminalOutput += `\nHTTP Error: Could not connect to the execution server.\n`;
+        console.error(err);
       }
-      this.terminalOutput += `\n🎉 All ${this.totalTests}/${this.totalTests} tests passed!\nRuntime: 36ms (beats 96.5%) | Memory: 14.2 MB (beats 92.1%)`;
-      this.isSubmitting = false;
-      this.showSubmitSuccess = true;
-      
-      // Update problem status locally (just for UX feedback)
-      this.problem.title = `${this.problem.title} (Solved)`;
-      
-      setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
-    }, 2500);
+    });
+  }
+
+  private handleExecutionResult(result: SubmissionResponseDto): void {
+    this.myTestsPassed = result.passed;
+    this.totalTests = result.total;
+    this.lastExecutionResult = result;
+    
+    this.terminalOutput += `\n$ Evaluating against all ${result.total} test cases...\n\n`;
+
+    if (result.status === 'CompileError' || result.status === 'CompilationError') {
+      this.terminalOutput += `✗ Compilation Error:\n${result.compileOutput || 'Unknown error'}\n`;
+      return;
+    }
+
+    if (result.status === 'InternalError') {
+      this.terminalOutput += `✗ Internal Error: Could not execute code properly.\n${result.compileOutput || ''}\n`;
+      return;
+    }
+
+    if (result.status === 'Accepted') {
+      this.terminalOutput += `🎉 All ${result.passed}/${result.total} tests passed!\n`;
+      this.terminalOutput += `Runtime: ${result.executionTime}ms | Memory: ${(result.memory / (1024 * 1024)).toFixed(1)} MB\n`;
+    } else {
+      this.terminalOutput += `✗ ${this.formatStatus(result.status)}\n`;
+      this.terminalOutput += `Passed: ${result.passed}/${result.total} tests.\n`;
+      if (result.compileOutput) {
+        this.terminalOutput += `\nOutput logs:\n${result.compileOutput}\n`;
+      }
+    }
+  }
+
+  private formatStatus(status: string): string {
+    return status.replace(/([A-Z])/g, ' $1').trim();
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
   get myFillPercent(): number {
-    return Math.round((this.myTestsPassed / this.totalTests) * 100);
+    return this.totalTests > 0 ? Math.round((this.myTestsPassed / this.totalTests) * 100) : 0;
   }
 
   getDifficultyClass(diff: string): string {
     return diff === 'Easy' ? 'difficulty-easy' : diff === 'Medium' ? 'difficulty-medium' : 'difficulty-hard';
+  }
+
+  analyzeWithAI(): void {
+    if (this.latestSubmissionId) {
+      this.router.navigate(['/arena/analysis'], { queryParams: { submissionId: this.latestSubmissionId } });
+    }
   }
 }

@@ -90,8 +90,8 @@ export class RegisterFormComponent {
     this.authService.register(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res.success) {
-          this.successMessage = res.message || 'Account created successfully! Please check your email to verify your account.';
+        if (res) {
+          this.successMessage = (res as any)?.message || 'Account created successfully! Please check your email to verify your account.';
           // Clear inputs on success
           this.name = '';
           this.email = '';
@@ -99,7 +99,7 @@ export class RegisterFormComponent {
           this.password = '';
           this.confirmPassword = '';
         } else {
-          this.errorMessage = res.message || 'Registration failed.';
+          this.errorMessage = (res as any)?.message || 'Registration failed.';
         }
       },
       error: (err) => {

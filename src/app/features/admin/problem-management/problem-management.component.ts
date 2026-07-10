@@ -63,8 +63,8 @@ export class ProblemManagementComponent implements OnInit {
     this.problemService.getProblems(1, 100).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
-          this.problems = res.data.items;
+        if (res) {
+          this.problems = res.items;
         }
       },
       error: (err) => {
@@ -104,13 +104,13 @@ export class ProblemManagementComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
-    this.problemService.getProblemById(problem.id).subscribe({
+    this.problemService.getProblemById(problem.problemId).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success && res.data) {
-          const detail = res.data;
+        if (res) {
+          const detail = res;
           this.isEditMode = true;
-          this.editingProblemId = problem.id;
+          this.editingProblemId = problem.problemId;
           
           this.newTitle = detail.title;
           this.newDifficulty = detail.difficulty;
@@ -136,7 +136,7 @@ export class ProblemManagementComponent implements OnInit {
           
           this.isCreateModalOpen = true;
         } else {
-          this.errorMessage = res.message || 'Failed to load problem details.';
+          this.errorMessage = (res as any)?.message || 'Failed to load problem details.';
         }
       },
       error: (err) => {
@@ -225,14 +225,14 @@ export class ProblemManagementComponent implements OnInit {
     this.problemService.createProblem(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success) {
+        if (res) {
           this.successMessage = 'Problem created successfully!';
           setTimeout(() => {
             this.closeCreateModal();
             this.loadProblems();
           }, 1500);
         } else {
-          this.errorMessage = res.message || 'Failed to create problem.';
+          this.errorMessage = (res as any)?.message || 'Failed to create problem.';
         }
       },
       error: (err) => {
@@ -292,14 +292,14 @@ export class ProblemManagementComponent implements OnInit {
     this.problemService.updateProblem(this.editingProblemId!, payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.success) {
+        if (res) {
           this.successMessage = 'Problem updated successfully!';
           setTimeout(() => {
             this.closeCreateModal();
             this.loadProblems();
           }, 1500);
         } else {
-          this.errorMessage = res.message || 'Failed to update problem.';
+          this.errorMessage = (res as any)?.message || 'Failed to update problem.';
         }
       },
       error: (err) => {
@@ -319,52 +319,24 @@ export class ProblemManagementComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    // First load full details to get current constraints, languages, testcases
-    this.problemService.getProblemById(problem.id).subscribe({
+    this.problemService.toggleProblemStatus(problem.problemId).subscribe({
       next: (res) => {
-        if (res && res.success && res.data) {
-          const detail = res.data;
-          const updatedPayload = {
-            title: detail.title,
-            difficulty: detail.difficulty,
-            category: detail.category,
-            statementMarkdown: detail.statementMarkdown,
-            constraints: detail.constraints,
-            allowedLanguages: detail.allowedLanguages,
-            timeLimitMs: detail.timeLimitMs,
-            memoryLimitMb: detail.memoryLimitMb,
-            testCases: detail.testCases.map(tc => ({
-              input: tc.input || '',
-              expectedOutput: tc.expectedOutput || '',
-              isHidden: tc.isHidden
-            })),
-            isActive: !problem.isActive // Toggle active state
-          };
-
-          this.problemService.updateProblem(problem.id, updatedPayload).subscribe({
-            next: (updateRes) => {
-              this.isLoading = false;
-              if (updateRes && updateRes.success) {
-                problem.isActive = !problem.isActive;
-                this.successMessage = `Problem ${problem.isActive ? 'published' : 'unpublished'} successfully!`;
-                setTimeout(() => this.successMessage = '', 3000);
-              } else {
-                this.errorMessage = updateRes.message || 'Failed to update problem.';
-              }
-            },
-            error: (err) => {
-              this.isLoading = false;
-              this.errorMessage = err.error?.message || 'An error occurred while updating the problem.';
-            }
-          });
+        this.isLoading = false;
+        if (res) {
+          problem.isActive = res ?? !problem.isActive;
+          this.successMessage = `Problem ${problem.isActive ? 'published' : 'unpublished'} successfully!`;
+          setTimeout(() => this.successMessage = '', 3000);
         } else {
-          this.isLoading = false;
-          this.errorMessage = 'Failed to load problem details.';
+          // Revert visual state since API failed
+          problem.isActive = !problem.isActive;
+          this.errorMessage = (res as any)?.message || 'Failed to update problem status.';
         }
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = 'An error occurred while loading problem details.';
+        // Revert visual state
+        problem.isActive = !problem.isActive;
+        this.errorMessage = err.error?.message || 'An error occurred while updating the problem status.';
       }
     });
   }
@@ -373,17 +345,13 @@ export class ProblemManagementComponent implements OnInit {
     if (confirm('Are you sure you want to delete this problem? This action cannot be undone.')) {
       this.isLoading = true;
       this.problemService.deleteProblem(problemId).subscribe({
-        next: (res) => {
+        next: () => {
           this.isLoading = false;
-          if (res && res.success) {
-            this.successMessage = 'Problem deleted successfully!';
-            setTimeout(() => {
-              this.successMessage = '';
-              this.loadProblems();
-            }, 1500);
-          } else {
-            this.errorMessage = res.message || 'Failed to delete problem.';
-          }
+          this.successMessage = 'Problem deleted successfully!';
+          setTimeout(() => {
+            this.successMessage = '';
+            this.loadProblems();
+          }, 1500);
         },
         error: (err) => {
           this.isLoading = false;

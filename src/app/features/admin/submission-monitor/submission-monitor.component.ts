@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { SubmissionsService, SubmissionSummary } from 'src/app/core/services/submissions.service';
 
 interface SubmissionRecord {
   id: string;
   user: string;
   problem: string;
   language: string;
-  status: 'Accepted' | 'Wrong Answer' | 'Time Limit Exceeded' | 'Runtime Error';
+  status: string;
   runtime: string;
   memory: string;
   timeAgo: string;
@@ -17,69 +18,68 @@ interface SubmissionRecord {
   styleUrls: ['./submission-monitor.component.scss']
 })
 export class SubmissionMonitorComponent implements OnInit, OnDestroy {
-  submissions: SubmissionRecord[] = [
-    { id: 'SUB-1052', user: 'NovaCoder', problem: 'Two Sum', language: 'Python', status: 'Accepted', runtime: '48ms', memory: '15.8 MB', timeAgo: 'Just now' },
-    { id: 'SUB-1051', user: 'ByteWizard', problem: 'Two Sum', language: 'JavaScript', status: 'Accepted', runtime: '52ms', memory: '16.2 MB', timeAgo: '30s ago' },
-    { id: 'SUB-1050', user: 'Algorist', problem: 'Two Sum', language: 'C++', status: 'Wrong Answer', runtime: '0ms', memory: '4.8 MB', timeAgo: '1m ago' },
-    { id: 'SUB-1049', user: 'Cheater404', problem: 'Two Sum', language: 'Python', status: 'Time Limit Exceeded', runtime: '2000ms', memory: '12.4 MB', timeAgo: '4m ago' },
-    { id: 'SUB-1048', user: 'StackOverlord', problem: 'Two Sum', language: 'Go', status: 'Accepted', runtime: '12ms', memory: '8.2 MB', timeAgo: '6m ago' }
-  ];
-
+  submissions: SubmissionRecord[] = [];
   private intervalId: any;
-  private userPool = ['NovaCoder', 'ByteWizard', 'Algorist', 'StackOverlord', 'CodeNinja', 'BitCrusher', 'SyntaxSlayer'];
-  private languagePool = ['Python', 'JavaScript', 'C++', 'Go'];
-  private statusPool: ('Accepted' | 'Wrong Answer' | 'Time Limit Exceeded' | 'Runtime Error')[] = [
-    'Accepted', 'Accepted', 'Accepted', 'Wrong Answer', 'Time Limit Exceeded', 'Runtime Error'
-  ];
+
+  constructor(private submissionsService: SubmissionsService) {}
 
   ngOnInit(): void {
-    // Generate new mock submissions dynamically
+    this.fetchSubmissions();
+    
+    // Poll every 5 seconds to get the latest submissions
     this.intervalId = setInterval(() => {
-      const randomUser = this.userPool[Math.floor(Math.random() * this.userPool.length)];
-      const randomLanguage = this.languagePool[Math.floor(Math.random() * this.languagePool.length)];
-      const randomStatus = this.statusPool[Math.floor(Math.random() * this.statusPool.length)];
-      
-      let runtime = '42ms';
-      let memory = '15.2 MB';
-      
-      if (randomStatus === 'Wrong Answer') {
-        runtime = '0ms';
-      } else if (randomStatus === 'Time Limit Exceeded') {
-        runtime = '2000ms';
-      } else if (randomStatus === 'Runtime Error') {
-        runtime = '0ms';
-        memory = '0 MB';
-      } else {
-        runtime = `${Math.floor(Math.random() * 60) + 10}ms`;
-        memory = `${(Math.random() * 10 + 6).toFixed(1)} MB`;
-      }
-
-      const newId = `SUB-${Math.floor(Math.random() * 9000) + 1000}`;
-      
-      this.submissions.unshift({
-        id: newId,
-        user: randomUser,
-        problem: 'Two Sum',
-        language: randomLanguage,
-        status: randomStatus,
-        runtime,
-        memory,
-        timeAgo: 'Just now'
-      });
-
-      // Keep array size reasonable
-      if (this.submissions.length > 20) {
-        this.submissions.pop();
-      }
-
-      // Update relative time strings for other elements
-      this.submissions.forEach((s, idx) => {
-        if (idx === 0) return;
-        if (idx === 1) s.timeAgo = '10s ago';
-        else if (idx === 2) s.timeAgo = '45s ago';
-        else s.timeAgo = `${idx * 2}m ago`;
-      });
+      this.fetchSubmissions();
     }, 5000);
+  }
+
+  fetchSubmissions(): void {
+    this.submissionsService.getSubmissions(1, 20).subscribe({
+      next: (response) => {
+        this.submissions = response.items.map(s => this.mapToRecord(s));
+      },
+      error: (err) => {
+        console.error('Error fetching submissions:', err);
+      }
+    });
+  }
+
+  mapToRecord(dto: SubmissionSummary): SubmissionRecord {
+    return {
+      id: dto.id.substring(0, 8).toUpperCase(),
+      user: dto.userName,
+      problem: dto.problemTitle,
+      language: this.capitalize(dto.language),
+      status: this.formatStatus(dto.status),
+      runtime: dto.executionTimeMs !== null && dto.executionTimeMs !== undefined ? `${dto.executionTimeMs}ms` : 'N/A',
+      memory: dto.memoryUsedBytes !== null && dto.memoryUsedBytes !== undefined ? `${(dto.memoryUsedBytes / (1024 * 1024)).toFixed(1)} MB` : 'N/A',
+      timeAgo: this.calculateTimeAgo(dto.createdAt)
+    };
+  }
+
+  private capitalize(str: string): string {
+    if (!str) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  private formatStatus(status: string): string {
+    // Map status enum string if needed, e.g., "WrongAnswer" -> "Wrong Answer"
+    return status.replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  private calculateTimeAgo(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+
+    if (diffSec < 10) return 'Just now';
+    if (diffSec < 60) return `${diffSec}s ago`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDays = Math.floor(diffHr / 24);
+    return `${diffDays}d ago`;
   }
 
   ngOnDestroy(): void {

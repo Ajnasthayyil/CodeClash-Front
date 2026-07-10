@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as signalR from '@microsoft/signalr';
 import { AuthService } from '../../core/services/auth.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 export interface AppNotification {
   id: string;
@@ -24,16 +25,7 @@ export interface Toast {
   providedIn: 'root'
 })
 export class NotificationService implements OnDestroy {
-  private notificationsSubject = new BehaviorSubject<AppNotification[]>([
-    {
-      id: 'notif-1',
-      title: 'Welcome to CodeClash! 🚀',
-      message: 'Challenge other developers in real-time speed coding battles.',
-      time: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-      read: false,
-      type: 'info'
-    }
-  ]);
+  private notificationsSubject = new BehaviorSubject<AppNotification[]>([]);
 
   private toastsSubject = new BehaviorSubject<Toast[]>([]);
 
@@ -47,7 +39,7 @@ export class NotificationService implements OnDestroy {
   private hubConnection: signalR.HubConnection | null = null;
   private connectionInterval: any;
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService, private http: HttpClient) {
     this.startSignalRConnection();
   }
 
@@ -69,6 +61,9 @@ export class NotificationService implements OnDestroy {
       return;
     }
 
+    // Load initial notifications
+    this.loadNotifications(token);
+
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl('https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/hubs/notifications', {
         accessTokenFactory: () => this.authService.getAccessToken() || ''
@@ -84,6 +79,26 @@ export class NotificationService implements OnDestroy {
       this.addNotification(data.title, data.message, data.type);
       this.showToast(`New Notification: ${data.title}`, data.type);
     });
+
+    this.hubConnection.on('ForceLogout', () => {
+      this.authService.logout();
+      window.location.href = '/login?error=blocked';
+    });
+  }
+
+  private loadNotifications(token: string): void {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    this.http.get<any>('https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications', { headers })
+      .subscribe({
+        next: (res) => {
+          if (res) {
+            this.notificationsSubject.next(res);
+          }
+        },
+        error: (err) => console.error('Failed to load notifications', err)
+      });
   }
 
   // ─── Notification Management ────────────────────────────────────────────────
@@ -102,15 +117,35 @@ export class NotificationService implements OnDestroy {
   }
 
   markAsRead(id: string): void {
-    const updated = this.notificationsSubject.value.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    );
-    this.notificationsSubject.next(updated);
+    const token = this.authService.getAccessToken();
+    if (!token) return;
+
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    this.http.put(`https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications/${id}/read`, {}, { headers })
+      .subscribe({
+        next: () => {
+          const updated = this.notificationsSubject.value.map(n => 
+            n.id === id ? { ...n, read: true } : n
+          );
+          this.notificationsSubject.next(updated);
+        },
+        error: (err) => console.error('Failed to mark as read', err)
+      });
   }
 
   markAllAsRead(): void {
-    const updated = this.notificationsSubject.value.map(n => ({ ...n, read: true }));
-    this.notificationsSubject.next(updated);
+    const token = this.authService.getAccessToken();
+    if (!token) return;
+
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    this.http.put(`https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/notifications/read-all`, {}, { headers })
+      .subscribe({
+        next: () => {
+          const updated = this.notificationsSubject.value.map(n => ({ ...n, read: true }));
+          this.notificationsSubject.next(updated);
+        },
+        error: (err) => console.error('Failed to mark all as read', err)
+      });
   }
 
   clearNotification(id: string): void {
