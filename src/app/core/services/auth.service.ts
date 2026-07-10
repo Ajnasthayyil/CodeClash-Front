@@ -33,7 +33,7 @@ export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private accessToken: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   register(payload: any): Observable<string> {
     return this.http.post<ApiResponse<string>>(`${this.apiUrl}/register`, {
@@ -102,7 +102,7 @@ export class AuthService {
 
   logout(): Observable<any> {
     const accessToken = this.accessToken || '';
-    
+
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${accessToken}`
     });

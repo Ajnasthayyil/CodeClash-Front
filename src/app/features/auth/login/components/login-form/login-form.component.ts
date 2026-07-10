@@ -12,7 +12,7 @@ export class LoginFormComponent implements OnInit {
   email = '';
   password = '';
   rememberMe = false;
-  
+
   errorMessage = '';
   isLoading = false;
   showPassword = false;
@@ -22,7 +22,7 @@ export class LoginFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -34,7 +34,7 @@ export class LoginFormComponent implements OnInit {
 
   onSubmit() {
     this.errorMessage = '';
-    
+
     if (!this.email) {
       this.errorMessage = 'Please enter your email address.';
       return;
@@ -82,7 +82,7 @@ export class LoginFormComponent implements OnInit {
   loginWithSocial(provider: string) {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     setTimeout(() => {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);

@@ -58,7 +58,7 @@ export interface PaginatedList<T> {
 export class ProblemService {
   private apiUrl = `${environment.apiUrl}/problems`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getProblems(
     pageNumber: number = 1,
