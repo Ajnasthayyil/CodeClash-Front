@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
-export interface T {
+export interface ApiResponse<T> {
   success: boolean;
   message: string;
-  data: T | null;
+  data: T;
   errors: string[];
 }
 
@@ -36,23 +36,25 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   register(payload: any): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/register`, {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/register`, {
       fullName: payload.fullName,
       email: payload.email,
       password: payload.password,
       confirmPassword: payload.confirmPassword,
       phoneNumber: payload.phoneNumber
-    });
+    }).pipe(
+      map(res => res.data)
+    );
   }
 
   login(payload: any): Observable<AuthResponseDto> {
-    return this.http.post<AuthResponseDto>(`${this.apiUrl}/login`, {
+    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/login`, {
       emailOrUsername: payload.email,
       password: payload.password
     }, { withCredentials: true }).pipe(
-      tap(res => {
-        if (res) {
-          const authData = res;
+      map(res => res.data),
+      tap(authData => {
+        if (authData) {
           this.accessToken = authData.accessToken;
 
           // Build initials
@@ -85,12 +87,13 @@ export class AuthService {
   }
 
   refresh(): Observable<AuthResponseDto> {
-    return this.http.post<AuthResponseDto>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
-      tap(res => {
-        if (res) {
-          this.accessToken = res.accessToken;
-          this.setCookie('token', res.accessToken, 7);
-          this.setCookie('refreshToken', res.refreshToken, 7);
+    return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
+      map(res => res.data),
+      tap(authData => {
+        if (authData) {
+          this.accessToken = authData.accessToken;
+          this.setCookie('token', authData.accessToken, 7);
+          this.setCookie('refreshToken', authData.refreshToken, 7);
         }
       })
     );
@@ -148,29 +151,39 @@ export class AuthService {
 
   getProfile(): Observable<any> {
     const profileUrl = `${environment.apiUrl}/profile`;
-    return this.http.get<any>(profileUrl);
+    return this.http.get<ApiResponse<any>>(profileUrl).pipe(
+      map(res => res.data)
+    );
   }
 
   getProfileStats(): Observable<any> {
     const statsUrl = `${environment.apiUrl}/profile/stats`;
-    return this.http.get<any>(statsUrl);
+    return this.http.get<ApiResponse<any>>(statsUrl).pipe(
+      map(res => res.data)
+    );
   }
 
   updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<any> {
     const profileUrl = `${environment.apiUrl}/profile`;
-    return this.http.put<any>(profileUrl, payload);
+    return this.http.put<ApiResponse<any>>(profileUrl, payload).pipe(
+      map(res => res.data)
+    );
   }
 
   uploadProfileImage(file: File): Observable<string> {
     const uploadUrl = `${environment.apiUrl}/profile/image`;
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<string>(uploadUrl, formData);
+    return this.http.post<ApiResponse<string>>(uploadUrl, formData).pipe(
+      map(res => res.data)
+    );
   }
 
   deleteAccount(): Observable<any> {
     const profileUrl = `${environment.apiUrl}/profile`;
-    return this.http.delete<any>(profileUrl);
+    return this.http.delete<ApiResponse<any>>(profileUrl).pipe(
+      map(res => res.data)
+    );
   }
 
   // ─── Token and Cookie Helpers ──────────────────────────────────────────

@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiResponse } from './auth.service';
 
 
 export interface AdminUserRecordDto {
@@ -23,14 +25,21 @@ export class AdminUserService {
   constructor(private http: HttpClient) {}
 
   getUsers(): Observable<AdminUserRecordDto[]> {
-    return this.http.get<AdminUserRecordDto[]>(this.apiUrl);
+    return this.http.get<ApiResponse<AdminUserRecordDto[]>>(this.apiUrl).pipe(
+      map(res => res.data)
+    );
   }
 
   toggleUserStatus(userId: string): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${userId}/toggle-status`, {});
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${userId}/toggle-status`, {}).pipe(
+      map(res => res.data)
+    );
   }
 
   sendNotification(payload: { userId?: string, title: string, message: string, type?: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/notify`, payload);
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/notify`, payload).pipe(
+      map(res => res.data)
+    );
   }
 }
+
