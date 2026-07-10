@@ -22,11 +22,11 @@ export interface AdminUserRecordDto {
 export class AdminUserService {
   private apiUrl = `${environment.apiUrl}/admin/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getUsers(): Observable<AdminUserRecordDto[]> {
     return this.http.get<ApiResponse<AdminUserRecordDto[]>>(this.apiUrl).pipe(
-      map(res => res.data!)
+      map(res => res.data)
     );
   }
 

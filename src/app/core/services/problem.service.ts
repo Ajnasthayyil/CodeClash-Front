@@ -58,7 +58,7 @@ export interface PaginatedList<T> {
 export class ProblemService {
   private apiUrl = `${environment.apiUrl}/problems`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getProblems(
     pageNumber: number = 1,
@@ -82,31 +82,31 @@ export class ProblemService {
     }
 
     return this.http.get<ApiResponse<PaginatedList<ProblemSummaryDto>>>(this.apiUrl, { params }).pipe(
-      map(res => res.data!)
+      map(res => res.data)
     );
   }
 
   getProblemById(problemId: string): Observable<ProblemDetailDto> {
     return this.http.get<ApiResponse<ProblemDetailDto>>(`${this.apiUrl}/${problemId}`).pipe(
-      map(res => res.data!)
+      map(res => res.data)
     );
   }
 
   createProblem(payload: any): Observable<string> {
     return this.http.post<ApiResponse<string>>(this.apiUrl, payload).pipe(
-      map(res => res.data!)
+      map(res => res.data)
     );
   }
 
   updateProblem(problemId: string, payload: any): Observable<string> {
     return this.http.put<ApiResponse<string>>(`${this.apiUrl}/${problemId}`, payload).pipe(
-      map(res => res.data!)
+      map(res => res.data)
     );
   }
 
   toggleProblemStatus(problemId: string): Observable<boolean> {
     return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/${problemId}/toggle-status`, {}).pipe(
-      map(res => res.data!)
+      map(res => res.data)
     );
   }
 
