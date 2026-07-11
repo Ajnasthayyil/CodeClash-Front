@@ -20,7 +20,7 @@ interface TestResult {
   got?: string;
 }
 
-type Language = 'Python' | 'JavaScript' | 'C++' | 'Go';
+type Language = 'Python' | 'JavaScript' | 'C++' | 'Java' | 'C#' | 'Go';
 
 @Component({
   selector: 'app-practice-arena',
@@ -36,7 +36,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   errorMessage = '';
 
   // ─── Code Editor ───────────────────────────────────────────────────────────
-  languages: Language[] = ['Python', 'JavaScript', 'C++', 'Go'];
+  languages: Language[] = ['Python', 'JavaScript', 'C++', 'Java', 'C#', 'Go'];
   selectedLanguage: Language = 'Python';
   autoSave = true;
   autoSaveIndicator = false;
@@ -128,9 +128,22 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
           // Update total tests for the mock terminal progress
           this.totalTests = dto.testCases?.length || 10;
 
+          // Map backend language values to UI display labels
+          const apiToLabel: Record<string, Language> = {
+            'python': 'Python', 'python3': 'Python', 'py': 'Python',
+            'javascript': 'JavaScript', 'js': 'JavaScript',
+            'cpp': 'C++', 'c++': 'C++', 'c': 'C++',
+            'java': 'Java',
+            'csharp': 'C#', 'c#': 'C#',
+            'go': 'Go', 'golang': 'Go'
+          };
+
           // Update available languages if provided by backend
           if (dto.allowedLanguages && dto.allowedLanguages.length > 0) {
-            this.languages = dto.allowedLanguages as Language[];
+            const mapped = dto.allowedLanguages
+              .map((l: string) => apiToLabel[l.toLowerCase()] ?? l as Language)
+              .filter((v: Language, i: number, arr: Language[]) => arr.indexOf(v) === i); // deduplicate
+            this.languages = mapped;
             if (!this.languages.includes(this.selectedLanguage)) {
               this.selectedLanguage = this.languages[0];
             }
@@ -158,14 +171,30 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   ngAfterViewChecked(): void {}
 
+  /** Maps UI language label → value expected by the backend */
+  private langToApiValue(lang: Language): string {
+    const map: Record<Language, string> = {
+      'Python': 'python',
+      'JavaScript': 'javascript',
+      'C++': 'cpp',
+      'Java': 'java',
+      'C#': 'csharp',
+      'Go': 'go'
+    };
+    return map[lang] ?? lang.toLowerCase();
+  }
+
   private generateBoilerplate(title: string) {
     const cleanTitle = title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
     const camelTitle = cleanTitle.replace(/_([a-z])/g, (g: string) => g[1].toUpperCase());
+    const pascalTitle = camelTitle.charAt(0).toUpperCase() + camelTitle.slice(1);
     
     this.codeSnippets = {
       'Python': `def ${cleanTitle}(*args, **kwargs):\n    # Write your Python solution for ${title} here\n    return None`,
       'JavaScript': `function ${camelTitle}(...args) {\n    // Write your JavaScript solution for ${title} here\n    return null;\n}`,
       'C++': `class Solution {\npublic:\n    // Write your C++ solution for ${title} here\n};`,
+      'Java': `public class Solution {\n    public void ${camelTitle}() {\n        // Write your Java solution for ${title} here\n    }\n}`,
+      'C#': `using System;\nusing System.Collections.Generic;\n\npublic class Solution {\n    public void ${pascalTitle}() {\n        // Write your C# solution for ${title} here\n    }\n}`,
       'Go': `func ${camelTitle}() {\n    // Write your Go solution for ${title} here\n}`
     };
   }
@@ -183,7 +212,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
-    this.submissionsService.runCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+    this.submissionsService.runCode(this.problem.id, this.langToApiValue(this.selectedLanguage), this.currentCode).subscribe({
       next: (response: SubmissionResponseDto) => {
         this.isRunning = false;
         this.handleExecutionResult(response);
@@ -206,7 +235,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
     this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting solution against test suite...\n';
 
-    this.submissionsService.submitCode(this.problem.id, this.selectedLanguage, this.currentCode).subscribe({
+    this.submissionsService.submitCode(this.problem.id, this.langToApiValue(this.selectedLanguage), this.currentCode).subscribe({
       next: (response: SubmissionResponseDto) => {
         this.isSubmitting = false;
         this.latestSubmissionId = response.submissionId;
