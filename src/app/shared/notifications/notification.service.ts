@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as signalR from '@microsoft/signalr';
 import { AuthService } from '../../core/services/auth.service';
@@ -36,6 +36,14 @@ export class NotificationService implements OnDestroy {
   unreadCount$: Observable<number> = this.notifications$.pipe(
     map(notifs => notifs.filter(n => !n.read).length)
   );
+
+  // Custom Duel Events
+  duelInvitationReceived$ = new Subject<any>();
+  invitationAccepted$ = new Subject<any>();
+  invitationDeclined$ = new Subject<any>();
+  playerJoined$ = new Subject<any>();
+  playerReady$ = new Subject<any>();
+  duelStarted$ = new Subject<any>();
 
   private hubConnection: signalR.HubConnection | null = null;
   private connectionInterval: any;
@@ -85,6 +93,44 @@ export class NotificationService implements OnDestroy {
       this.authService.logout();
       window.location.href = '/login?error=blocked';
     });
+
+    this.hubConnection.on('DuelInvitationReceived', (data: any) => {
+      this.duelInvitationReceived$.next(data);
+    });
+
+    this.hubConnection.on('InvitationAccepted', (data: any) => {
+      this.invitationAccepted$.next(data);
+    });
+
+    this.hubConnection.on('InvitationDeclined', (data: any) => {
+      this.invitationDeclined$.next(data);
+    });
+
+    this.hubConnection.on('PlayerJoined', (userId: string) => {
+      this.playerJoined$.next(userId);
+    });
+
+    this.hubConnection.on('PlayerReady', (data: any) => {
+      this.playerReady$.next(data);
+    });
+
+    this.hubConnection.on('DuelStarted', (data: any) => {
+      this.duelStarted$.next(data);
+    });
+  }
+
+  joinRoomGroup(roomId: string): void {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      this.hubConnection.invoke('JoinRoom', roomId)
+        .catch(err => console.error('Error joining room group:', err));
+    }
+  }
+
+  leaveRoomGroup(roomId: string): void {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      this.hubConnection.invoke('LeaveRoom', roomId)
+        .catch(err => console.error('Error leaving room group:', err));
+    }
   }
 
   private loadNotifications(token: string): void {

@@ -441,9 +441,9 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     if (file) {
       this.isLoading = true;
       this.authService.uploadProfileImage(file).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isLoading = false;
-          if (res && res.success && res.data) {
+          if (res && res.data) {
             const newUrl = res.data;
             this.user.profileImageUrl = newUrl;
             

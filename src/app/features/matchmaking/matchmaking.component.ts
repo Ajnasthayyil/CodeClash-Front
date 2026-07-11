@@ -1,6 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { FormControl } from '@angular/forms';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../shared/notifications/notification.service';
+import { CustomDuelService, UserSearchResultDto, CustomDuelRoomDto } from '../../core/services/custom-duel.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-matchmaking',
@@ -8,35 +13,129 @@ import { NotificationService } from '../../shared/notifications/notification.ser
   styleUrls: ['./matchmaking.component.scss']
 })
 export class MatchmakingComponent implements OnInit, OnDestroy {
-  // Ranked Duel Queue States
+  // ─── Ranked Duel Queue States ──────────────────────────────────────────────
   queueStatus: 'idle' | 'searching' | 'matched' = 'idle';
   queueSeconds = 0;
   private queueInterval: any;
 
-  // Opponent matching settings
   selectedDifficulty: 'easy' | 'medium' | 'hard' = 'medium';
   selectedLanguage = 'Python';
   languages: string[] = ['Python', 'JavaScript', 'TypeScript', 'C++', 'Java', 'Go', 'Rust'];
   userElo = 1842;
   userInitial = 'N';
 
-  // Custom Friend Room States
-  friendlyRoomId = '';
-  friendlyUrl = '';
-  linkCopied = false;
+  // ─── Custom Duel Features ──────────────────────────────────────────────────
+  currentUser: any = null;
+  inviteModalOpen = false;
+  searchControl = new FormControl('');
+  searchResults: UserSearchResultDto[] = [];
+  isSearchingUsers = false;
+  searchErrorMessage = '';
+
+  lobbyRoomId = '';
+  lobbyRoom: CustomDuelRoomDto | null = null;
+  isLobbyLoading = false;
+  isLobbyReady = false;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
-    private notificationService: NotificationService
+    private route: ActivatedRoute,
+    private notificationService: NotificationService,
+    private customDuelService: CustomDuelService,
+    private authService: AuthService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // 1. Fetch current user
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      this.currentUser = JSON.parse(savedUser);
+      this.userElo = this.currentUser.rating || 1500;
+      this.userInitial = this.currentUser.initials || 'C';
+    }
+
+    // 2. Query parameters subscription (for waiting lobby redirection)
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const room = params['room'];
+      if (room) {
+        this.joinLobby(room);
+      } else {
+        this.leaveLobby();
+      }
+    });
+
+    // 3. Debounced friend search
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$),
+      switchMap(query => {
+        if (!query || query.trim().length < 2) {
+          this.searchResults = [];
+          return [];
+        }
+        this.isSearchingUsers = true;
+        this.searchErrorMessage = '';
+        return this.customDuelService.searchUsers(query.trim());
+      })
+    ).subscribe({
+      next: (results) => {
+        this.isSearchingUsers = false;
+        this.searchResults = results;
+      },
+      error: (err) => {
+        this.isSearchingUsers = false;
+        this.searchErrorMessage = 'Failed to load search results.';
+        console.error(err);
+      }
+    });
+
+    // 4. SignalR waiting lobby event bindings
+    this.notificationService.invitationAccepted$.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      if (this.lobbyRoomId && this.lobbyRoomId === data.roomId) {
+        this.notificationService.showToast(`${data.friendUsername} joined the lobby!`, 'success');
+        this.refreshLobby();
+      }
+    });
+
+    this.notificationService.playerJoined$.pipe(takeUntil(this.destroy$)).subscribe(userId => {
+      if (this.lobbyRoomId) {
+        this.refreshLobby();
+      }
+    });
+
+    this.notificationService.playerReady$.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      if (this.lobbyRoomId && this.lobbyRoomId === data.roomId) {
+        this.refreshLobby();
+      }
+    });
+
+    this.notificationService.duelStarted$.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      if (this.lobbyRoomId && this.lobbyRoomId === data.roomId) {
+        this.notificationService.showToast('Duel started! Navigating to coding arena...', 'success');
+        this.notificationService.leaveRoomGroup(data.roomId);
+        this.router.navigate(['/arena/battle'], { queryParams: { room: data.roomCode, problemId: data.problemId } });
+      }
+    });
+
+    this.notificationService.invitationDeclined$.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      if (this.lobbyRoomId && this.lobbyRoomId === data.roomId) {
+        this.notificationService.showToast('Friend declined the duel invitation.', 'warning');
+        this.exitLobby();
+      }
+    });
+  }
 
   ngOnDestroy(): void {
     this.cancelSearch();
+    this.leaveLobby();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  // ─── Ranked Queue ──────────────────────────────────────────────────────────
+  // ─── Ranked Queue matchmaking ──────────────────────────────────────────────
   setDifficulty(diff: 'easy' | 'medium' | 'hard'): void {
     this.selectedDifficulty = diff;
     this.notificationService.showToast(`Difficulty filter set to ${diff.toUpperCase()}`, 'info', 2000);
@@ -56,12 +155,10 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     this.queueInterval = setInterval(() => {
       this.queueSeconds++;
 
-      // Simulate match found after 15 seconds
       if (this.queueSeconds >= 15) {
         clearInterval(this.queueInterval);
         this.queueStatus = 'matched';
 
-        // Trigger success notification and toast
         this.notificationService.showToast('Match found! Teleporting to arena...', 'success', 3000);
         this.notificationService.addNotification(
           'Match Found! ⚔️',
@@ -69,7 +166,6 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
           'success'
         );
 
-        // Redirect to Battle Arena after 2 seconds match display
         setTimeout(() => {
           this.router.navigate(['/arena/battle']);
         }, 2000);
@@ -88,49 +184,119 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     this.queueSeconds = 0;
   }
 
-  // ─── Friendly Duel ─────────────────────────────────────────────────────────
-  createFriendlyRoom(): void {
-    // Generate a random uppercase room code
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    this.friendlyRoomId = `CLASH-${code}`;
-    // Construct absolute URL (using window.location origins)
-    const origin = window.location.origin;
-    this.friendlyUrl = `${origin}/arena/battle?room=${this.friendlyRoomId}`;
-    this.linkCopied = false;
+  // ─── Friend Invite and Waiting Lobby ──────────────────────────────────────
+  openInviteModal(): void {
+    this.inviteModalOpen = true;
+    this.searchControl.setValue('');
+    this.searchResults = [];
+    this.searchErrorMessage = '';
   }
 
-  copyRoomLink(): void {
-    if (!this.friendlyUrl) return;
-    navigator.clipboard.writeText(this.friendlyUrl).then(() => {
-      this.linkCopied = true;
-      setTimeout(() => {
-        this.linkCopied = false;
-      }, 3000);
+  closeInviteModal(): void {
+    this.inviteModalOpen = false;
+  }
+
+  inviteUser(friendUserId: string): void {
+    if (!this.currentUser) {
+      this.notificationService.showToast('Please log in to invite friends.', 'error');
+      return;
+    }
+
+    this.customDuelService.inviteFriend(this.currentUser.id, friendUserId).subscribe({
+      next: (room) => {
+        this.closeInviteModal();
+        this.notificationService.showToast('Invitation sent! Waiting for acceptance...', 'info');
+        this.router.navigate(['/arena'], { queryParams: { room: room.roomId } });
+      },
+      error: (err) => {
+        this.notificationService.showToast('Failed to send invitation.', 'error');
+        console.error(err);
+      }
     });
   }
 
-  startFriendlyDuel(): void {
-    if (!this.friendlyRoomId) return;
-    this.router.navigate(['/arena/battle'], { queryParams: { room: this.friendlyRoomId } });
+  joinLobby(roomId: string): void {
+    this.lobbyRoomId = roomId;
+    this.isLobbyLoading = true;
+
+    this.customDuelService.getRoomDetails(roomId).subscribe({
+      next: (room) => {
+        this.isLobbyLoading = false;
+        this.lobbyRoom = room;
+
+        // Sync local ready status with backend status
+        if (this.currentUser) {
+          this.isLobbyReady = this.currentUser.id === room.hostUserId ? room.isHostReady : room.isFriendReady;
+        }
+
+        // Join SignalR room group
+        this.notificationService.joinRoomGroup(roomId);
+      },
+      error: (err) => {
+        this.isLobbyLoading = false;
+        this.notificationService.showToast('Failed to join lobby room.', 'error');
+        this.exitLobby();
+        console.error(err);
+      }
+    });
   }
 
-  shareRoom(): void {
-    if (!this.friendlyUrl) return;
-    if (navigator.share) {
-      navigator.share({
-        title: 'CodeClash Duel Invite',
-        text: `Join my private coding duel on CodeClash! Room Code: ${this.friendlyRoomId}`,
-        url: this.friendlyUrl
-      }).catch(err => {
-        console.log('Error sharing:', err);
-      });
-    } else {
-      this.copyRoomLink();
+  leaveLobby(): void {
+    if (this.lobbyRoomId) {
+      this.notificationService.leaveRoomGroup(this.lobbyRoomId);
     }
+    this.lobbyRoomId = '';
+    this.lobbyRoom = null;
+    this.isLobbyReady = false;
+  }
+
+  refreshLobby(): void {
+    if (!this.lobbyRoomId) return;
+
+    this.customDuelService.getRoomDetails(this.lobbyRoomId).subscribe({
+      next: (room) => {
+        this.lobbyRoom = room;
+        if (this.currentUser) {
+          this.isLobbyReady = this.currentUser.id === room.hostUserId ? room.isHostReady : room.isFriendReady;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to refresh waiting lobby details', err);
+      }
+    });
+  }
+
+  toggleReady(): void {
+    if (!this.lobbyRoomId || !this.currentUser) return;
+
+    const nextReadyState = !this.isLobbyReady;
+    this.customDuelService.setPlayerReady(this.lobbyRoomId, this.currentUser.id, nextReadyState).subscribe({
+      next: (res) => {
+        this.isLobbyReady = nextReadyState;
+        this.refreshLobby();
+      },
+      error: (err) => {
+        this.notificationService.showToast('Failed to toggle ready status.', 'error');
+        console.error(err);
+      }
+    });
+  }
+
+  launchDuel(): void {
+    if (!this.lobbyRoomId) return;
+
+    this.customDuelService.startDuel(this.lobbyRoomId).subscribe({
+      next: (res) => {
+        this.notificationService.showToast('Launching duel...', 'success');
+      },
+      error: (err) => {
+        this.notificationService.showToast(err.error?.message || 'Failed to start duel.', 'error');
+        console.error(err);
+      }
+    });
+  }
+
+  exitLobby(): void {
+    this.router.navigate(['/arena']);
   }
 }

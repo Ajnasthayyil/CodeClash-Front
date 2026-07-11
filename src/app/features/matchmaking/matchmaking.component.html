@@ -46,7 +46,7 @@
       </div>
 
       <!-- CARD 2: PLAY WITH FRIENDS -->
-      <div class="mode-card friends-card" [class.active-mode]="friendlyRoomId !== ''">
+      <div class="mode-card friends-card">
         <div class="mode-badge-wrap">
           <span class="mode-badge friends-badge">Custom Duel</span>
         </div>
@@ -56,43 +56,12 @@
           </svg>
         </div>
         <h2 class="card-title">Play with Friends</h2>
-        <p class="card-desc">Create a private duel room. Generate a room key and share the link with a friend to play a two-person clash.</p>
+        <p class="card-desc">Invite a friend to a private duel room. Compete in real-time, side by side, on standard algorithms.</p>
 
         <div class="interactive-area">
-          <!-- Generate trigger -->
-          <button *ngIf="!friendlyRoomId" (click)="createFriendlyRoom()" class="btn-primary-purple">
+          <button (click)="openInviteModal()" class="btn-primary-purple">
             Create Custom Room
           </button>
-
-          <!-- Generated Links -->
-          <div *ngIf="friendlyRoomId" class="room-details">
-            <div class="room-label">Room Code: <span class="font-mono text-purple-400 font-bold">{{ friendlyRoomId }}</span></div>
-            
-            <div class="link-input-group">
-              <input type="text" readonly [value]="friendlyUrl" class="friendly-url-input" />
-              <button (click)="copyRoomLink()" class="btn-copy" [class.copied]="linkCopied" [title]="linkCopied ? 'Copied!' : 'Copy Link'">
-                <svg *ngIf="!linkCopied" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                </svg>
-                <span *ngIf="linkCopied" class="text-xs font-bold text-green-400">Copied</span>
-              </button>
-            </div>
-
-            <div class="room-action-row">
-              <button (click)="startFriendlyDuel()" class="btn-start-duel">
-                Launch Duel
-              </button>
-              <button (click)="shareRoom()" class="btn-share-room">
-                <svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l5.474-2.737m0 0a3.978 3.978 0 110-3.01m0 3.01a3.978 3.978 0 110 3.01m0-3.01l-5.474 2.737m0 0a3.978 3.978 0 11-3.01 0m3.01 0a3.978 3.978 0 113.01 0" />
-                </svg>
-                <span>Share Link</span>
-              </button>
-              <button (click)="friendlyRoomId = ''" class="btn-close-room text-slate-500 hover:text-slate-200">
-                Reset
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -198,6 +167,146 @@
         </div>
       </ng-container>
 
+    </div>
+  </div>
+</div>
+
+<!-- Invite Friend Modal -->
+<div *ngIf="inviteModalOpen" class="modal-overlay">
+  <div class="modal-card invite-friend-modal">
+    <div class="modal-header">
+      <h2>Invite Friend</h2>
+      <button (click)="closeInviteModal()" class="btn-close-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="search-hint">Search by Username or Email</p>
+      <div class="search-input-group">
+        <input type="text" [formControl]="searchControl" placeholder="Type username or email..." class="search-input" />
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isSearchingUsers" class="spinner-container">
+        <div class="search-spinner"></div>
+        <p>Searching...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="searchErrorMessage" class="error-msg">
+        {{ searchErrorMessage }}
+      </div>
+
+      <!-- Search Results -->
+      <div *ngIf="!isSearchingUsers && searchControl.value && searchResults.length > 0" class="search-results-section">
+        <h3>Search Results</h3>
+        <div class="results-list">
+          <div *ngFor="let user of searchResults" class="result-item">
+            <div class="user-info">
+              <div class="avatar-placeholder">
+                <img *ngIf="user.profilePicture" [src]="user.profilePicture" alt="avatar" />
+                <span *ngIf="!user.profilePicture">{{ user.username[0] | uppercase }}</span>
+              </div>
+              <div class="details">
+                <span class="username">{{ user.username }}</span>
+                <span class="email">{{ user.email }}</span>
+              </div>
+            </div>
+            <button (click)="inviteUser(user.id)" class="btn-invite-user">Invite</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isSearchingUsers && searchControl.value && searchControl.value.length >= 2 && searchResults.length === 0" class="empty-state">
+        No users found.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Waiting Lobby Overlay -->
+<div *ngIf="lobbyRoomId" class="search-overlay lobby-overlay">
+  <div class="search-overlay-content lobby-card">
+    <div *ngIf="isLobbyLoading" class="spinner-container">
+      <div class="search-spinner"></div>
+      <p>Loading waiting lobby...</p>
+    </div>
+
+    <div *ngIf="!isLobbyLoading && lobbyRoom">
+      <!-- Lobby Header -->
+      <div class="lobby-header">
+        <span class="mode-badge lobby-badge">Custom Duel</span>
+        <h2>Waiting Lobby</h2>
+        <p class="lobby-code-label">Room Code: <span class="room-code-badge">{{ lobbyRoom.roomCode }}</span></p>
+      </div>
+
+      <!-- Players Grid -->
+      <div class="lobby-players-grid">
+        <!-- Player 1: Host -->
+        <div class="lobby-player-card" [class.ready-card]="lobbyRoom.isHostReady">
+          <div class="avatar-box">
+            <span class="avatar-initial">{{ lobbyRoom.hostUsername[0] | uppercase }}</span>
+            <div class="crown-badge">👑</div>
+          </div>
+          <div class="player-info">
+            <span class="role-lbl">Host</span>
+            <span class="name-lbl">{{ lobbyRoom.hostUsername }}</span>
+            <span class="ready-status" [class.ready]="lobbyRoom.isHostReady">
+              {{ lobbyRoom.isHostReady ? 'Ready' : 'Not Ready' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- VS divider -->
+        <div class="vs-divider">VS</div>
+
+        <!-- Player 2: Invited Friend -->
+        <div class="lobby-player-card" [class.ready-card]="lobbyRoom.isFriendReady" [class.empty-card]="!lobbyRoom.friendUsername">
+          <div class="avatar-box">
+            <span *ngIf="lobbyRoom.friendUsername" class="avatar-initial">{{ lobbyRoom.friendUsername[0] | uppercase }}</span>
+            <span *ngIf="!lobbyRoom.friendUsername" class="avatar-initial">?</span>
+          </div>
+          <div class="player-info">
+            <span class="role-lbl">Guest</span>
+            <span class="name-lbl">{{ lobbyRoom.friendUsername || 'Invited Friend' }}</span>
+            <span class="ready-status" [class.ready]="lobbyRoom.isFriendReady">
+              {{ lobbyRoom.friendUsername ? (lobbyRoom.isFriendReady ? 'Ready' : 'Not Ready') : 'Pending Invitation...' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ready Status Panel -->
+      <div class="lobby-status-panel">
+        <div class="status-indicator">
+          Lobby Status: 
+          <strong *ngIf="!lobbyRoom.friendUsername" class="text-orange-400">Waiting for invited friend...</strong>
+          <strong *ngIf="lobbyRoom.friendUsername && (!lobbyRoom.isHostReady || !lobbyRoom.isFriendReady)" class="text-yellow-400">Waiting for players to get ready...</strong>
+          <strong *ngIf="lobbyRoom.friendUsername && lobbyRoom.isHostReady && lobbyRoom.isFriendReady" class="text-green-400">Ready to start!</strong>
+        </div>
+      </div>
+
+      <!-- Action Row -->
+      <div class="lobby-actions">
+        <!-- Ready Toggle -->
+        <button (click)="toggleReady()" class="btn-ready-toggle" [class.btn-ready-active]="isLobbyReady">
+          {{ isLobbyReady ? 'I\'m Ready!' : 'Click to Get Ready' }}
+        </button>
+
+        <!-- Start Duel (Host Only) -->
+        <button *ngIf="currentUser && currentUser.id === lobbyRoom.hostUserId" 
+                (click)="launchDuel()" 
+                [disabled]="!lobbyRoom.friendUsername || !lobbyRoom.isHostReady || !lobbyRoom.isFriendReady"
+                class="btn-launch-duel"
+                [class.btn-launch-enabled]="lobbyRoom.friendUsername && lobbyRoom.isHostReady && lobbyRoom.isFriendReady">
+          Launch Duel
+        </button>
+
+        <!-- Exit Lobby -->
+        <button (click)="exitLobby()" class="btn-exit-lobby">
+          Leave Lobby
+        </button>
+      </div>
     </div>
   </div>
 </div>
