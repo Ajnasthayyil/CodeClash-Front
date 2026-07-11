@@ -66,7 +66,7 @@ export class NotificationService implements OnDestroy {
     const token = this.authService.getAccessToken();
     if (!token) {
       // Periodically check if token becomes available (e.g. after login)
-      this.connectionInterval = setTimeout(() => this.startSignalRConnection(), 5000);
+      this.connectionInterval = setTimeout(() => this.startSignalRConnection(), 500);
       return;
     }
 
@@ -75,7 +75,9 @@ export class NotificationService implements OnDestroy {
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${environment.backendUrl}/hubs/notifications`, {
-        accessTokenFactory: () => this.authService.getAccessToken() || ''
+        accessTokenFactory: () => this.authService.getAccessToken() || '',
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets
       })
       .withAutomaticReconnect()
       .build();
