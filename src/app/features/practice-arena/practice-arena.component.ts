@@ -29,6 +29,7 @@ type Language = 'Python' | 'JavaScript' | 'C++' | 'Go';
 })
 export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('codeEditor') codeEditor!: ElementRef;
+  @ViewChild('lineNums') lineNums!: ElementRef;
 
   problem: ProblemDetails | null = null;
   isLoading = true;
@@ -43,14 +44,16 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   codeSnippets: Partial<Record<Language, string>> = {};
 
   runCodeSuccess = false;
+  editorCode = '';
 
-  get currentCode(): string { return this.codeSnippets[this.selectedLanguage] || ''; }
-  set currentCode(val: string) { 
+  onCodeChange(val: string): void {
     this.codeSnippets[this.selectedLanguage] = val;
     this.runCodeSuccess = false;
   }
 
-  get codeLines(): string[] { return this.currentCode.split('\n'); }
+  get currentCode(): string { return this.editorCode; }
+
+  get codeLines(): string[] { return this.editorCode.split('\n'); }
 
   // ─── Terminal / Run ────────────────────────────────────────────────────────
   isRunning = false;
@@ -134,6 +137,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
           }
 
           this.generateBoilerplate(this.problem.title);
+          this.editorCode = this.codeSnippets[this.selectedLanguage] || '';
         } else {
           this.errorMessage = (res as any)?.message || 'Failed to load problem details.';
         }
@@ -169,6 +173,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
   // ─── Language ──────────────────────────────────────────────────────────────
   selectLanguage(lang: Language): void {
     this.selectedLanguage = lang;
+    this.editorCode = this.codeSnippets[lang] || '';
   }
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
@@ -255,6 +260,13 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   private formatStatus(status: string): string {
     return status.replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  syncScroll(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    if (this.lineNums) {
+      this.lineNums.nativeElement.scrollTop = textarea.scrollTop;
+    }
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────

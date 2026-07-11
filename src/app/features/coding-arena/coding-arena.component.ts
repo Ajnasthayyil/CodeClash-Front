@@ -35,6 +35,7 @@ type Language = 'Python' | 'JavaScript' | 'C++' | 'Go';
 export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('aiScrollContainer') aiScrollContainer!: ElementRef;
   @ViewChild('codeEditor') codeEditor!: ElementRef;
+  @ViewChild('lineNums') lineNums!: ElementRef;
 
   // ─── Players ───────────────────────────────────────────────────────────────
   playerName = 'NovaCoder';
@@ -355,6 +356,13 @@ public:
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendAiMessage();
+    }
+  }
+
+  syncScroll(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    if (this.lineNums) {
+      this.lineNums.nativeElement.scrollTop = textarea.scrollTop;
     }
   }
 

@@ -125,13 +125,15 @@
 
       <!-- Code editor: line numbers + textarea -->
       <div class="editor-area">
-        <div class="line-nums" aria-hidden="true">
+        <div #lineNums class="line-nums" aria-hidden="true">
           <div *ngFor="let ln of codeLines; let i = index" class="ln">{{ i + 1 }}</div>
         </div>
         <textarea
           #codeEditor
           class="code-area"
-          [(ngModel)]="currentCode"
+          [(ngModel)]="editorCode"
+          (ngModelChange)="onCodeChange($event)"
+          (scroll)="syncScroll($event)"
           spellcheck="false"
           autocomplete="off"
           autocorrect="off"
