@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { SubmissionResponseDto } from '../../core/services/submissions.service';
-import { ProblemService } from '../../core/services/problem.service';
 
 interface Problem {
   title: string;
@@ -206,11 +205,7 @@ public:
   private opponentInterval: any;
   private autoSaveInterval: any;
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private problemService: ProblemService
-  ) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     const savedUser = localStorage.getItem('currentUser');
@@ -219,18 +214,6 @@ public:
       this.playerName = parsed.name || this.playerName;
       this.playerRating = parsed.rating || this.playerRating;
     }
-
-    // Subscribe to query parameters to load chosen problem dynamically
-    this.route.queryParams.subscribe(params => {
-      const problemId = params['problemId'];
-      if (problemId) {
-        this.loadProblem(problemId);
-      }
-      const room = params['room'];
-      if (room) {
-        this.matchId = `ROOM-${room}`;
-      }
-    });
 
     // Countdown timer
     this.timerInterval = setInterval(() => {
@@ -255,48 +238,6 @@ public:
         setTimeout(() => { this.autoSaveIndicator = false; }, 1500);
       }
     }, 30000);
-  }
-
-  loadProblem(problemId: string): void {
-    this.problemService.getProblemById(problemId).subscribe({
-      next: (detail) => {
-        this.problem = {
-          title: detail.title,
-          difficulty: this.capitalizeDifficulty(detail.difficulty),
-          description: detail.statementMarkdown,
-          examples: detail.testCases ? detail.testCases.filter(t => !t.isHidden).slice(0, 3).map(t => ({
-            input: t.input || '',
-            output: t.expectedOutput || ''
-          })) : [],
-          constraints: detail.constraints || [],
-          tags: [detail.category || 'General']
-        };
-
-        // Populate initial dynamic boilerplate snippets for the editor based on problem name
-        this.generateDefaultSnippets(detail.title);
-      },
-      error: (err) => {
-        console.error('Failed to load active duel problem details', err);
-      }
-    });
-  }
-
-  private capitalizeDifficulty(diff: string): 'Easy' | 'Medium' | 'Hard' {
-    if (!diff) return 'Medium';
-    const lower = diff.toLowerCase();
-    if (lower === 'easy') return 'Easy';
-    if (lower === 'hard') return 'Hard';
-    return 'Medium';
-  }
-
-  private generateDefaultSnippets(title: string): void {
-    const functionName = title.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    this.codeSnippets = {
-      'Python': `def ${functionName}(nums, target):\n    # Write your solution here\n    pass`,
-      'JavaScript': `function ${functionName}(nums, target) {\n    // Write your solution here\n    \n}`,
-      'C++': `class Solution {\npublic:\n    vector<int> ${functionName}(vector<int>& nums, int target) {\n        // Write your solution here\n        \n    }\n};`,
-      'Go': `func ${functionName}(nums []int, target int) []int {\n    // Write your solution here\n    return nil\n}`
-    };
   }
 
   ngOnDestroy(): void {
