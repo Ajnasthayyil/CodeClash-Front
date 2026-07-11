@@ -13,6 +13,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'codeclash-frontend';
   activeInvitation: any = null;
   private inviteSub!: Subscription;
+  private inviteTimeout: any = null;
 
   constructor(
     private notificationService: NotificationService,
@@ -22,9 +23,16 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.inviteSub = this.notificationService.duelInvitationReceived$.subscribe(data => {
+      // Clear any existing active invitation timeout
+      if (this.inviteTimeout) {
+        clearTimeout(this.inviteTimeout);
+        this.inviteTimeout = null;
+      }
+
       this.activeInvitation = data;
+
       // Auto decline or dismiss after 30 seconds
-      setTimeout(() => {
+      this.inviteTimeout = setTimeout(() => {
         if (this.activeInvitation && this.activeInvitation.roomId === data.roomId) {
           this.declineInvite();
         }
@@ -36,11 +44,20 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.inviteSub) {
       this.inviteSub.unsubscribe();
     }
+    if (this.inviteTimeout) {
+      clearTimeout(this.inviteTimeout);
+    }
   }
 
   acceptInvite(): void {
     if (!this.activeInvitation) return;
     const roomId = this.activeInvitation.roomId;
+
+    if (this.inviteTimeout) {
+      clearTimeout(this.inviteTimeout);
+      this.inviteTimeout = null;
+    }
+
     this.customDuelService.acceptInvitation(roomId).subscribe({
       next: (res) => {
         this.activeInvitation = null;
@@ -58,6 +75,12 @@ export class AppComponent implements OnInit, OnDestroy {
   declineInvite(): void {
     if (!this.activeInvitation) return;
     const roomId = this.activeInvitation.roomId;
+
+    if (this.inviteTimeout) {
+      clearTimeout(this.inviteTimeout);
+      this.inviteTimeout = null;
+    }
+
     this.customDuelService.declineInvitation(roomId).subscribe({
       next: (res) => {
         this.activeInvitation = null;

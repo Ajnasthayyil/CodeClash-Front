@@ -49,9 +49,6 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   isFriendReady = false;
   amIReady = false;
 
-  // Incoming duel invitation modal
-  incomingInvitation: { roomId: string; roomCode: string; hostUsername: string } | null = null;
-
   // Popup visibility flags
   showSearchPopup = false;
   showLobbyPopup = false;
@@ -98,17 +95,6 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     }
 
     const listeners = [
-      {
-        event: 'DuelInvitationReceived',
-        handler: (data: any) => {
-          this.incomingInvitation = {
-            roomId: data.roomId,
-            roomCode: data.roomCode,
-            hostUsername: data.hostUsername
-          };
-          this.notificationService.showToast(`Duel Invitation from ${data.hostUsername}!`, 'info', 6000);
-        }
-      },
       {
         event: 'InvitationAccepted',
         handler: (data: any) => {
@@ -278,40 +264,6 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     });
   }
 
-  acceptIncomingInvitation(): void {
-    if (!this.incomingInvitation) return;
-    const inv = this.incomingInvitation;
-    this.incomingInvitation = null;
-
-    this.http.post<any>(`${environment.apiUrl}/customduel/accept`, {
-      roomId: inv.roomId
-    }).subscribe({
-      next: (res) => {
-        // Load the room details and show lobby popup
-        this.joinExistingRoom(inv.roomId);
-        this.showLobbyPopup = true;
-      },
-      error: (err) => {
-        this.notificationService.showToast(err.error?.message || 'Failed to accept invitation.', 'error', 3000);
-      }
-    });
-  }
-
-  declineIncomingInvitation(): void {
-    if (!this.incomingInvitation) return;
-    const inv = this.incomingInvitation;
-    this.incomingInvitation = null;
-
-    this.http.post<any>(`${environment.apiUrl}/customduel/decline`, {
-      roomId: inv.roomId
-    }).subscribe({
-      next: () => {
-        this.notificationService.showToast('Invitation declined.', 'info', 2000);
-      },
-      error: (err) => console.error('Failed to decline invitation', err)
-    });
-  }
-
   // ─── Custom Duel Lobby Handling ────────────────────────────────────────────
   private joinExistingRoom(roomId: string): void {
     this.http.get<any>(`${environment.apiUrl}/customduel/${roomId}`)
@@ -328,6 +280,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
           this.isHostReady = room.isHostReady;
           this.isFriendReady = room.isFriendReady;
           this.amIReady = this.currentUser?.id === room.hostUserId ? room.isHostReady : room.isFriendReady;
+
+          this.showLobbyPopup = true;
 
           // Join SignalR group
           const hub = this.notificationService.getHubConnection();

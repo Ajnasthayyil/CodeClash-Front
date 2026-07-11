@@ -398,29 +398,4 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════ -->
-  <!-- Incoming Duel Invitation Alert                     -->
-  <!-- ══════════════════════════════════════════════════ -->
-  <div *ngIf="incomingInvitation" class="search-overlay">
-    <div class="search-overlay-content" style="max-width:380px; width:100%;">
-      <div class="flex items-center justify-center mb-4 text-purple-400">
-        <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-      </div>
-      <h3 class="text-lg font-bold text-white mb-1 text-center">DUEL CHALLENGE!</h3>
-      <p class="text-sm text-slate-300 mb-6 text-center">
-        <strong class="text-purple-400">{{ incomingInvitation.hostUsername }}</strong> has challenged you to a 1v1 duel!
-      </p>
-      <div class="flex items-center justify-center gap-3">
-        <button (click)="acceptIncomingInvitation()" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition-all">
-          Accept ⚔️
-        </button>
-        <button (click)="declineIncomingInvitation()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-lg text-sm transition-all border border-slate-700">
-          Decline
-        </button>
-      </div>
-    </div>
-  </div>
-
 </div>
