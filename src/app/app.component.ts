@@ -31,10 +31,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
       this.activeInvitation = data;
 
-      // Auto decline or dismiss after 30 seconds
+      // Auto dismiss banner from screen after 30 seconds (do NOT call declineInvite API to avoid multi-tab desync)
       this.inviteTimeout = setTimeout(() => {
         if (this.activeInvitation && this.activeInvitation.roomId === data.roomId) {
-          this.declineInvite();
+          this.activeInvitation = null;
         }
       }, 30000);
     });
