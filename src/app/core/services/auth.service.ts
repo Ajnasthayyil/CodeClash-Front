@@ -95,6 +95,18 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(payload: { email: string, otp: string, password: string, confirmPassword?: string }): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/reset-password`, {
+      email: payload.email,
+      otp: payload.otp,
+      newPassword: payload.password
+    });
+  }
+
   logout(): Observable<ApiResponse<any>> {
     const accessToken = this.accessToken || '';
 
@@ -135,6 +147,11 @@ export class AuthService {
   getProfile(): Observable<ApiResponse<any>> {
     const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
     return this.http.get<ApiResponse<any>>(profileUrl);
+  }
+
+  getProfileStats(): Observable<ApiResponse<any>> {
+    const statsUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/stats';
+    return this.http.get<ApiResponse<any>>(statsUrl);
   }
 
   updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<ApiResponse<any>> {

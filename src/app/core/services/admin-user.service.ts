@@ -26,7 +26,7 @@ export class AdminUserService {
 
   getUsers(): Observable<AdminUserRecordDto[]> {
     return this.http.get<ApiResponse<AdminUserRecordDto[]>>(this.apiUrl).pipe(
-      map(res => res.data)
+      map(res => res.data as AdminUserRecordDto[])
     );
   }
 

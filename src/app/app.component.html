@@ -1,2 +1,20 @@
 <router-outlet></router-outlet>
 <app-toast></app-toast>
+
+<!-- Global Duel Invitation Toast Card -->
+<div *ngIf="activeInvitation" class="duel-invite-banner">
+  <div class="duel-invite-card">
+    <div class="duel-invite-header">
+      <span class="controller-icon">🎮</span>
+      <span class="invite-title">Duel Invitation</span>
+    </div>
+    <div class="duel-invite-body">
+      <strong class="host-name">{{ activeInvitation.hostUsername }}</strong> invited you to a custom duel.
+    </div>
+    <div class="duel-invite-actions">
+      <button (click)="acceptInvite()" class="btn-invite-accept">Accept</button>
+      <button (click)="declineInvite()" class="btn-invite-decline">Decline</button>
+    </div>
+  </div>
+</div>
+<app-chatbot-widget></app-chatbot-widget>

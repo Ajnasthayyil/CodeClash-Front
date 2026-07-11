@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '../../../../../../environments/environment';
 import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
@@ -22,6 +22,7 @@ export class LoginFormComponent {
     private router: Router,
     private authService: AuthService
   ) { }
+
 
   onSubmit() {
     this.errorMessage = '';
@@ -81,7 +82,7 @@ export class LoginFormComponent {
   }
 
   loginWithGithub() {
-    window.location.href = `${environment.apiUrl}/auth/github-login`;
+    window.location.href = `${environment.apiUrl}/auth/github-login?redirectUri=${encodeURIComponent(window.location.origin)}`;
   }
 
   togglePasswordVisibility() {

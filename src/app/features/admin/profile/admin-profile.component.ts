@@ -65,8 +65,8 @@ export class AdminProfileComponent implements OnInit {
     // Call API to fetch fresh data
     this.authService.getProfile().subscribe({
       next: (res) => {
-        if (res) {
-          const profile = res;
+        if (res && res.success && res.data) {
+          const profile = res.data;
           this.adminInfo.username = profile.username;
           this.adminInfo.email = profile.email;
           this.adminInfo.role = profile.role === 'Admin' ? 'Root Administrator' : profile.role;
@@ -132,18 +132,19 @@ export class AdminProfileComponent implements OnInit {
     this.authService.updateProfile(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res) {
+        if (res && res.success && res.data) {
+          const profile = res.data;
           // Update details inside state
-          this.adminInfo.username = res.username;
-          this.adminInfo.email = res.email;
-          this.adminInfo.role = res.role === 'Admin' ? 'Root Administrator' : res.role;
+          this.adminInfo.username = profile.username;
+          this.adminInfo.email = profile.email;
+          this.adminInfo.role = profile.role === 'Admin' ? 'Root Administrator' : profile.role;
 
           // Save back to localStorage
           const savedUser = localStorage.getItem('currentUser');
           const existing = savedUser ? JSON.parse(savedUser) : {};
           
           // Compute initials
-          const parts = (res.fullName || '').trim().split(/\s+/);
+          const parts = (profile.fullName || '').trim().split(/\s+/);
           let initials = 'SA';
           if (parts.length >= 2) {
             initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -153,11 +154,11 @@ export class AdminProfileComponent implements OnInit {
 
           const updatedUser = {
             ...existing,
-            name: res.fullName,
-            email: res.email,
-            phoneNumber: res.phoneNumber,
-            username: res.username,
-            role: res.role,
+            name: profile.fullName,
+            email: profile.email,
+            phoneNumber: profile.phoneNumber,
+            username: profile.username,
+            role: profile.role,
             initials: initials
           };
           localStorage.setItem('currentUser', JSON.stringify(updatedUser));

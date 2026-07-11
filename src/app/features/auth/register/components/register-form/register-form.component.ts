@@ -25,7 +25,7 @@ export class RegisterFormComponent {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   onSubmit() {
     this.errorMessage = '';
@@ -122,7 +122,7 @@ export class RegisterFormComponent {
   registerWithSocial(provider: string) {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     setTimeout(() => {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);
@@ -130,8 +130,7 @@ export class RegisterFormComponent {
   }
 
   registerWithGithub() {
-    window.location.href =
-      "https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth/github-login";
+    window.location.href = `${environment.apiUrl}/auth/github-login?redirectUri=${encodeURIComponent(window.location.origin)}`;
   }
 
   togglePasswordVisibility() {

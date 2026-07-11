@@ -547,11 +547,8 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   min-height: 100px;
   resize: vertical;
   background: $bg;
-  overflow: auto;
+  overflow: hidden;
   position: relative;
-
-  &::-webkit-scrollbar { width: 5px; height: 5px; }
-  &::-webkit-scrollbar-thumb { background: $border; border-radius: 4px; }
 }
 
 .line-nums {
@@ -566,6 +563,8 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   min-width: 38px;
   margin: 0;
   box-sizing: border-box;
+  overflow: hidden;
+  height: 100%;
 }
 
 .ln {
@@ -586,12 +585,17 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   color: $text;
   caret-color: $orange;
   white-space: pre;
-  overflow: hidden;
+  overflow: auto;
   tab-size: 4;
   margin: 0;
   box-sizing: border-box;
+  height: 100%;
 
   &::selection { background: rgba(249,115,22,0.18); }
+
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-thumb { background: $border; border-radius: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
 }
 
 // Terminal
