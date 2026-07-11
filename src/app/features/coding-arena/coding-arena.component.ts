@@ -64,6 +64,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   // ─── Code Editor ───────────────────────────────────────────────────────────
   languages: Language[] = ['csharp', 'python', 'javascript', 'cpp', 'java', 'go', 'rust'];
   selectedLanguage: Language = 'python';
+  preferredLanguage: Language | null = null;
   autoSave = true;
   autoSaveIndicator = false;
 
@@ -169,6 +170,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     // Parse room parameter from URL query params
     this.route.queryParams.subscribe(params => {
       const roomParam = params['room'];
+      const langParam = params['lang'];
+      if (langParam && this.languages.includes(langParam.toLowerCase() as Language)) {
+        this.preferredLanguage = langParam.toLowerCase() as Language;
+        this.selectedLanguage = this.preferredLanguage;
+      }
       if (roomParam) {
         this.roomId = roomParam;
         this.loadDuelRoomDetails(roomParam);
@@ -279,8 +285,10 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
             });
           }
 
-          // Select first allowed language
-          if (p.allowedLanguages && p.allowedLanguages.length > 0) {
+          // Select preferred language if allowed by problem, else first allowed
+          if (this.preferredLanguage && p.allowedLanguages.map(l => l.toLowerCase()).includes(this.preferredLanguage)) {
+            this.selectedLanguage = this.preferredLanguage;
+          } else if (p.allowedLanguages && p.allowedLanguages.length > 0) {
             const firstAllowed = p.allowedLanguages[0].toLowerCase() as Language;
             if (this.languages.includes(firstAllowed)) {
               this.selectedLanguage = firstAllowed;

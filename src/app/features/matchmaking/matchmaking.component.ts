@@ -141,8 +141,17 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
             this.duelNavigating = true;
             this.notificationService.showToast('Duel is starting! Entering arena...', 'success', 2000);
             setTimeout(() => {
-              this.router.navigate(['/arena/battle'], { queryParams: { room: this.friendlyRoomId } });
+              this.router.navigate(['/arena/battle'], { queryParams: { room: this.friendlyRoomId, lang: this.selectedLanguage.toLowerCase() } });
             }, 1500);
+          }
+        }
+      },
+      {
+        event: 'LobbySettingsUpdated',
+        handler: (data: any) => {
+          if (data.roomId === this.friendlyRoomId) {
+            this.selectedDifficulty = data.difficulty;
+            this.selectedLanguage = data.language;
           }
         }
       }
@@ -168,11 +177,24 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   setDifficulty(diff: 'easy' | 'medium' | 'hard'): void {
     this.selectedDifficulty = diff;
     this.notificationService.showToast(`Difficulty filter set to ${diff.toUpperCase()}`, 'info', 2000);
+    this.syncLobbySettings(diff, this.selectedLanguage);
   }
 
   onLanguageChange(lang: string): void {
     this.selectedLanguage = lang;
     this.notificationService.showToast(`Language filter set to ${lang}`, 'info', 2000);
+    this.syncLobbySettings(this.selectedDifficulty, lang);
+  }
+
+  syncLobbySettings(diff: string, lang: string): void {
+    if (!this.friendlyRoomId || this.currentUser?.id !== this.hostUser?.id) return;
+    this.http.post<any>(`${environment.apiUrl}/customduel/settings`, {
+      roomId: this.friendlyRoomId,
+      difficulty: diff,
+      language: lang
+    }).subscribe({
+      error: (err) => console.error('Failed to sync lobby settings', err)
+    });
   }
 
   startSearch(): void {
