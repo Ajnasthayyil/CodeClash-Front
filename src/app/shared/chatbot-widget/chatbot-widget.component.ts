@@ -20,8 +20,8 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   inputText     = '';
   sessionId     : string | null = null;
   messages      : ChatMessageDto[] = [];
-  isAuthenticated = false;
-
+  
+  private _lastAuthState = false;
   private shouldScroll = false;
 
   constructor(
@@ -29,11 +29,27 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
     private chatbot: ChatbotService
   ) {}
 
+  get isAuthenticated(): boolean {
+    const currentAuth = this.auth.isLoggedIn && !!this.auth.getCurrentUser();
+    if (currentAuth !== this._lastAuthState) {
+      this._lastAuthState = currentAuth;
+      if (!currentAuth) {
+        this.clearSession();
+      } else {
+        const saved = localStorage.getItem('cc_chat_session');
+        if (saved) {
+          this.sessionId = saved;
+          this.loadHistory();
+        }
+      }
+    }
+    return currentAuth;
+  }
+
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.isAuthenticated = this.auth.isLoggedIn && !!this.auth.getCurrentUser();
-
-    if (this.isAuthenticated) {
+    this._lastAuthState = this.auth.isLoggedIn && !!this.auth.getCurrentUser();
+    if (this._lastAuthState) {
       const saved = localStorage.getItem('cc_chat_session');
       if (saved) {
         this.sessionId = saved;
