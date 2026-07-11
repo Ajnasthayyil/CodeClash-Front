@@ -23,7 +23,6 @@ export class LoginFormComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService
   ) { }
-
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['error'] === 'blocked') {
@@ -90,7 +89,7 @@ export class LoginFormComponent implements OnInit {
   }
 
   loginWithGithub() {
-    window.location.href = `${environment.apiUrl}/auth/github-login`;
+    window.location.href = `${environment.apiUrl}/auth/github-login?redirectUri=${encodeURIComponent(window.location.origin)}`;
   }
 
   togglePasswordVisibility() {
