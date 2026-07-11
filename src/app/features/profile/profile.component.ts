@@ -149,8 +149,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     // Load fresh data from the server
     this.authService.getProfile().subscribe({
       next: (res) => {
-        if (res) {
-          const profile = res;
+        if (res && res.success && res.data) {
+          const profile = res.data;
           this.user.name = profile.fullName || this.user.name;
           this.user.email = profile.email || this.user.email;
           this.user.phoneNumber = profile.phoneNumber || '';
@@ -189,15 +189,16 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     // Load stats
     this.authService.getProfileStats().subscribe({
       next: (res) => {
-        if (res) {
-          this.stats[0].value = res.totalBattles.toString();
-          this.stats[1].value = res.wins.toString();
-          this.stats[2].value = res.winRate;
-          this.stats[3].value = res.problemsSolved.toString();
-          this.stats[4].value = res.bestStreak;
+        if (res && res.success && res.data) {
+          const statsData = res.data;
+          this.stats[0].value = statsData.totalBattles.toString();
+          this.stats[1].value = statsData.wins.toString();
+          this.stats[2].value = statsData.winRate;
+          this.stats[3].value = statsData.problemsSolved.toString();
+          this.stats[4].value = statsData.bestStreak;
 
-          if (res.topLanguages && res.topLanguages.length > 0) {
-            this.languages = res.topLanguages.map((l: any) => ({
+          if (statsData.topLanguages && statsData.topLanguages.length > 0) {
+            this.languages = statsData.topLanguages.map((l: any) => ({
               name: l.name,
               pct: l.pct,
               color: l.color
@@ -206,8 +207,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
             this.drawDonut();
           }
 
-          if (res.matchHistory && res.matchHistory.length > 0) {
-            this.matchHistory = res.matchHistory.map((m: any) => ({
+          if (statsData.matchHistory && statsData.matchHistory.length > 0) {
+            this.matchHistory = statsData.matchHistory.map((m: any) => ({
               opponent: m.opponent,
               problem: m.problem,
               result: m.result,
@@ -387,11 +388,12 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     this.authService.updateProfile(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res) {
-          this.user.name = res.fullName || this.user.name;
-          this.user.handle = res.username || this.user.handle;
-          this.user.phoneNumber = res.phoneNumber || '';
-          this.user.email = res.email || this.user.email;
+        if (res && res.success && res.data) {
+          const profile = res.data;
+          this.user.name = profile.fullName || this.user.name;
+          this.user.handle = profile.username || this.user.handle;
+          this.user.phoneNumber = profile.phoneNumber || '';
+          this.user.email = profile.email || this.user.email;
 
           this.updateInitials();
 
@@ -441,8 +443,8 @@ export class ProfileComponent implements OnInit, AfterViewInit {
       this.authService.uploadProfileImage(file).subscribe({
         next: (res) => {
           this.isLoading = false;
-          if (res) {
-            const newUrl = res;
+          if (res && res.success && res.data) {
+            const newUrl = res.data;
             this.user.profileImageUrl = newUrl;
             
             // Sync to localStorage
@@ -496,7 +498,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
     this.authService.deleteAccount().subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res) {
+        if (res && res.success) {
           this.authService.clearSession();
           this.closeConfirmDeleteModal();
           window.location.href = '/';
