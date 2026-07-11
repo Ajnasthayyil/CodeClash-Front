@@ -52,6 +52,10 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   // Incoming duel invitation modal
   incomingInvitation: { roomId: string; roomCode: string; hostUsername: string } | null = null;
 
+  // Popup visibility flags
+  showSearchPopup = false;
+  showLobbyPopup = false;
+
   private signalRListeners: { event: string; handler: (...args: any[]) => void }[] = [];
 
   constructor(
@@ -111,6 +115,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
           if (data.roomId === this.friendlyRoomId) {
             this.lobbyStatus = 'lobby';
             this.invitedFriend = { id: data.friendUserId, username: data.friendUsername };
+            this.showLobbyPopup = true; // Auto-open lobby when friend joins
             this.notificationService.showToast(`${data.friendUsername} joined the lobby!`, 'success', 3000);
           }
         }
@@ -236,6 +241,11 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
       });
   }
 
+  inviteFriendFromPopup(friend: UserSearchResult): void {
+    this.showSearchPopup = false;
+    this.inviteFriend(friend);
+  }
+
   inviteFriend(friend: UserSearchResult): void {
     if (!this.currentUser) return;
     this.http.post<any>(`${environment.apiUrl}/customduel/invite`, {
@@ -277,7 +287,9 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
       roomId: inv.roomId
     }).subscribe({
       next: (res) => {
-        this.router.navigate(['/arena'], { queryParams: { room: inv.roomId } });
+        // Load the room details and show lobby popup
+        this.joinExistingRoom(inv.roomId);
+        this.showLobbyPopup = true;
       },
       error: (err) => {
         this.notificationService.showToast(err.error?.message || 'Failed to accept invitation.', 'error', 3000);
@@ -349,8 +361,10 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
   startFriendlyDuel(): void {
     if (!this.friendlyRoomId) return;
+    this.showLobbyPopup = false;
     this.http.post<any>(`${environment.apiUrl}/customduel/start`, {
-      roomId: this.friendlyRoomId
+      roomId: this.friendlyRoomId,
+      difficulty: this.selectedDifficulty
     }).subscribe({
       next: () => {
         // DuelStarted SignalR message will trigger navigation
