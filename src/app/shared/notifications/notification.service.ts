@@ -87,6 +87,11 @@ export class NotificationService implements OnDestroy {
     });
   }
 
+  public getHubConnection(): signalR.HubConnection | null {
+    return this.hubConnection;
+  }
+
+
   private loadNotifications(token: string): void {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
