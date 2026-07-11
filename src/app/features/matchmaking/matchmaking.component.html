@@ -207,11 +207,7 @@
         </button>
       </div>
 
-      <!-- Waiting state -->
-      <div *ngIf="lobbyStatus === 'invited'" class="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-lg px-3 py-2.5 mb-4">
-        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse flex-shrink-0"></span>
-        <span class="text-xs text-orange-300 font-semibold">Waiting for <strong>{{ invitedFriend?.username }}</strong> to accept the invitation...</span>
-      </div>
+
 
       <!-- Players Ready Grid -->
       <div class="grid grid-cols-2 gap-3 mb-5">
@@ -296,7 +292,6 @@
           (click)="toggleReadyState()"
           class="w-full py-2.5 rounded-lg text-sm font-bold transition-all text-white"
           [ngClass]="amIReady ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'"
-          [disabled]="lobbyStatus === 'invited'"
         >
           {{ amIReady ? '✗ Unready' : '✓ Set Ready' }}
         </button>
