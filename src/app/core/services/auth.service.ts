@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { tap } from 'rxjs/operators';
 
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
-  data: T;
+  data: T | null;
   errors: string[];
 }
 
@@ -30,37 +29,34 @@ export interface AuthResponseDto {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth`;
+  private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth';
   private accessToken: string | null = null;
 
   constructor(private http: HttpClient) { }
 
-  register(payload: any): Observable<string> {
+  register(payload: any): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.apiUrl}/register`, {
       fullName: payload.fullName,
       email: payload.email,
       password: payload.password,
       confirmPassword: payload.confirmPassword,
       phoneNumber: payload.phoneNumber
-    }).pipe(
-      map(res => res.data)
-    );
+    });
   }
 
-  login(payload: any): Observable<AuthResponseDto> {
+  login(payload: any): Observable<ApiResponse<AuthResponseDto>> {
     return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/login`, {
       emailOrUsername: payload.email,
       password: payload.password
     }, { withCredentials: true }).pipe(
-      map(res => res.data),
-      tap(authData => {
-        if (authData) {
+      tap(res => {
+        if (res && res.success && res.data) {
+          const authData = res.data;
           this.accessToken = authData.accessToken;
 
-          // Build initials (null-safe: fullName can be null for OAuth users)
-          const fullName = authData.user.fullName || authData.user.username || '';
-          const parts = fullName.trim().split(/\s+/);
-          let initials = 'CC';
+          // Build initials
+          const parts = authData.user.fullName.trim().split(/\s+/);
+          let initials = 'NC';
           if (parts.length >= 2) {
             initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
           } else if (parts.length === 1 && parts[0].length > 0) {
@@ -70,7 +66,7 @@ export class AuthService {
           // Build the currentUser object and save to local storage
           const currentUser = {
             id: authData.user.userId,
-            name: authData.user.fullName || authData.user.username || '',
+            name: authData.user.fullName,
             email: authData.user.email,
             phoneNumber: payload.phoneNumber || '',
             username: authData.user.username,
@@ -87,44 +83,30 @@ export class AuthService {
     );
   }
 
-  refresh(): Observable<AuthResponseDto> {
+  refresh(): Observable<ApiResponse<AuthResponseDto>> {
     return this.http.post<ApiResponse<AuthResponseDto>>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
-      map(res => res.data),
-      tap(authData => {
-        if (authData) {
-          this.accessToken = authData.accessToken;
-          this.setCookie('token', authData.accessToken, 7);
-          this.setCookie('refreshToken', authData.refreshToken, 7);
+      tap(res => {
+        if (res && res.success && res.data) {
+          this.accessToken = res.data.accessToken;
+          this.setCookie('token', res.data.accessToken, 7);
+          this.setCookie('refreshToken', res.data.refreshToken, 7);
         }
       })
     );
   }
 
-  logout(): Observable<any> {
+  logout(): Observable<ApiResponse<any>> {
     const accessToken = this.accessToken || '';
 
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${accessToken}`
     });
 
-    return this.http.post<any>(`${this.apiUrl}/logout`, {}, { headers, withCredentials: true }).pipe(
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/logout`, {}, { headers, withCredentials: true }).pipe(
       tap(() => {
         this.clearSession();
       })
     );
-  }
-
-  forgotPassword(email: string): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/forgot-password`, { email });
-  }
-
-  resetPassword(payload: { email: string, otp: string, password: string, confirmPassword: string }): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/reset-password`, {
-      email: payload.email,
-      otp: payload.otp,
-      newPassword: payload.password,
-      confirmPassword: payload.confirmPassword
-    });
   }
 
   clearSession(): void {
@@ -150,41 +132,26 @@ export class AuthService {
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  getProfile(): Observable<any> {
-    const profileUrl = `${environment.apiUrl}/profile`;
-    return this.http.get<ApiResponse<any>>(profileUrl).pipe(
-      map(res => res.data)
-    );
+  getProfile(): Observable<ApiResponse<any>> {
+    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    return this.http.get<ApiResponse<any>>(profileUrl);
   }
 
-  getProfileStats(): Observable<any> {
-    const statsUrl = `${environment.apiUrl}/profile/stats`;
-    return this.http.get<ApiResponse<any>>(statsUrl).pipe(
-      map(res => res.data)
-    );
+  updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<ApiResponse<any>> {
+    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    return this.http.put<ApiResponse<any>>(profileUrl, payload);
   }
 
-  updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<any> {
-    const profileUrl = `${environment.apiUrl}/profile`;
-    return this.http.put<ApiResponse<any>>(profileUrl, payload).pipe(
-      map(res => res.data)
-    );
-  }
-
-  uploadProfileImage(file: File): Observable<string> {
-    const uploadUrl = `${environment.apiUrl}/profile/image`;
+  uploadProfileImage(file: File): Observable<ApiResponse<string>> {
+    const uploadUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/image';
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<ApiResponse<string>>(uploadUrl, formData).pipe(
-      map(res => res.data)
-    );
+    return this.http.post<ApiResponse<string>>(uploadUrl, formData);
   }
 
-  deleteAccount(): Observable<any> {
-    const profileUrl = `${environment.apiUrl}/profile`;
-    return this.http.delete<ApiResponse<any>>(profileUrl).pipe(
-      map(res => res.data)
-    );
+  deleteAccount(): Observable<ApiResponse<any>> {
+    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    return this.http.delete<ApiResponse<any>>(profileUrl);
   }
 
   // ─── Token and Cookie Helpers ──────────────────────────────────────────
@@ -202,9 +169,9 @@ export class AuthService {
       date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
       expires = '; expires=' + date.toUTCString();
     }
-    // Secure Cookie Flag integration (Secure only if HTTPS, SameSite=Lax, Path=/)
-    const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = `${name}=${value || ''}${expires}; path=/; SameSite=Lax${secureFlag}`;
+    // Only use Secure cookie flag on HTTPS (prevents local HTTP localhost development cookies from being blocked)
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=${value || ''}${expires}; path=/; SameSite=Lax${secure}`;
   }
 
   getCookie(name: string): string | null {
@@ -223,7 +190,7 @@ export class AuthService {
   }
 
   deleteCookie(name: string): void {
-    const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax${secureFlag}`;
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax${secure}`;
   }
 }

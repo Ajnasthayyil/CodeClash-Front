@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { environment } from '../../../../../../environments/environment';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
@@ -8,7 +8,7 @@ import { AuthService } from '../../../../../core/services/auth.service';
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.scss']
 })
-export class LoginFormComponent implements OnInit {
+export class LoginFormComponent {
   email = '';
   password = '';
   rememberMe = false;
@@ -20,16 +20,9 @@ export class LoginFormComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
     private authService: AuthService
   ) { }
-  ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      if (params['error'] === 'blocked') {
-        this.errorMessage = 'the admin blocked the user please contect to admin';
-      }
-    });
-  }
+
 
   onSubmit() {
     this.errorMessage = '';
@@ -52,7 +45,7 @@ export class LoginFormComponent implements OnInit {
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res) {
+        if (res.success) {
           const user = this.authService.getCurrentUser();
           if (user && user.role === 'Admin') {
             this.router.navigate(['/admin']);
@@ -60,7 +53,7 @@ export class LoginFormComponent implements OnInit {
             this.router.navigate(['/dashboard']);
           }
         } else {
-          this.errorMessage = (res as any)?.message || 'Login failed.';
+          this.errorMessage = res.message || 'Login failed.';
         }
       },
       error: (err) => {
