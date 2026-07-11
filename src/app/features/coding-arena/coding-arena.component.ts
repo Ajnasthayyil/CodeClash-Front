@@ -148,6 +148,10 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   mobileActiveTab: 'description' | 'editor' | 'info' = 'editor';
   scrollToAi = false;
 
+  // ─── Victory Stats ─────────────────────────────────────────────────────────
+  victoryPoints = 15;
+  victoryTime = '';
+
   // ─── Intervals ─────────────────────────────────────────────────────────────
   private timerInterval: any;
   private autoSaveInterval: any;
@@ -337,12 +341,17 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           if (data.roomId === this.roomId) {
             clearInterval(this.timerInterval);
             if (data.winnerId === this.currentUser?.id) {
+              // Calculate elapsed time
+              const elapsed = (30 * 60) - this.timeRemainingSeconds;
+              const m = Math.floor(elapsed / 60);
+              const s = elapsed % 60;
+              this.victoryTime = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+              this.victoryPoints = data.pointsAwarded ?? 15;
               this.showVictoryModal = true;
-              this.notificationService.showToast('VICTORY! You won the duel!', 'success', 5000);
               
               // Increment local user score/points
               if (this.currentUser) {
-                this.currentUser.rating = (this.currentUser.rating || 1200) + 15;
+                this.currentUser.totalPoints = (this.currentUser.totalPoints || 0) + this.victoryPoints;
                 localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
               }
             } else {
@@ -434,14 +443,14 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           this.terminalOutput += `Passed: ${res.passed}/${res.total} test cases\n`;
 
           if (res.status === 'Accepted') {
-            this.showSubmitSuccess = true;
             this.notificationService.showToast('Solution Accepted! Processing duel result...', 'success', 3000);
-            
-            // Redirect to matchmaking screen lobby or Dashboard after 2s
-            setTimeout(() => {
-              this.showSubmitSuccess = false;
-              this.router.navigate(['/arena']);
-            }, 2000);
+            // Victory modal is shown by the DuelEnded SignalR event
+            // If no room (solo practice), navigate back after a short delay
+            if (!this.roomId) {
+              setTimeout(() => {
+                this.router.navigate(['/arena']);
+              }, 2000);
+            }
           } else {
             this.terminalOutput += `\n✗ Solution Rejected. Keep trying to fix bugs!`;
           }

@@ -252,18 +252,63 @@
   </div>
 
   <!-- ══════════════════ VICTORY MODAL ══════════════════ -->
-  <div *ngIf="showVictoryModal" class="modal-bg">
-    <div class="modal-box border border-green-500/30">
-      <div class="modal-icon text-5xl">🏆</div>
-      <h3 class="modal-title text-green-400 text-2xl font-black">VICTORY</h3>
-      <p class="modal-body text-slate-300">You solved the challenge first and won the duel! <br/><span class="text-green-400 font-bold font-mono">+15 Leaderboard Points</span></p>
-      <div class="modal-btns">
-        <button (click)="router.navigate(['/arena'])" class="btn-keep bg-green-600 hover:bg-green-700 text-white font-bold w-full py-2.5">
-          Return to Arena
+  <div *ngIf="showVictoryModal" class="modal-bg victory-overlay">
+    <div class="victory-modal" (click)="$event.stopPropagation()">
+
+      <!-- Particle sparkles -->
+      <div class="victory-particles">
+        <span *ngFor="let p of [1,2,3,4,5,6,7,8,9,10,11,12]" class="particle" [style.--i]="p"></span>
+      </div>
+
+      <!-- Glow ring -->
+      <div class="victory-glow-ring"></div>
+
+      <!-- Trophy badge -->
+      <div class="victory-badge-wrap">
+        <div class="victory-badge">
+          <span class="trophy-emoji">🏆</span>
+        </div>
+        <div class="win-badge-label">WINNER</div>
+      </div>
+
+      <!-- Title -->
+      <h2 class="victory-title">Victory!</h2>
+      <p class="victory-subtitle">You solved the challenge first and won the duel!</p>
+
+      <!-- Stats grid -->
+      <div class="victory-stats">
+        <div class="victory-stat-card points-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value">+{{ victoryPoints }}</div>
+          <div class="stat-label">Points Earned</div>
+        </div>
+        <div class="victory-stat-card time-card">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-value">{{ victoryTime || timeDisplay }}</div>
+          <div class="stat-label">Time Taken</div>
+        </div>
+        <div class="victory-stat-card opponent-card">
+          <div class="stat-icon">⚔️</div>
+          <div class="stat-value opponent-name-val">{{ opponentName }}</div>
+          <div class="stat-label">Defeated</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="victory-actions">
+        <button (click)="router.navigate(['/arena'])" class="btn-victory-home">
+          🏠 Return to Arena
+        </button>
+        <button (click)="router.navigate(['/leaderboard'])" class="btn-victory-lb">
+          📊 View Leaderboard
         </button>
       </div>
+
+      <!-- Close X -->
+      <button class="victory-close-btn" (click)="showVictoryModal = false" title="Close">✕</button>
     </div>
   </div>
+
 
   <!-- ══════════════════ DEFEAT MODAL ══════════════════ -->
   <div *ngIf="showDefeatModal" class="modal-bg">
