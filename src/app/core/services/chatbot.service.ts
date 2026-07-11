@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponse } from './auth.service';
 
-// ── Request / Response DTOs (matches backend ChatRequest & ChatResponse) ──────
 export interface ChatRequest {
   message: string;
   problemId?: string;
