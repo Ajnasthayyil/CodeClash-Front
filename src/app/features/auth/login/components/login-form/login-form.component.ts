@@ -11,7 +11,7 @@ export class LoginFormComponent {
   email = '';
   password = '';
   rememberMe = false;
-  
+
   errorMessage = '';
   isLoading = false;
   showPassword = false;
@@ -19,11 +19,11 @@ export class LoginFormComponent {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   onSubmit() {
     this.errorMessage = '';
-    
+
     if (!this.email) {
       this.errorMessage = 'Please enter your email address.';
       return;
@@ -72,7 +72,7 @@ export class LoginFormComponent {
   loginWithSocial(provider: string) {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     setTimeout(() => {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);

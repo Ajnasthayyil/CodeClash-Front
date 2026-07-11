@@ -23,7 +23,7 @@ export class RegisterFormComponent {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   onSubmit() {
     this.errorMessage = '';
@@ -120,7 +120,7 @@ export class RegisterFormComponent {
   registerWithSocial(provider: string) {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     setTimeout(() => {
       this.isLoading = false;
       this.router.navigate(['/dashboard']);
