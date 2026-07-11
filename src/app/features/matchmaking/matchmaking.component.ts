@@ -54,6 +54,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   showLobbyPopup = false;
 
   private signalRListeners: { event: string; handler: (...args: any[]) => void }[] = [];
+  private duelNavigating = false; // guard against double-navigation from duplicate DuelStarted events
 
   constructor(
     private router: Router,
@@ -136,7 +137,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
       {
         event: 'DuelStarted',
         handler: (data: any) => {
-          if (data.roomId === this.friendlyRoomId) {
+          if (data.roomId === this.friendlyRoomId && !this.duelNavigating) {
+            this.duelNavigating = true;
             this.notificationService.showToast('Duel is starting! Entering arena...', 'success', 2000);
             setTimeout(() => {
               this.router.navigate(['/arena/battle'], { queryParams: { room: this.friendlyRoomId } });
@@ -250,13 +252,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
         this.notificationService.showToast(`Invitation sent to ${friend.username}!`, 'success', 3000);
 
-        // Join SignalR group for room
-        const hub = this.notificationService.getHubConnection();
-        if (hub) {
-          hub.invoke('JoinRoom', this.friendlyRoomId)
-            .then(() => console.log(`Joined SignalR group for Custom Duel: ${this.friendlyRoomId}`))
-            .catch(err => console.error('Failed to join room group', err));
-        }
+        // Join SignalR group for room (tracked for auto-rejoin on reconnect)
+        this.notificationService.joinRoomGroup(this.friendlyRoomId);
       },
       error: (err) => {
         this.notificationService.showToast(err.error?.message || 'Failed to send invite.', 'error', 3000);
@@ -283,13 +280,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
           this.showLobbyPopup = true;
 
-          // Join SignalR group
-          const hub = this.notificationService.getHubConnection();
-          if (hub) {
-            hub.invoke('JoinRoom', this.friendlyRoomId)
-              .then(() => console.log(`Joined SignalR group for Custom Duel: ${this.friendlyRoomId}`))
-              .catch(err => console.error('Failed to join room group', err));
-          }
+          // Join SignalR group (tracked for auto-rejoin on reconnect)
+          this.notificationService.joinRoomGroup(this.friendlyRoomId);
         },
         error: (err) => {
           this.notificationService.showToast('Failed to load duel lobby details.', 'error', 3000);
@@ -315,15 +307,26 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
   startFriendlyDuel(): void {
     if (!this.friendlyRoomId) return;
+    this.duelNavigating = false; // reset guard before each attempt
     this.showLobbyPopup = false;
     this.http.post<any>(`${environment.apiUrl}/customduel/start`, {
       roomId: this.friendlyRoomId,
       difficulty: this.selectedDifficulty
     }).subscribe({
       next: () => {
-        // DuelStarted SignalR message will trigger navigation
+        // Navigate immediately from HTTP success — SignalR DuelStarted is a secondary mechanism.
+        // This prevents the host from being stranded if their SignalR group membership dropped.
+        if (!this.duelNavigating) {
+          this.duelNavigating = true;
+          this.notificationService.showToast('Duel is starting! Entering arena...', 'success', 2000);
+          setTimeout(() => {
+            this.router.navigate(['/arena/battle'], { queryParams: { room: this.friendlyRoomId } });
+          }, 1500);
+        }
       },
       error: (err) => {
+        this.duelNavigating = false;
+        this.showLobbyPopup = true; // re-open lobby on error
         this.notificationService.showToast(err.error?.message || 'Failed to start duel.', 'error', 3000);
       }
     });
@@ -353,9 +356,9 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   }
 
   resetCustomRoom(): void {
-    const hub = this.notificationService.getHubConnection();
-    if (hub && this.friendlyRoomId) {
-      hub.invoke('LeaveRoom', this.friendlyRoomId).catch(err => console.error(err));
+    this.duelNavigating = false;
+    if (this.friendlyRoomId) {
+      this.notificationService.leaveRoomGroup(this.friendlyRoomId);
     }
     this.friendlyRoomId = '';
     this.friendlyRoomCode = '';
