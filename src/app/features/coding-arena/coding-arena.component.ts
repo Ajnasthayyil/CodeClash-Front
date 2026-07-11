@@ -85,7 +85,23 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     this.runCodeSuccess = false;
   }
 
+  // Alias used by the template's [(ngModel)]="editorCode"
+  get editorCode(): string { return this.currentCode; }
+  set editorCode(val: string) { this.currentCode = val; }
+
   get codeLines(): string[] { return this.currentCode.split('\n'); }
+
+  onCodeChange(val: string): void {
+    this.currentCode = val;
+  }
+
+  syncScroll(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    const lineNums = textarea.previousElementSibling as HTMLElement;
+    if (lineNums) {
+      lineNums.scrollTop = textarea.scrollTop;
+    }
+  }
 
   // ─── Terminal / Run ────────────────────────────────────────────────────────
   isRunning = false;
@@ -137,7 +153,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   private signalRListeners: { event: string; handler: (...args: any[]) => void }[] = [];
 
   constructor(
-    private router: Router,
+    public router: Router,
     private route: ActivatedRoute,
     private http: HttpClient,
     private problemService: ProblemService,
