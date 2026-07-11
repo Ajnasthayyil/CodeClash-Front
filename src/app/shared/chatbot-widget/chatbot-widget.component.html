@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-<div class="cc-chat-root" *ngIf="isAuthenticated">
-
-  <!-- Launcher FAB -->
-  <button id="chatbot-fab" class="cc-fab" [class.cc-fab--active]="isOpen" (click)="toggle()" title="Ask CodeClash AI" aria-label="Open AI Chatbot">
-    <span class="cc-fab__icon" *ngIf="!isOpen">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2a2 2 0 0 1 2 2v1h2a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2V4a2 2 0 0 1 2-2z"/>
-        <circle cx="9" cy="11" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1.2" fill="currentColor" stroke="none"/>
-=======
 <!-- ─── Floating Launcher Button ──────────────────────────────────────────── -->
 <div class="cc-chat-root" *ngIf="isAuthenticated">
 
@@ -26,28 +16,19 @@
         <path d="M12 2a2 2 0 0 1 2 2v1h2a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2V4a2 2 0 0 1 2-2z"/>
         <circle cx="9" cy="11" r="1.2" fill="currentColor" stroke="none"/>
         <circle cx="15" cy="11" r="1.2" fill="currentColor" stroke="none"/>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
         <path d="M9 15s1 1.5 3 1.5 3-1.5 3-1.5"/>
       </svg>
     </span>
     <span class="cc-fab__icon" *ngIf="isOpen">
-<<<<<<< HEAD
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-=======
       <!-- Close X -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
         <path d="M18 6 6 18M6 6l12 12"/>
       </svg>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
     </span>
     <span class="cc-fab__pulse" *ngIf="!isOpen"></span>
   </button>
 
-<<<<<<< HEAD
-  <!-- Chat Panel -->
-=======
   <!-- ─── Chat Panel ──────────────────────────────────────────────────────── -->
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
   <div class="cc-panel" [class.cc-panel--open]="isOpen" role="dialog" aria-label="AI Chatbot">
 
     <!-- Header -->
@@ -56,24 +37,16 @@
         <div class="cc-avatar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a2 2 0 0 1 2 2v1h2a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2V4a2 2 0 0 1 2-2z"/>
-<<<<<<< HEAD
-            <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
-=======
             <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/>
             <circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
           </svg>
         </div>
         <div class="cc-header__meta">
           <span class="cc-header__name">CodeClash AI</span>
-<<<<<<< HEAD
-          <span class="cc-header__status"><span class="cc-dot"></span>RAG-powered assistant</span>
-=======
           <span class="cc-header__status">
             <span class="cc-dot"></span>
             RAG-powered assistant
           </span>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
         </div>
       </div>
       <div class="cc-header__actions">
@@ -83,23 +56,16 @@
           </svg>
         </button>
         <button class="cc-icon-btn" (click)="toggle()" title="Close">
-<<<<<<< HEAD
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-=======
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <path d="M18 6 6 18M6 6l12 12"/>
           </svg>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
         </button>
       </div>
     </div>
 
     <!-- Messages -->
     <div class="cc-messages" id="cc-messages-scroll">
-<<<<<<< HEAD
-=======
 
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
       <!-- Empty state -->
       <div class="cc-empty" *ngIf="messages.length === 0 && !isLoading">
         <div class="cc-empty__orb">
@@ -108,11 +74,7 @@
           </svg>
         </div>
         <h3 class="cc-empty__title">Ask me anything</h3>
-<<<<<<< HEAD
-        <p class="cc-empty__sub">I have knowledge about algorithms, data structures, and competitive programming tips.</p>
-=======
         <p class="cc-empty__sub">I have knowledge about CodeClash problems, algorithms, data structures, and competitive programming tips.</p>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
         <div class="cc-suggestions">
           <button class="cc-chip" (click)="inputText = 'What are the best sorting algorithms?'; send()">Best sorting algorithms</button>
           <button class="cc-chip" (click)="inputText = 'Explain dynamic programming'; send()">Explain DP</button>
@@ -120,16 +82,6 @@
         </div>
       </div>
 
-<<<<<<< HEAD
-      <!-- Messages -->
-      <ng-container *ngFor="let msg of messages">
-        <div class="cc-msg cc-msg--user" *ngIf="msg.role === 'user'">
-          <div class="cc-bubble cc-bubble--user">{{ msg.content }}</div>
-          <div class="cc-user-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
-        </div>
-=======
       <!-- Message list -->
       <ng-container *ngFor="let msg of messages">
         <!-- User bubble -->
@@ -143,25 +95,16 @@
         </div>
 
         <!-- Assistant bubble -->
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
         <div class="cc-msg cc-msg--bot" *ngIf="msg.role === 'assistant'">
           <div class="cc-bot-avatar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M12 2a2 2 0 0 1 2 2v1h2a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2V4a2 2 0 0 1 2-2z"/>
-<<<<<<< HEAD
-              <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
-=======
               <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/>
               <circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
             </svg>
           </div>
           <div class="cc-bubble cc-bubble--bot">
             <div [innerHTML]="renderMarkdown(msg.content)"></div>
-<<<<<<< HEAD
-            <div class="cc-sources" *ngIf="msg.sourcesUsed && msg.sourcesUsed.length > 0">
-              <div class="cc-sources__label">Sources</div>
-=======
             <!-- Sources -->
             <div class="cc-sources" *ngIf="msg.sourcesUsed && msg.sourcesUsed.length > 0">
               <div class="cc-sources__label">
@@ -170,7 +113,6 @@
                 </svg>
                 Sources
               </div>
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
               <div class="cc-sources__list">
                 <span class="cc-source-tag" *ngFor="let src of msg.sourcesUsed">{{ src }}</span>
               </div>
@@ -180,27 +122,6 @@
       </ng-container>
 
       <!-- Typing indicator -->
-<<<<<<< HEAD
-      <div class="cc-msg cc-msg--bot" *ngIf="isLoading">
-        <div class="cc-bot-avatar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 2a2 2 0 0 1 2 2v1h2a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2V4a2 2 0 0 1 2-2z"/>
-            <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
-          </svg>
-        </div>
-        <div class="cc-bubble cc-bubble--bot">
-          <div class="cc-typing"><span></span><span></span><span></span></div>
-        </div>
-      </div>
-      <div #messagesEnd></div>
-    </div>
-
-    <!-- Input -->
-    <div class="cc-input-area">
-      <div class="cc-input-wrap">
-        <textarea #inputRef class="cc-textarea" [(ngModel)]="inputText" (keydown)="onEnter($event)" [disabled]="isLoading" placeholder="Ask me about algorithms, problems…" rows="1"></textarea>
-        <button class="cc-send-btn" (click)="send()" [disabled]="!inputText.trim() || isLoading" title="Send">
-=======
       <div class="cc-msg cc-msg--bot cc-msg--typing" *ngIf="isLoading">
         <div class="cc-bot-avatar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -238,7 +159,6 @@
           [disabled]="!inputText.trim() || isLoading"
           title="Send"
         >
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
@@ -246,9 +166,5 @@
       </div>
       <div class="cc-footer-note">RAG-powered · context-aware · CodeClash AI</div>
     </div>
-<<<<<<< HEAD
-=======
-
->>>>>>> f9b4ae88e814bd25d5e3f7967dd3301b530d085d
   </div>
 </div>
