@@ -23,6 +23,7 @@ export class LoginFormComponent {
     private authService: AuthService
   ) { }
 
+
   onSubmit() {
     this.errorMessage = '';
 
@@ -81,7 +82,7 @@ export class LoginFormComponent {
   }
 
   loginWithGithub() {
-    window.location.href = `${environment.apiUrl}/auth/github-login`;
+    window.location.href = `${environment.apiUrl}/auth/github-login?redirectUri=${encodeURIComponent(window.location.origin)}`;
   }
 
   togglePasswordVisibility() {
