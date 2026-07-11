@@ -122,14 +122,14 @@ public:
   };
 
   runCodeSuccess = false;
+  editorCode = '';
 
-  get currentCode(): string { return this.codeSnippets[this.selectedLanguage]; }
-  set currentCode(val: string) { 
-    this.codeSnippets[this.selectedLanguage] = val; 
+  onCodeChange(val: string): void {
+    this.codeSnippets[this.selectedLanguage] = val;
     this.runCodeSuccess = false;
   }
 
-  get codeLines(): string[] { return this.currentCode.split('\n'); }
+  get codeLines(): string[] { return this.editorCode.split('\n'); }
 
   // ─── Terminal / Run ────────────────────────────────────────────────────────
   isRunning = false;
@@ -208,6 +208,7 @@ public:
   constructor(private router: Router) {}
 
   ngOnInit(): void {
+    this.editorCode = this.codeSnippets[this.selectedLanguage];
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
@@ -257,6 +258,7 @@ public:
   // ─── Language ──────────────────────────────────────────────────────────────
   selectLanguage(lang: Language): void {
     this.selectedLanguage = lang;
+    this.editorCode = this.codeSnippets[lang];
   }
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
