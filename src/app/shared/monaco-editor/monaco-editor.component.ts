@@ -79,49 +79,7 @@ export class MonacoEditorComponent implements OnInit, OnChanges, OnDestroy {
     const monaco = await loader.init();
     const monacoLang = MonacoEditorComponent.langMap[this.language] || this.language;
 
-    this.editor = monaco.editor.create(this.containerRef.nativeElement, {
-      value: this.value ?? '',
-      language: monacoLang,
-      theme: 'vs-dark',
-      fontSize: 14,
-      fontFamily: "'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace",
-      fontLigatures: true,
-      lineHeight: 22,
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      automaticLayout: true,
-      tabSize: 4,
-      wordWrap: 'off',
-      renderLineHighlight: 'line',
-      renderWhitespace: 'selection',
-      cursorBlinking: 'smooth',
-      cursorSmoothCaretAnimation: 'on',
-      smoothScrolling: true,
-      bracketPairColorization: { enabled: true },
-      guides: {
-        bracketPairs: true,
-        indentation: true,
-      },
-      padding: { top: 12, bottom: 12 },
-      overviewRulerLanes: 0,
-      hideCursorInOverviewRuler: true,
-      overviewRulerBorder: false,
-      scrollbar: {
-        vertical: 'auto',
-        horizontal: 'auto',
-        verticalScrollbarSize: 8,
-        horizontalScrollbarSize: 8,
-      },
-      suggest: {
-        showKeywords: true,
-        showSnippets: true,
-      },
-      quickSuggestions: true,
-      acceptSuggestionOnEnter: 'on',
-      formatOnPaste: false,
-    });
-
-    // Override theme tokens for VS Code Dark+ look
+    // Define theme BEFORE creating the editor instance
     monaco.editor.defineTheme('codeclash-dark', {
       base: 'vs-dark',
       inherit: true,
@@ -184,7 +142,48 @@ export class MonacoEditorComponent implements OnInit, OnChanges, OnDestroy {
         'editorSuggestWidget.selectedBackground': '#1f3451',
       }
     });
-    monaco.editor.setTheme('codeclash-dark');
+
+    this.editor = monaco.editor.create(this.containerRef.nativeElement, {
+      value: this.value ?? '',
+      language: monacoLang,
+      theme: 'codeclash-dark', // Use the custom theme here directly
+      fontSize: 14,
+      fontFamily: "'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace",
+      fontLigatures: true,
+      lineHeight: 22,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      automaticLayout: true,
+      tabSize: 4,
+      wordWrap: 'off',
+      renderLineHighlight: 'line',
+      renderWhitespace: 'selection',
+      cursorBlinking: 'smooth',
+      cursorSmoothCaretAnimation: 'on',
+      smoothScrolling: true,
+      bracketPairColorization: { enabled: true },
+      guides: {
+        bracketPairs: true,
+        indentation: true,
+      },
+      padding: { top: 12, bottom: 12 },
+      overviewRulerLanes: 0,
+      hideCursorInOverviewRuler: true,
+      overviewRulerBorder: false,
+      scrollbar: {
+        vertical: 'auto',
+        horizontal: 'auto',
+        verticalScrollbarSize: 8,
+        horizontalScrollbarSize: 8,
+      },
+      suggest: {
+        showKeywords: true,
+        showSnippets: true,
+      },
+      quickSuggestions: true,
+      acceptSuggestionOnEnter: 'on',
+      formatOnPaste: false,
+    });
 
     // Propagate changes to parent via two-way binding
     this.editor.onDidChangeModelContent(() => {
