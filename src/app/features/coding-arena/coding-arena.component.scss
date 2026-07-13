@@ -549,6 +549,16 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   background: $bg;
   overflow: hidden;
   position: relative;
+
+  // Monaco fills the whole container
+  &.monaco-area {
+    display: block;
+    app-monaco-editor,
+    .monaco-host {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
 }
 
 .line-nums {
