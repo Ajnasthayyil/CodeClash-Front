@@ -46,6 +46,12 @@ export class MonacoEditorComponent implements OnInit, OnChanges, OnDestroy {
     typescript: 'typescript',
   };
 
+  private getMonacoLanguageId(lang: string): string {
+    const rawLang = (lang || '').toLowerCase().trim();
+    const cleanLang = rawLang === 'c#' ? 'csharp' : rawLang === 'c++' ? 'cpp' : rawLang;
+    return MonacoEditorComponent.langMap[cleanLang] || cleanLang;
+  }
+
   ngOnInit(): void {
     this.initMonaco();
   }
@@ -54,7 +60,7 @@ export class MonacoEditorComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['language'] && this.editor) {
       const monaco = (window as any).monaco;
       if (monaco) {
-        const monacoLang = MonacoEditorComponent.langMap[this.language] || this.language;
+        const monacoLang = this.getMonacoLanguageId(this.language);
         monaco.editor.setModelLanguage(this.editor.getModel(), monacoLang);
       }
     }
@@ -77,41 +83,45 @@ export class MonacoEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     const monaco = await loader.init();
-    const monacoLang = MonacoEditorComponent.langMap[this.language] || this.language;
+    const monacoLang = this.getMonacoLanguageId(this.language);
 
     // Define theme BEFORE creating the editor instance
     monaco.editor.defineTheme('codeclash-dark', {
       base: 'vs-dark',
       inherit: true,
       rules: [
-        // Keywords — blue
-        { token: 'keyword', foreground: '569CD6', fontStyle: 'bold' },
+        // Keywords — Purple / Control keywords
+        { token: 'keyword', foreground: 'C586C0', fontStyle: 'bold' },
         { token: 'keyword.control', foreground: 'C586C0', fontStyle: 'bold' },
-        // Types / classes — green/teal
+        // Types / classes — Cyan / Teal
         { token: 'type', foreground: '4EC9B0' },
+        { token: 'type.identifier', foreground: '4EC9B0' },
         { token: 'entity.name.type', foreground: '4EC9B0' },
         { token: 'entity.name.class', foreground: '4EC9B0' },
-        // Functions — yellow
+        { token: 'class', foreground: '4EC9B0' },
+        // Functions — Yellow
         { token: 'entity.name.function', foreground: 'DCDCAA' },
         { token: 'support.function', foreground: 'DCDCAA' },
-        // Strings — orange-brown
+        { token: 'function', foreground: 'DCDCAA' },
+        { token: 'identifier.function', foreground: 'DCDCAA' },
+        // Strings — Orange / Salmon
         { token: 'string', foreground: 'CE9178' },
         { token: 'string.quoted', foreground: 'CE9178' },
-        // Numbers — light green
+        // Numbers — Light Green
         { token: 'number', foreground: 'B5CEA8' },
-        // Comments — gray-green italic
+        // Comments — Green / Italic
         { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
-        // Variables — light blue
+        // Variables — Light Blue
         { token: 'variable', foreground: '9CDCFE' },
-        // Parameters — light blue italic
         { token: 'variable.parameter', foreground: '9CDCFE', fontStyle: 'italic' },
-        // Constants
+        { token: 'identifier', foreground: '9CDCFE' },
+        // Constants — Cyan
         { token: 'constant', foreground: '4FC1FF' },
         // Decorators/annotations
         { token: 'tag', foreground: '4EC9B0' },
-        // Operators
+        // Operators — White / Light Gray
         { token: 'operator', foreground: 'D4D4D4' },
-        // Punctuation
+        // Punctuation / Delimiters
         { token: 'delimiter', foreground: 'D4D4D4' },
         // Built-ins (Python builtins, etc)
         { token: 'support.type', foreground: '4EC9B0' },
