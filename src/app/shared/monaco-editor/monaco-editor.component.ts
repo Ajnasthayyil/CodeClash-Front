@@ -73,7 +73,7 @@ export class MonacoEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   private async initMonaco(): Promise<void> {
     loader.config({
-      paths: { vs: 'assets/monaco/vs' }
+      paths: { vs: '/assets/monaco/vs' }
     });
 
     const monaco = await loader.init();
