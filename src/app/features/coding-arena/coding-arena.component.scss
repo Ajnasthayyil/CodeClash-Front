@@ -1628,3 +1628,42 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
   transition: background 0.15s, color 0.15s;
   &:hover { background: rgba(255,255,255,0.12); color: #e2e8f0; }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   DRAG-RESIZABLE SEPARATOR DIVIDER
+   ────────────────────────────────────────────────────────────────────────── */
+.resize-divider {
+  height: 6px;
+  background: #1e293b;
+  border-top: 1px solid #30363d;
+  border-bottom: 1px solid #30363d;
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+
+  &:hover {
+    background: #f97316;
+    border-top-color: #fbbf24;
+    border-bottom-color: #fbbf24;
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+
+    .resize-handle-line {
+      background: #ffffff;
+      width: 48px;
+    }
+  }
+
+  .resize-handle-line {
+    width: 32px;
+    height: 2px;
+    background: #475569;
+    border-radius: 2px;
+    transition: all 0.2s ease-in-out;
+  }
+}
+

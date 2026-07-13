@@ -152,6 +152,35 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   victoryPoints = 15;
   victoryTime = '';
 
+  // ─── Resizing ──────────────────────────────────────────────────────────────
+  editorHeight = 450;
+  private isResizing = false;
+  private startY = 0;
+  private startHeight = 0;
+
+  startResize(event: MouseEvent): void {
+    event.preventDefault();
+    this.isResizing = true;
+    this.startY = event.clientY;
+    this.startHeight = this.editorHeight;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!this.isResizing) return;
+      const deltaY = moveEvent.clientY - this.startY;
+      // Min 150px, Max 800px
+      this.editorHeight = Math.max(150, Math.min(800, this.startHeight + deltaY));
+    };
+
+    const onMouseUp = () => {
+      this.isResizing = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
   // ─── Intervals ─────────────────────────────────────────────────────────────
   private timerInterval: any;
   private autoSaveInterval: any;

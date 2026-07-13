@@ -124,7 +124,7 @@
       </div>
 
       <!-- Code editor: Monaco with full syntax highlighting -->
-      <div class="editor-area monaco-area">
+      <div class="editor-area monaco-area" [style.height.px]="editorHeight">
         <app-monaco-editor
           [value]="currentCode"
           [language]="selectedLanguage"
@@ -133,6 +133,10 @@
         ></app-monaco-editor>
       </div>
 
+      <!-- Drag-resizable separator border -->
+      <div class="resize-divider" (mousedown)="startResize($event)" title="Drag to resize editor">
+        <div class="resize-handle-line"></div>
+      </div>
 
       <!-- Terminal output -->
       <div class="terminal-wrap">
