@@ -198,7 +198,9 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   showVictoryModal = false;
   showDefeatModal = false;
   showExitConfirmModal = false;
+  victoryTitle = 'Victory!';
   victorySubtitle = 'You solved the challenge first and won the duel!';
+  defeatTitle = 'DEFEAT';
   defeatSubtitle = 'You were defeated in the duel. Keep practicing to climb the leaderboard!';
   private exitConfirmationPromiseResolver: ((value: boolean) => void) | null = null;
   battleEndData: any = null;
@@ -380,9 +382,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       if (data.winnerId === this.currentUser?.id) {
         if (data.isSurrender) {
           this.notificationService.showToast('VICTORY! The opponent surrendered!', 'success', 5000);
-          this.victorySubtitle = 'Your opponent surrendered the battle!';
+          this.victoryTitle = 'Opponent Surrendered';
+          this.victorySubtitle = 'The opponent surrendered, you won the match!';
         } else {
           this.notificationService.showToast('VICTORY! You solved the challenge first!', 'success', 5000);
+          this.victoryTitle = 'Victory!';
           this.victorySubtitle = 'You solved the challenge first and won the duel!';
         }
         const elapsed = (30 * 60) - this.timeRemainingSeconds;
@@ -394,9 +398,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       } else {
         if (data.isSurrender) {
           this.notificationService.showToast('DEFEAT! You surrendered the match!', 'error', 5000);
+          this.defeatTitle = 'SURRENDERED';
           this.defeatSubtitle = 'You surrendered the match.';
         } else {
           this.notificationService.showToast(`DEFEAT! ${this.opponentName} solved the challenge first!`, 'error', 5000);
+          this.defeatTitle = 'DEFEAT';
           this.defeatSubtitle = 'You were defeated in the duel. Keep practicing to climb the leaderboard!';
         }
         this.showDefeatModal = true;
