@@ -56,21 +56,49 @@ export class MatchResultComponent implements OnInit {
     { label: 'Code Quality', youValue: '94/100', opponentValue: '78/100', isYouBetter: true }
   ];
 
-  constructor(private router: Router) {}
+  navState: any = null;
+
+  constructor(private router: Router) {
+    const nav = this.router.getCurrentNavigation();
+    if (nav && nav.extras && nav.extras.state) {
+      this.navState = nav.extras.state;
+    }
+  }
 
   ngOnInit(): void {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
       this.you.name = parsed.name || this.you.name;
-      this.you.elo = parsed.rating || this.you.elo;
       if (parsed.initials) {
         this.you.initial = parsed.initials.charAt(0);
       } else {
         this.you.initial = this.you.name.charAt(0).toUpperCase();
       }
-      this.eloStart = this.you.elo;
-      this.eloEnd = this.eloStart + this.eloDelta;
+
+      if (this.navState) {
+        const isWinner = this.navState.winnerId === parsed.id;
+        this.you.isWinner = isWinner;
+        
+        if (this.navState.opponentName) {
+          this.opponent.name = this.navState.opponentName;
+          this.opponent.initial = this.opponent.name.charAt(0).toUpperCase();
+        }
+        if (this.navState.opponentRating) {
+          this.opponent.elo = this.navState.opponentRating;
+        }
+        this.opponent.isWinner = !isWinner;
+
+        const delta = isWinner ? this.navState.winnerDelta : this.navState.loserDelta;
+        this.you.elo = parsed.rating || this.you.elo;
+        this.eloDelta = delta;
+        this.eloStart = this.you.elo - delta;
+        this.eloEnd = this.you.elo;
+      } else {
+        this.you.elo = parsed.rating || this.you.elo;
+        this.eloStart = this.you.elo;
+        this.eloEnd = this.eloStart + this.eloDelta;
+      }
     }
   }
 

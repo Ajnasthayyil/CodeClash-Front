@@ -197,6 +197,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   showSubmitSuccess = false;
   showVictoryModal = false;
   showDefeatModal = false;
+  battleEndData: any = null;
   activePanel: 'problem' | 'hints' = 'problem';
   mobileActiveTab: 'description' | 'editor' | 'info' = 'editor';
   scrollToAi = false;
@@ -363,15 +364,28 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     });
 
     this.battleHub.on('BattleEnded', (data: any) => {
-      this.notificationService.showToast('Battle Concluded!', 'success');
-      this.router.navigate(['/arena/result'], {
-        state: {
-          battleId: battleId,
-          winnerId: data.winnerId,
-          winnerDelta: data.winnerDelta,
-          loserDelta: data.loserDelta
-        }
-      });
+      this.battleEndData = data;
+      clearInterval(this.timerInterval);
+
+      if (data.winnerId === this.currentUser?.id) {
+        this.notificationService.showToast('VICTORY! You solved the challenge first!', 'success', 5000);
+        const elapsed = (30 * 60) - this.timeRemainingSeconds;
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        this.victoryTime = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        this.victoryPoints = data.winnerDelta;
+        this.showVictoryModal = true;
+      } else {
+        this.notificationService.showToast(`DEFEAT! ${this.opponentName} solved the challenge first!`, 'error', 5000);
+        this.showDefeatModal = true;
+      }
+
+      if (this.currentUser) {
+        const ratingChange = (data.winnerId === this.currentUser.id) ? data.winnerDelta : data.loserDelta;
+        this.currentUser.rating = (this.currentUser.rating || 1200) + ratingChange;
+        this.playerRating = this.currentUser.rating;
+        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+      }
     });
 
     this.battleHub.on('BattleCancelled', () => {
@@ -726,6 +740,23 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       });
     } else if (this.battleHub && this.matchId) {
       this.battleHub.invoke('Surrender', this.matchId);
+    } else {
+      this.router.navigate(['/arena']);
+    }
+  }
+
+  goToResults(): void {
+    if (this.battleEndData) {
+      this.router.navigate(['/arena/result'], {
+        state: {
+          battleId: this.matchId,
+          winnerId: this.battleEndData.winnerId,
+          winnerDelta: this.battleEndData.winnerDelta,
+          loserDelta: this.battleEndData.loserDelta,
+          opponentName: this.opponentName,
+          opponentRating: this.opponentRating
+        }
+      });
     } else {
       this.router.navigate(['/arena']);
     }
