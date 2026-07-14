@@ -46,11 +46,7 @@
         </div>
 
         <!-- Description -->
-        <div class="problem-body">
-          Given an array of integers <code class="inline-code">nums</code> and an integer
-          <code class="inline-code">target</code>, return indices of the two numbers such that
-          they add up to target. You may not use the same element twice.
-        </div>
+        <div class="problem-body" [innerHTML]="problem.description"></div>
 
         <!-- Examples -->
         <div *ngFor="let ex of problem.examples; let i = index" class="example-box">
@@ -103,12 +99,9 @@
       <!-- Editor top bar: language + autosave -->
       <div class="editor-topbar">
         <div class="lang-tabs">
-          <button *ngFor="let lang of languages"
-                  (click)="selectLanguage(lang)"
-                  class="lang-tab"
-                  [class.lang-active]="selectedLanguage === lang">
-            {{ lang }}
-          </button>
+          <span class="lang-tab lang-active lang-locked" title="Language locked for this battle">
+            🔒 {{ battleLanguageLabel }}
+          </span>
         </div>
         <div class="autosave-wrap">
           <span class="autosave-text" [class.saved]="autoSaveIndicator">

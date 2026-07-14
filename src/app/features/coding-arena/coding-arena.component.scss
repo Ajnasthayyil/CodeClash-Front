@@ -479,6 +479,11 @@ $mono:      'Fira Code', 'Cascadia Code', monospace;
     background: rgba(249,115,22,0.09);
     border-color: rgba(249,115,22,0.25);
   }
+  &.lang-locked {
+    cursor: default;
+    pointer-events: none;
+    letter-spacing: 0.03em;
+  }
 }
 
 .autosave-wrap {

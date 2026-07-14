@@ -137,6 +137,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
       this.user.handle = parsed.username || this.user.handle;
       this.user.eloRating = parsed.rating || this.user.eloRating;
       this.user.eloRatingDisplay = this.user.eloRating.toLocaleString();
+      this.user.tier = this.getTier(this.user.eloRating);
       this.user.role = parsed.role || 'User';
       this.user.joined = parsed.joined || this.user.joined;
       if (parsed.initials) {
@@ -156,6 +157,9 @@ export class ProfileComponent implements OnInit, AfterViewInit {
           this.user.phoneNumber = profile.phoneNumber || '';
           this.user.handle = profile.username || this.user.handle;
           this.user.profileImageUrl = profile.profileImageUrl || '';
+          this.user.eloRating = profile.rating || this.user.eloRating;
+          this.user.eloRatingDisplay = this.user.eloRating.toLocaleString();
+          this.user.tier = this.getTier(this.user.eloRating);
           
           if (profile.createdAt) {
             const joinedDate = new Date(profile.createdAt);
@@ -176,9 +180,11 @@ export class ProfileComponent implements OnInit, AfterViewInit {
             initials: this.user.initials,
             profileImageUrl: this.user.profileImageUrl,
             joined: this.user.joined,
-            role: this.user.role
+            role: this.user.role,
+            rating: this.user.eloRating
           };
           localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+          this.computeEloHistory();
         }
       },
       error: (err) => {
@@ -218,6 +224,7 @@ export class ProfileComponent implements OnInit, AfterViewInit {
               date: m.date,
               eloChange: m.eloChange
             }));
+            this.computeEloHistory();
           }
         }
       },
@@ -352,6 +359,70 @@ export class ProfileComponent implements OnInit, AfterViewInit {
       Epic: 'rarity-epic', Legendary: 'rarity-legendary'
     };
     return map[rarity] || '';
+  }
+
+  getTier(rating: number): string {
+    if (rating >= 2400) return 'Master';
+    if (rating >= 2100) return 'Diamond';
+    if (rating >= 1800) return 'Platinum';
+    if (rating >= 1500) return 'Gold';
+    if (rating >= 1200) return 'Silver';
+    return 'Bronze';
+  }
+
+  getTierBg(rating: number): string {
+    if (rating >= 2400) return 'linear-gradient(135deg, #c084fc, #7e22ce)';
+    if (rating >= 2100) return 'linear-gradient(135deg, #67e8f9, #0891b2)';
+    if (rating >= 1800) return 'linear-gradient(135deg, #a78bfa, #6d28d9)';
+    if (rating >= 1500) return 'linear-gradient(135deg, #fbbf24, #d97706)';
+    if (rating >= 1200) return 'linear-gradient(135deg, #cbd5e1, #475569)';
+    return 'linear-gradient(135deg, #b45309, #78350f)';
+  }
+
+  getTierColor(rating: number): string {
+    if (rating >= 2400) return '#c084fc';
+    if (rating >= 2100) return '#67e8f9';
+    if (rating >= 1800) return '#a78bfa';
+    if (rating >= 1500) return '#fbbf24';
+    if (rating >= 1200) return '#cbd5e1';
+    return '#b45309';
+  }
+
+  getTierProgress(rating: number): number {
+    let min = 0;
+    let max = 1200;
+
+    if (rating >= 2400) { min = 2400; max = 3000; }
+    else if (rating >= 2100) { min = 2100; max = 2400; }
+    else if (rating >= 1800) { min = 1800; max = 2100; }
+    else if (rating >= 1500) { min = 1500; max = 1800; }
+    else if (rating >= 1200) { min = 1200; max = 1500; }
+    else { min = 0; max = 1200; }
+
+    const pct = Math.round(((rating - min) / (max - min)) * 100);
+    return Math.max(0, Math.min(100, pct));
+  }
+
+  private computeEloHistory(): void {
+    let currentElo = this.user.eloRating;
+    const history = [{ month: 'Current', elo: currentElo }];
+    
+    for (let i = 0; i < Math.min(this.matchHistory.length, 6); i++) {
+      const match = this.matchHistory[i];
+      currentElo -= match.eloChange;
+      
+      let label = `Match -${i + 1}`;
+      if (match.date.includes('hour') || match.date.includes('now') || match.date.includes('mins')) {
+        label = 'Today';
+      } else if (match.date.includes('day')) {
+        label = match.date.replace(' ago', '');
+      }
+      
+      history.push({ month: label, elo: currentElo });
+    }
+    
+    this.eloHistory = history.reverse();
+    this.drawEloLine();
   }
 
   get earnedCount(): number {

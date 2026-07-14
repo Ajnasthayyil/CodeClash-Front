@@ -643,7 +643,7 @@ $text-light: #f0f6fc;
   gap: 10px;
   margin-bottom: 32px;
   
-  .badge-elo, .badge-lang {
+  .badge-elo, .badge-lang, .badge-diff {
     background: rgba(163, 113, 247, 0.08);
     color: #c084fc;
     border: 1px solid rgba(163, 113, 247, 0.25);
@@ -658,6 +658,12 @@ $text-light: #f0f6fc;
     background: rgba(99, 102, 241, 0.08);
     color: #818cf8;
     border-color: rgba(99, 102, 241, 0.25);
+  }
+
+  .badge-diff {
+    background: rgba(249, 115, 22, 0.08);
+    color: #fdba74;
+    border-color: rgba(249, 115, 22, 0.25);
   }
 }
 
