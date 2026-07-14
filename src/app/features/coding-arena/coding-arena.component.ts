@@ -118,6 +118,12 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
 
   get currentCode(): string {
     const lang = this.selectedLanguage.toLowerCase();
+    if (this.matchId) {
+      const stored = localStorage.getItem(`cc_code_${this.matchId}_${lang}`);
+      if (stored !== null) {
+        this.codeSnippets[lang] = stored;
+      }
+    }
     if (this.codeSnippets[lang] === undefined) {
       this.codeSnippets[lang] = '';
     }
@@ -127,6 +133,10 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     const lang = this.selectedLanguage.toLowerCase();
     this.codeSnippets[lang] = val;
     this.runCodeSuccess = false;
+
+    if (this.matchId) {
+      localStorage.setItem(`cc_code_${this.matchId}_${lang}`, val);
+    }
 
     if (this.battleHub && this.matchId) {
       this.battleHub.invoke('SendTypingStatus', this.matchId, true);
@@ -168,6 +178,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
 
   // ─── Timer ─────────────────────────────────────────────────────────────────
   timeRemainingSeconds = 30 * 60; // 30 minutes for custom duel
+  totalTimeLimitSeconds = 30 * 60; // total duration
   get timeDisplay(): string {
     const m = Math.floor(this.timeRemainingSeconds / 60);
     const s = this.timeRemainingSeconds % 60;
@@ -289,6 +300,8 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         // 1v1 Ranked Battle flow
         if (battleId) {
           this.matchId = battleId;
+          // Sync timer from server (handles refresh correctly)
+          this.syncTimerFromServer(battleId);
           this.connectToBattleRoom(battleId);
         }
 
@@ -317,7 +330,10 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
                 tags: [p.category]
               };
               this.totalTests = p.testCases.length;
-              this.setTimerDuration(p.difficulty);
+              // Do NOT reset timer here for ranked battles — server sync already set it
+              if (!battleId) {
+                this.setTimerDuration(p.difficulty);
+              }
             },
             error: (err) => {
               console.error('Failed to load problem:', err);
@@ -329,14 +345,22 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       }
     });
 
-    // Countdown timer
+    // Countdown timer — ticks from server-synced value
     this.timerInterval = setInterval(() => {
       if (this.timeRemainingSeconds > 0) {
         this.timeRemainingSeconds--;
       } else {
-        // Time expired, trigger defeat
-        this.showDefeatModal = true;
         clearInterval(this.timerInterval);
+        // Notify server that time has expired; server broadcasts BattleTimedOut
+        if (this.matchId && this.battleHub) {
+          this.battleHub.invoke('TimeExpired', this.matchId, this.myTestsPassed)
+            .catch(() => {
+              // If server already resolved (e.g. other player called first), just show defeat
+              this.showDefeatModal = true;
+            });
+        } else {
+          this.showDefeatModal = true;
+        }
       }
     }, 1000);
 
@@ -389,7 +413,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           this.victoryTitle = 'Victory!';
           this.victorySubtitle = 'You solved the challenge first and won the duel!';
         }
-        const elapsed = (30 * 60) - this.timeRemainingSeconds;
+        const elapsed = this.totalTimeLimitSeconds - this.timeRemainingSeconds;
         const m = Math.floor(elapsed / 60);
         const s = elapsed % 60;
         this.victoryTime = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
@@ -414,9 +438,20 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         this.playerRating = this.currentUser.rating;
         localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
       }
+      this.cleanupLocalStorageCode();
+    });
+
+    this.battleHub.on('BattleTimedOut', () => {
+      clearInterval(this.timerInterval);
+      this.notificationService.showToast('Match timed out! It is a draw.', 'warning', 5000);
+      this.defeatTitle = 'TIME EXPIRED';
+      this.defeatSubtitle = 'The match ended in a draw because the time limit was reached!';
+      this.cleanupLocalStorageCode();
+      this.showDefeatModal = true;
     });
 
     this.battleHub.on('BattleCancelled', () => {
+      this.cleanupLocalStorageCode();
       this.notificationService.showToast('Battle cancelled by server.', 'warning');
       this.router.navigate(['/arena']);
     });
@@ -554,6 +589,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     } else {
       this.timeRemainingSeconds = 30 * 60; // default 30 minutes
     }
+    this.totalTimeLimitSeconds = this.timeRemainingSeconds;
   }
 
   // ─── SignalR Events ────────────────────────────────────────────────────────
@@ -799,6 +835,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   goToResults(): void {
+    this.cleanupLocalStorageCode();
     this.router.navigate(['/arena']);
   }
 
@@ -834,6 +871,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   onConfirmExit(): void {
+    this.cleanupLocalStorageCode();
     this.showExitConfirmModal = false;
     this.confirmSurrender();
     if (this.exitConfirmationPromiseResolver) {
@@ -847,6 +885,47 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     if (this.exitConfirmationPromiseResolver) {
       this.exitConfirmationPromiseResolver(false);
       this.exitConfirmationPromiseResolver = null;
+    }
+  }
+
+  private syncTimerFromServer(battleId: string): void {
+    const token = this.authService.getAccessToken();
+    this.http.get<any>(`${environment.apiUrl}/matchmaking/battle/${battleId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (battle) => {
+        if (battle && battle.timeRemainingSeconds !== undefined) {
+          this.timeRemainingSeconds = battle.timeRemainingSeconds;
+          
+          if (battle.durationSeconds !== undefined) {
+            this.totalTimeLimitSeconds = battle.durationSeconds;
+          }
+          
+          if (battle.participants) {
+            const opp = battle.participants.find((p: any) => p.userId !== this.currentUser?.id);
+            const me = battle.participants.find((p: any) => p.userId === this.currentUser?.id);
+            if (opp) {
+              this.opponentName = opp.username;
+              this.opponentRating = opp.rating;
+            }
+            if (me) {
+              this.playerName = me.username;
+              this.playerRating = me.rating;
+            }
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Failed to sync timer from server:', err);
+      }
+    });
+  }
+
+  private cleanupLocalStorageCode(): void {
+    if (this.matchId) {
+      this.languages.forEach(lang => {
+        localStorage.removeItem(`cc_code_${this.matchId}_${lang.toLowerCase()}`);
+      });
     }
   }
 }
