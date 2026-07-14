@@ -2,6 +2,9 @@ import {
   Component, OnInit, OnDestroy,
   ViewChild, ElementRef, AfterViewChecked, HostListener
 } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { ChatbotService, ChatMessageDto } from '../../core/services/chatbot.service';
 
@@ -20,13 +23,16 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   inputText     = '';
   sessionId     : string | null = null;
   messages      : ChatMessageDto[] = [];
+  isVisible     = true;
   
   private _lastAuthState = false;
   private shouldScroll = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private auth: AuthService,
-    private chatbot: ChatbotService
+    private chatbot: ChatbotService,
+    private router: Router
   ) {}
 
   get isAuthenticated(): boolean {
@@ -56,6 +62,15 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
         this.loadHistory();
       }
     }
+
+    // Monitor routing events to hide chatbot in battlefield pages
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: any) => {
+      this.checkVisibility(event.urlAfterRedirects);
+    });
+    this.checkVisibility(this.router.url);
   }
 
   ngAfterViewChecked(): void {
@@ -65,7 +80,23 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
     }
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private checkVisibility(url: string): void {
+    const lowerUrl = url.toLowerCase();
+    // Hide chatbot in battlefields (coding arena, practice arena, tournament match)
+    this.isVisible = !(
+      lowerUrl.includes('/arena/battle') ||
+      lowerUrl.includes('/problems/solve/') ||
+      (lowerUrl.includes('/tournament/') && lowerUrl.includes('/match/'))
+    );
+    if (!this.isVisible && this.isOpen) {
+      this.isOpen = false;
+    }
+  }
 
   // ── Toggle ───────────────────────────────────────────────────────────────────
   toggle(): void {
