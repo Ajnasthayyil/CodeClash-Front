@@ -215,13 +215,11 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   // ─── Ranked Queue ──────────────────────────────────────────────────────────
   setDifficulty(diff: 'easy' | 'medium' | 'hard'): void {
     this.selectedDifficulty = diff;
-    this.notificationService.showToast(`Difficulty filter set to ${diff.toUpperCase()}`, 'info', 2000);
     this.syncLobbySettings(diff, this.selectedLanguage);
   }
 
   onLanguageChange(lang: string): void {
     this.selectedLanguage = lang;
-    this.notificationService.showToast(`Language filter set to ${lang}`, 'info', 2000);
     this.syncLobbySettings(this.selectedDifficulty, lang);
   }
 
