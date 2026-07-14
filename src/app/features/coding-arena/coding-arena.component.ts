@@ -610,7 +610,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         },
         error: (err) => {
           this.isRunning = false;
-          this.terminalOutput = `$ Remote compiler error:\n${err.error?.message || err.message}`;
+          let errMsg = err.error?.message || err.message;
+          if (err.error?.errors && Array.isArray(err.error.errors) && err.error.errors.length > 0) {
+            errMsg += '\nDetails:\n- ' + err.error.errors.join('\n- ');
+          }
+          this.terminalOutput = `$ Remote compiler error:\n${errMsg}`;
         }
       });
   }
@@ -654,7 +658,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         },
         error: (err) => {
           this.isSubmitting = false;
-          this.terminalOutput = `$ Submission failed: ${err.error?.message || err.message}`;
+          let errMsg = err.error?.message || err.message;
+          if (err.error?.errors && Array.isArray(err.error.errors) && err.error.errors.length > 0) {
+            errMsg += '\nDetails:\n- ' + err.error.errors.join('\n- ');
+          }
+          this.terminalOutput = `$ Submission failed: ${errMsg}`;
         }
       });
   }
