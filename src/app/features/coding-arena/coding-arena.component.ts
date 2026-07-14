@@ -311,6 +311,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
                 tags: [p.category]
               };
               this.totalTests = p.testCases.length;
+              this.setTimerDuration(p.difficulty);
             },
             error: (err) => {
               console.error('Failed to load problem:', err);
@@ -494,6 +495,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
               this.selectedLanguage = firstAllowed;
             }
           }
+          this.setTimerDuration(p.difficulty);
         },
         error: (err) => console.error('Failed to load problem details', err)
       });
@@ -511,6 +513,20 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       tags: ['Array']
     };
     this.totalTests = 3;
+    this.setTimerDuration('Easy');
+  }
+
+  private setTimerDuration(difficulty: string): void {
+    const diff = difficulty.toLowerCase();
+    if (diff === 'easy') {
+      this.timeRemainingSeconds = 10 * 60; // 10 minutes
+    } else if (diff === 'medium') {
+      this.timeRemainingSeconds = 15 * 60; // 15 minutes
+    } else if (diff === 'hard') {
+      this.timeRemainingSeconds = 25 * 60; // 25 minutes
+    } else {
+      this.timeRemainingSeconds = 30 * 60; // default 30 minutes
+    }
   }
 
   // ─── SignalR Events ────────────────────────────────────────────────────────
