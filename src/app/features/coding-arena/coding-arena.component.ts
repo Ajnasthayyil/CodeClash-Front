@@ -6,6 +6,7 @@ import { SubmissionsService, SubmissionResponseDto } from '../../core/services/s
 import { NotificationService } from '../../shared/notifications/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
+import * as signalR from '@microsoft/signalr';
 
 interface Problem {
   title: string;
@@ -30,7 +31,35 @@ interface TestResult {
   got?: string;
 }
 
-type Language = 'csharp' | 'python' | 'javascript' | 'cpp' | 'java' | 'go' | 'rust';
+type Language = string;
+
+/** Maps display names → submission identifiers used by the judge. */
+const LANGUAGE_DISPLAY_MAP: Record<string, string> = {
+  'python':     'Python',
+  'javascript': 'JavaScript',
+  'typescript': 'TypeScript',
+  'csharp':     'C#',
+  'c#':         'C#',
+  'cpp':        'C++',
+  'c++':        'C++',
+  'java':       'Java',
+  'go':         'Go',
+  'rust':       'Rust',
+};
+
+/** Returns a minimal valid starter template for a language. */
+function starterTemplate(lang: string): string {
+  const l = lang.toLowerCase();
+  if (l === 'python')     return '# Write your solution here\n\n';
+  if (l === 'javascript') return '// Write your solution here\n\n';
+  if (l === 'typescript') return '// Write your solution here\n\n';
+  if (l === 'csharp' || l === 'c#') return 'using System;\n\nclass Solution {\n    // Write your solution here\n}\n';
+  if (l === 'cpp'   || l === 'c++') return '#include <bits/stdc++.h>\nusing namespace std;\n\n// Write your solution here\n';
+  if (l === 'java')       return 'class Solution {\n    // Write your solution here\n}\n';
+  if (l === 'go')         return 'package main\n\n// Write your solution here\n';
+  if (l === 'rust')       return 'fn main() {\n    // Write your solution here\n}\n';
+  return '// Write your solution here\n';
+}
 
 @Component({
   selector: 'app-coding-arena',
@@ -52,23 +81,30 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   opponentSolved = 0;
   opponentTotal = 10;
 
-  matchId = 'CUSTOM-DUEL';
+  matchId = 'CODE-CLASH-542';
+  problemId = '';
+  opponentCode = '';
   roomId = '';
   currentUser: any = null;
+  private battleHub: signalR.HubConnection | null = null;
+  private typingTimeout: any;
 
   // ─── Problem ───────────────────────────────────────────────────────────────
-  problemId = '';
   problem: Problem | null = null;
   allowedLanguages: string[] = [];
 
   // ─── Code Editor ───────────────────────────────────────────────────────────
-  languages: Language[] = ['csharp', 'python', 'javascript', 'cpp', 'java', 'go', 'rust'];
-  selectedLanguage: Language = 'python';
-  preferredLanguage: Language | null = null;
+  languages: string[] = ['csharp', 'python', 'javascript', 'cpp', 'java', 'go', 'rust'];
+  battleLanguage: string = 'Python';
+  get battleLanguageLabel(): string {
+    return LANGUAGE_DISPLAY_MAP[this.battleLanguage.toLowerCase()] ?? this.battleLanguage;
+  }
+  selectedLanguage: string = 'Python';
+  preferredLanguage: string | null = null;
   autoSave = true;
   autoSaveIndicator = false;
 
-  codeSnippets: Record<Language, string> = {
+  codeSnippets: Record<string, string> = {
     'csharp': `public class Solution {\n    public int[] TwoSum(int[] nums, int target) {\n        return new int[] {};\n    }\n}`,
     'python': `class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        pass`,
     'javascript': `var twoSum = function(nums, target) {\n\n};`,
@@ -80,10 +116,27 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
 
   runCodeSuccess = false;
 
-  get currentCode(): string { return this.codeSnippets[this.selectedLanguage]; }
-  set currentCode(val: string) { 
-    this.codeSnippets[this.selectedLanguage] = val; 
+  get currentCode(): string {
+    const lang = this.selectedLanguage.toLowerCase();
+    if (this.codeSnippets[lang] === undefined) {
+      this.codeSnippets[lang] = '';
+    }
+    return this.codeSnippets[lang];
+  }
+  set currentCode(val: string) {
+    const lang = this.selectedLanguage.toLowerCase();
+    this.codeSnippets[lang] = val;
     this.runCodeSuccess = false;
+
+    if (this.battleHub && this.matchId) {
+      this.battleHub.invoke('SendTypingStatus', this.matchId, true);
+      this.battleHub.invoke('SendCodeMirror', this.matchId, val);
+
+      if (this.typingTimeout) clearTimeout(this.typingTimeout);
+      this.typingTimeout = setTimeout(() => {
+        this.battleHub?.invoke('SendTypingStatus', this.matchId, false);
+      }, 1500);
+    }
   }
 
   // Alias used by the template's [(ngModel)]="editorCode"
@@ -199,21 +252,72 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     this.playerName = this.currentUser?.name || this.currentUser?.username || 'You';
+    this.playerRating = this.currentUser?.rating || this.playerRating;
 
-    // Parse room parameter from URL query params
     this.route.queryParams.subscribe(params => {
       const roomParam = params['room'];
       const langParam = params['lang'];
-      if (langParam && this.languages.includes(langParam.toLowerCase() as Language)) {
-        this.preferredLanguage = langParam.toLowerCase() as Language;
-        this.selectedLanguage = this.preferredLanguage;
+      const battleId  = params['battleId'];
+      const problemId = params['problemId'];
+      const language  = params['language'];
+      const opName    = params['opponentName'];
+      const opElo     = params['opponentElo'];
+
+      if (opName) {
+        this.opponentName = opName;
       }
+      if (opElo) {
+        this.opponentRating = parseInt(opElo, 10);
+      }
+
       if (roomParam) {
+        // Custom Duel Room loading flow
         this.roomId = roomParam;
+        if (langParam) {
+          this.preferredLanguage = langParam.toLowerCase();
+          this.selectedLanguage = langParam.toLowerCase();
+        }
         this.loadDuelRoomDetails(roomParam);
       } else {
-        // Fallback for direct practice or demo
-        this.loadDemoProblem();
+        // 1v1 Ranked Battle flow
+        if (battleId) {
+          this.matchId = battleId;
+          this.connectToBattleRoom(battleId);
+        }
+
+        if (language) {
+          this.battleLanguage = language;
+          this.selectedLanguage = this.battleLanguage.toLowerCase();
+          this.codeSnippets[this.selectedLanguage] = starterTemplate(language);
+        } else {
+          this.selectedLanguage = this.battleLanguage.toLowerCase();
+          this.codeSnippets[this.selectedLanguage] = starterTemplate(this.battleLanguage);
+        }
+
+        if (problemId) {
+          this.problemId = problemId;
+          this.problemService.getProblemById(problemId).subscribe({
+            next: (p) => {
+              this.problem = {
+                title: p.title,
+                difficulty: p.difficulty as any,
+                description: p.statementMarkdown,
+                examples: p.testCases.filter(tc => !tc.isHidden).map(tc => ({
+                  input: tc.input || '',
+                  output: tc.expectedOutput || ''
+                })),
+                constraints: p.constraints,
+                tags: [p.category]
+              };
+              this.totalTests = p.testCases.length;
+            },
+            error: (err) => {
+              console.error('Failed to load problem:', err);
+            }
+          });
+        } else {
+          this.loadDemoProblem();
+        }
       }
     });
 
@@ -237,9 +341,58 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     }, 30000);
   }
 
+  private connectToBattleRoom(battleId: string): void {
+    const token = this.authService.getAccessToken();
+    this.battleHub = new signalR.HubConnectionBuilder()
+      .withUrl(`${environment.backendUrl}/hubs/battle`, {
+        accessTokenFactory: () => token || ''
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.battleHub.on('PlayerConnected', (userId) => {
+      console.log('Opponent player connected:', userId);
+    });
+
+    this.battleHub.on('OpponentTyping', (isTyping) => {
+      this.opponentIsTyping = isTyping;
+    });
+
+    this.battleHub.on('OpponentCodeUpdated', (code) => {
+      this.opponentCode = code;
+    });
+
+    this.battleHub.on('BattleEnded', (data: any) => {
+      this.notificationService.showToast('Battle Concluded!', 'success');
+      this.router.navigate(['/arena/result'], {
+        state: {
+          battleId: battleId,
+          winnerId: data.winnerId,
+          winnerDelta: data.winnerDelta,
+          loserDelta: data.loserDelta
+        }
+      });
+    });
+
+    this.battleHub.on('BattleCancelled', () => {
+      this.notificationService.showToast('Battle cancelled by server.', 'warning');
+      this.router.navigate(['/arena']);
+    });
+
+    this.battleHub.start().then(() => {
+      this.battleHub?.invoke('JoinBattleRoom', battleId);
+    }).catch(err => {
+      console.error('Failed to connect to BattleHub SignalR:', err);
+    });
+  }
+
   ngOnDestroy(): void {
     clearInterval(this.timerInterval);
     clearInterval(this.autoSaveInterval);
+    if (this.typingTimeout) clearTimeout(this.typingTimeout);
+    if (this.battleHub) {
+      this.battleHub.stop();
+    }
     this.cleanupSignalRListeners();
   }
 
@@ -311,7 +464,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           // Populate starter code snippets if returned
           if (p.languageTemplates && p.languageTemplates.length > 0) {
             p.languageTemplates.forEach(template => {
-              const langKey = template.language.toLowerCase() as Language;
+              const langKey = template.language.toLowerCase();
               if (this.codeSnippets[langKey] !== undefined) {
                 this.codeSnippets[langKey] = template.starterCode;
               }
@@ -322,7 +475,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           if (this.preferredLanguage && p.allowedLanguages.map(l => l.toLowerCase()).includes(this.preferredLanguage)) {
             this.selectedLanguage = this.preferredLanguage;
           } else if (p.allowedLanguages && p.allowedLanguages.length > 0) {
-            const firstAllowed = p.allowedLanguages[0].toLowerCase() as Language;
+            const firstAllowed = p.allowedLanguages[0].toLowerCase();
             if (this.languages.includes(firstAllowed)) {
               this.selectedLanguage = firstAllowed;
             }
@@ -410,8 +563,17 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   // ─── Language ──────────────────────────────────────────────────────────────
-  selectLanguage(lang: Language): void {
-    this.selectedLanguage = lang;
+  selectLanguage(lang: string): void {
+    if (!this.roomId) {
+      // Language is locked for ranked battles
+      return;
+    }
+    this.selectedLanguage = lang.toLowerCase();
+  }
+
+  get mappedLanguage(): string {
+    const lang = this.selectedLanguage.toLowerCase();
+    return LANGUAGE_DISPLAY_MAP[lang] ?? this.selectedLanguage;
   }
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
@@ -421,7 +583,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     this.lastExecutionResult = null;
     this.terminalOutput = '$ Compiling and executing code against sample test cases...\n';
 
-    this.submissionsService.runCode(this.problemId, this.selectedLanguage, this.currentCode)
+    this.submissionsService.runCode(this.problemId, this.mappedLanguage, this.currentCode)
       .subscribe({
         next: (res) => {
           this.isRunning = false;
@@ -460,7 +622,9 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting code to remote verification server...\n';
 
-    this.submissionsService.submitCode(this.problemId, this.selectedLanguage, this.currentCode)
+    const battleIdParam = this.roomId ? undefined : this.matchId;
+
+    this.submissionsService.submitCode(this.problemId, this.mappedLanguage, this.currentCode, battleIdParam)
       .subscribe({
         next: (res) => {
           this.isSubmitting = false;
@@ -473,12 +637,16 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
 
           if (res.status === 'Accepted') {
             this.notificationService.showToast('Solution Accepted! Processing duel result...', 'success', 3000);
-            // Victory modal is shown by the DuelEnded SignalR event
-            // If no room (solo practice), navigate back after a short delay
             if (!this.roomId) {
-              setTimeout(() => {
-                this.router.navigate(['/arena']);
-              }, 2000);
+              this.showSubmitSuccess = true;
+            } else {
+              // Victory modal is shown by the DuelEnded SignalR event
+              // If no room (solo practice), navigate back after a short delay
+              if (!this.battleHub) {
+                setTimeout(() => {
+                  this.router.navigate(['/arena']);
+                }, 2000);
+              }
             }
           } else {
             this.terminalOutput += `\n✗ Solution Rejected. Keep trying to fix bugs!`;
@@ -530,9 +698,9 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   // ─── Surrender ─────────────────────────────────────────────────────────────
   confirmSurrender(): void {
     this.showSurrenderModal = false;
-    
-    // Call Leave API on backend so opponent knows
+
     if (this.roomId && this.currentUser) {
+      // Call Leave API on backend so opponent knows
       this.http.post<any>(`${environment.apiUrl}/customduel/leave`, {
         roomId: this.roomId,
         userId: this.currentUser.id
@@ -548,6 +716,8 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           this.router.navigate(['/arena']);
         }
       });
+    } else if (this.battleHub && this.matchId) {
+      this.battleHub.invoke('Surrender', this.matchId);
     } else {
       this.router.navigate(['/arena']);
     }

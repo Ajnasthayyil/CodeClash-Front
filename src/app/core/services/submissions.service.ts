@@ -3,7 +3,6 @@ import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-
 export interface SubmissionSummary {
   id: string;
   userName: string;
@@ -71,15 +70,17 @@ export class SubmissionsService {
     return this.http.get<PaginatedList<SubmissionSummary>>(this.apiUrl, { params });
   }
 
-  submitCode(problemId: string, language: string, sourceCode: string): Observable<SubmissionResponseDto> {
+  submitCode(problemId: string, language: string, sourceCode: string, battleId?: string): Observable<SubmissionResponseDto> {
     const payload = {
       problemId,
       language,
-      sourceCode
+      sourceCode,
+      battleId
     };
     return this.http.post<SubmissionResponseDto>(this.apiUrl, payload, { withCredentials: true });
   }
-  runCode(problemId: string, language: string, sourceCode: string): Observable<SubmissionResponseDto> {
+
+  runCode(problemId: string, language: string, sourceCode: string): Observable<SubmissionResponseDto> {
     const payload = {
       problemId,
       language,

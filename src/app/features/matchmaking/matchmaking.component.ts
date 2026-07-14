@@ -1,16 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../shared/notifications/notification.service';
+import { CustomDuelService, UserSearchResultDto } from '../../core/services/custom-duel.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MatchmakingService } from '../../core/services/matchmaking.service';
 import { environment } from '../../../environments/environment';
-
-interface UserSearchResult {
-  id: string;
-  username: string;
-  email: string;
-  profilePicture?: string;
-}
 
 @Component({
   selector: 'app-matchmaking',
@@ -18,15 +15,15 @@ interface UserSearchResult {
   styleUrls: ['./matchmaking.component.scss']
 })
 export class MatchmakingComponent implements OnInit, OnDestroy {
-  // Ranked Duel Queue States
-  queueStatus: 'idle' | 'searching' | 'matched' = 'idle';
+  // ─── Ranked Duel Queue States ──────────────────────────────────────────────
+  queueStatus: 'idle' | 'configuring' | 'searching' | 'matched' = 'idle';
   queueSeconds = 0;
   private queueInterval: any;
 
   // Opponent matching settings
   selectedDifficulty: 'easy' | 'medium' | 'hard' = 'medium';
   selectedLanguage = 'Python';
-  languages: string[] = ['Python', 'JavaScript', 'TypeScript', 'C++', 'Java', 'Go', 'Rust'];
+  languages: string[] = ['Python', 'JavaScript', 'TypeScript', 'C++', 'C#', 'Java', 'Go', 'Rust'];
   userElo = 1200;
   userInitial = 'U';
   currentUser: any = null;
@@ -39,7 +36,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
   // Friend Search / Invite States
   searchQuery = '';
-  searchResults: UserSearchResult[] = [];
+  searchResults: UserSearchResultDto[] = [];
   lobbyStatus: 'idle' | 'invited' | 'lobby' | 'declined' = 'idle';
   invitedFriend: { id: string; username: string } | null = null;
   hostUser: { id: string; username: string } | null = null;
@@ -55,13 +52,16 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
   private signalRListeners: { event: string; handler: (...args: any[]) => void }[] = [];
   private duelNavigating = false; // guard against double-navigation from duplicate DuelStarted events
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private http: HttpClient,
     private notificationService: NotificationService,
-    private authService: AuthService
+    private customDuelService: CustomDuelService,
+    private authService: AuthService,
+    private matchmakingService: MatchmakingService
   ) {}
 
   ngOnInit(): void {
@@ -73,8 +73,42 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
     this.setupSignalRListeners();
 
+    // Real-time 1v1 Ranked Matchmaking subscriptions
+    this.matchmakingService.opponentFound$.pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      if (this.queueInterval) {
+        clearInterval(this.queueInterval);
+      }
+      this.queueStatus = 'matched';
+      this.notificationService.showToast('Match found! Teleporting to coding arena...', 'success', 3000);
+      this.notificationService.addNotification(
+        'Match Found! ⚔️',
+        `Opponent found for ${this.selectedLanguage} (${this.selectedDifficulty.toUpperCase()}).`,
+        'success'
+      );
+      setTimeout(() => {
+        this.router.navigate(['/arena/battle'], {
+          queryParams: {
+            battleId: data.battleId,
+            problemId: data.problemId,
+            language: data.language,
+            opponentName: data.opponentName,
+            opponentElo: data.opponentElo,
+            mode: '1v1'
+          }
+        });
+      }, 2000);
+    });
+
+    this.matchmakingService.queueLeft$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.queueInterval) {
+        clearInterval(this.queueInterval);
+      }
+      this.queueStatus = 'configuring';
+      this.queueSeconds = 0;
+    });
+
     // Check if routed with a roomId query param
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const roomParam = params['room'];
       if (roomParam) {
         this.joinExistingRoom(roomParam);
@@ -85,6 +119,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.cancelSearch();
     this.cleanupSignalRListeners();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // ─── SignalR Events ────────────────────────────────────────────────────────
@@ -125,7 +161,6 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
               this.amIReady = data.isReady;
             }
             // Update host / friend ready states
-            const isHost = this.currentUser?.id === this.hostUser?.id;
             if (data.userId === this.hostUser?.id) {
               this.isHostReady = data.isReady;
             } else {
@@ -197,71 +232,78 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     });
   }
 
+  openConfigOverlay(): void {
+    this.queueStatus = 'configuring';
+  }
+
+  closeConfigOverlay(): void {
+    this.queueStatus = 'idle';
+  }
+
   startSearch(): void {
-    if (this.queueStatus !== 'idle') return;
+    if (this.queueStatus !== 'configuring') return;
     this.queueStatus = 'searching';
     this.queueSeconds = 0;
-    this.notificationService.showToast('Matchmaking search started...', 'info', 2500);
+    this.notificationService.showToast('Entering matchmaking queue...', 'info', 2500);
 
-    this.queueInterval = setInterval(() => {
-      this.queueSeconds++;
-
-      // Simulate match found after 15 seconds
-      if (this.queueSeconds >= 15) {
-        clearInterval(this.queueInterval);
-        this.queueStatus = 'matched';
-
-        this.notificationService.showToast('Match found! Teleporting to arena...', 'success', 3000);
-        this.notificationService.addNotification(
-          'Match Found! ⚔️',
-          `Opponent: ByteWizard (1766 ELO) matched for ${this.selectedLanguage} (${this.selectedDifficulty.toUpperCase()}).`,
-          'success'
-        );
-
-        setTimeout(() => {
-          this.router.navigate(['/arena/battle']);
-        }, 2000);
+    this.matchmakingService.getQueueTicket().subscribe({
+      next: () => {
+        this.matchmakingService.initConnection().then(() => {
+          this.matchmakingService.joinQueue(this.selectedLanguage, this.selectedDifficulty);
+          this.queueInterval = setInterval(() => {
+            this.queueSeconds++;
+          }, 1000);
+        }).catch(err => {
+          this.notificationService.showToast('Failed to connect to matchmaking server.', 'error');
+          this.queueStatus = 'configuring';
+          console.error(err);
+        });
+      },
+      error: (err) => {
+        this.notificationService.showToast('Failed to acquire matchmaking ticket.', 'error');
+        this.queueStatus = 'configuring';
+        console.error(err);
       }
-    }, 1000);
+    });
   }
 
   cancelSearch(): void {
     if (this.queueStatus === 'searching') {
       this.notificationService.showToast('Matchmaking search cancelled.', 'warning', 2500);
     }
+    this.matchmakingService.leaveQueue();
+    this.matchmakingService.stopConnection();
     if (this.queueInterval) {
       clearInterval(this.queueInterval);
+      this.queueInterval = null;
     }
-    this.queueStatus = 'idle';
+    this.queueStatus = 'configuring';
     this.queueSeconds = 0;
   }
 
   // ─── Friendly Duel Invitation ──────────────────────────────────────────────
   searchUsers(): void {
-    if (!this.searchQuery.trim()) {
+    const query = this.searchQuery.trim();
+    if (!query || query.length < 2) {
       this.searchResults = [];
       return;
     }
-    this.http.get<UserSearchResult[]>(`${environment.apiUrl}/users/search?query=${encodeURIComponent(this.searchQuery.trim())}`)
-      .subscribe({
-        next: (res) => {
-          this.searchResults = res || [];
-        },
-        error: (err) => console.error('Failed to search users', err)
-      });
+    this.customDuelService.searchUsers(query).subscribe({
+      next: (res) => {
+        this.searchResults = res || [];
+      },
+      error: (err) => console.error('Failed to search users', err)
+    });
   }
 
-  inviteFriendFromPopup(friend: UserSearchResult): void {
+  inviteFriendFromPopup(friend: UserSearchResultDto): void {
     this.showSearchPopup = false;
     this.inviteFriend(friend);
   }
 
-  inviteFriend(friend: UserSearchResult): void {
+  inviteFriend(friend: UserSearchResultDto): void {
     if (!this.currentUser) return;
-    this.http.post<any>(`${environment.apiUrl}/customduel/invite`, {
-      hostUserId: this.currentUser.id,
-      friendUserId: friend.id
-    }).subscribe({
+    this.customDuelService.inviteFriend(this.currentUser.id, friend.id).subscribe({
       next: (res) => {
         this.friendlyRoomId = res.roomId;
         this.friendlyRoomCode = res.roomCode;
@@ -285,7 +327,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
   // ─── Custom Duel Lobby Handling ────────────────────────────────────────────
   private joinExistingRoom(roomId: string): void {
-    this.http.get<any>(`${environment.apiUrl}/customduel/${roomId}`)
+    this.customDuelService.getRoomDetails(roomId)
       .subscribe({
         next: (room) => {
           this.friendlyRoomId = room.id;
@@ -315,11 +357,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   toggleReadyState(): void {
     if (!this.friendlyRoomId || !this.currentUser) return;
     const nextReadyState = !this.amIReady;
-    this.http.post<any>(`${environment.apiUrl}/customduel/ready`, {
-      roomId: this.friendlyRoomId,
-      userId: this.currentUser.id,
-      isReady: nextReadyState
-    }).subscribe({
+    this.customDuelService.setPlayerReady(this.friendlyRoomId, this.currentUser.id, nextReadyState).subscribe({
       next: () => {
         this.amIReady = nextReadyState;
       },
@@ -331,10 +369,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     if (!this.friendlyRoomId) return;
     this.duelNavigating = false; // reset guard before each attempt
     this.showLobbyPopup = false;
-    this.http.post<any>(`${environment.apiUrl}/customduel/start`, {
-      roomId: this.friendlyRoomId,
-      difficulty: this.selectedDifficulty
-    }).subscribe({
+    this.customDuelService.startDuel(this.friendlyRoomId).subscribe({
       next: () => {
         // Navigate immediately from HTTP success — SignalR DuelStarted is a secondary mechanism.
         // This prevents the host from being stranded if their SignalR group membership dropped.
