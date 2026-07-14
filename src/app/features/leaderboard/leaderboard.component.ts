@@ -1,11 +1,13 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { LeaderboardService } from '../../core/services/leaderboard.service';
+import { LeaderboardService, MyStatsDto } from '../../core/services/leaderboard.service';
 import { AuthService } from '../../core/services/auth.service';
 
 interface LeaderboardEntry {
   rank: number;
+  id: string;
   name: string;
   points: number;
+  rating: number;
   wl: string;
   battles: number;
   streak: number;
@@ -13,7 +15,6 @@ interface LeaderboardEntry {
   initial: string;
   avatarColor: string;
   isCurrentUser?: boolean;
-  country: string;
 }
 
 @Component({
@@ -25,45 +26,23 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
   @ViewChild('eloSparkline') eloSparkline!: ElementRef<HTMLCanvasElement>;
 
   activeTab = 'Global';
-  tabs = ['Global', 'Friends', 'This Week', 'By Language'];
+  tabs = ['Global', 'Recent Battles', 'This Week', 'By Language'];
 
-  selectedCountry = 'All';
   selectedLanguage = 'All';
-  selectedTimePeriod = 'All';
+  languages = ['All', 'Python', 'JavaScript', 'C#', 'Java', 'C++'];
 
-  countries = [
-    { code: 'All', name: 'All Countries' },
-    { code: 'US', name: 'United States' },
-    { code: 'UK', name: 'United Kingdom' },
-    { code: 'IN', name: 'India' },
-    { code: 'DE', name: 'Germany' },
-    { code: 'FR', name: 'France' }
-  ];
-
-  languages = ['All', 'Python', 'Go', 'Rust', 'Java', 'C++', 'JavaScript', 'TypeScript'];
-  timePeriods = ['All', 'This Week', 'This Month'];
-
-  // ELO History for NovaCoder (You)
-  eloHistory = [
-    { day: 1, elo: 1710 },
-    { day: 5, elo: 1735 },
-    { day: 10, elo: 1720 },
-    { day: 15, elo: 1765 },
-    { day: 20, elo: 1750 },
-    { day: 25, elo: 1810 },
-    { day: 30, elo: 1842 }
-  ];
-
-  // Raw database
   private allPlayers: LeaderboardEntry[] = [];
   isLoading = false;
 
-  // Filtered view data
   filteredPlayers: LeaderboardEntry[] = [];
   topThree: LeaderboardEntry[] = [];
   remainingPlayers: LeaderboardEntry[] = [];
+
+  // Current user sidebar stats
+  myStats: MyStatsDto | null = null;
   currentUserRank: number | null = null;
   totalPlayers: number = 0;
+
   Math = Math;
 
   constructor(
@@ -73,113 +52,116 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.fetchLeaderboard();
+    this.fetchMyStats();
   }
 
-  fetchLeaderboard() {
-    this.isLoading = true;
-    this.leaderboardService.getLeaderboard().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res) {
-          // Map DB users to leaderboard entries
-          // Rank is assigned sequentially since the backend already sorts them alphabetically
-          this.allPlayers = res.map((user, index) => {
-            const initial = user.username ? user.username.charAt(0).toUpperCase() : '?';
-            
-            // Assign deterministic color based on username
-            const colors = ['#22c55e', '#3b82f6', '#a855f7', '#14b8a6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
-            let colorIndex = 0;
-            if (user.username) {
-              colorIndex = user.username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-            }
-            
-            return {
-              rank: index + 1,
-              name: user.username,
-              points: user.totalPoints || 0,
-              wl: '0/0',
-              battles: 0,
-              streak: 0,
-              lang: 'Any',
-              initial: initial,
-              avatarColor: colors[colorIndex],
-              country: 'US'
-            };
-          });
-          this.applyFilters();
-        }
+  fetchMyStats() {
+    this.leaderboardService.getMyStats().subscribe({
+      next: (stats) => {
+        this.myStats = stats;
+        this.currentUserRank = stats.rank;
+        this.totalPlayers = stats.totalPlayers;
       },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Failed to fetch leaderboard', err);
-        this.allPlayers = [];
-        this.applyFilters();
+      error: () => {
+        // Not logged in or error — ignore silently
       }
     });
   }
 
+  fetchLeaderboard(language?: string, scope?: string) {
+    this.isLoading = true;
+    this.leaderboardService.getLeaderboard(language, scope).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        const currentUserId = this.authService.getCurrentUser()?.id;
+        this.allPlayers = this.mapToEntries(res, currentUserId);
+        this.buildView(this.allPlayers);
+      },
+      error: () => {
+        this.isLoading = false;
+        this.allPlayers = [];
+        this.buildView([]);
+      }
+    });
+  }
+
+  fetchRecentBattles() {
+    this.isLoading = true;
+    this.leaderboardService.getRecentBattles().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        const currentUserId = this.authService.getCurrentUser()?.id;
+        const entries = this.mapToEntries(res, currentUserId);
+        this.buildView(entries);
+      },
+      error: () => {
+        this.isLoading = false;
+        this.buildView([]);
+      }
+    });
+  }
+
+  private mapToEntries(res: any[], currentUserId?: string): LeaderboardEntry[] {
+    const colors = ['#22c55e', '#3b82f6', '#a855f7', '#14b8a6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
+    return res.map((user, index) => {
+      const colorIndex = user.username
+        ? user.username.split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0) % colors.length
+        : 0;
+      return {
+        rank: index + 1,
+        id: user.id,
+        name: user.username,
+        points: user.totalPoints ?? 0,
+        rating: user.rating ?? 1500,
+        wl: `${user.wins ?? 0}/${user.losses ?? 0}`,
+        battles: user.battles ?? 0,
+        streak: 0,
+        lang: user.favLanguage && user.favLanguage !== 'N/A' ? user.favLanguage : '—',
+        initial: user.username ? user.username.charAt(0).toUpperCase() : '?',
+        avatarColor: colors[colorIndex],
+        isCurrentUser: !!currentUserId && user.id === currentUserId
+      };
+    });
+  }
+
   ngAfterViewInit() {
-    // Redraw sparkline when canvas is rendered
     setTimeout(() => this.drawEloSparkline(), 50);
   }
 
   setTab(tab: string) {
     this.activeTab = tab;
-    this.applyFilters();
+    this.selectedLanguage = 'All';
+
+    if (tab === 'Global') {
+      this.fetchLeaderboard();
+    } else if (tab === 'This Week') {
+      this.fetchLeaderboard(undefined, 'weekly');
+    } else if (tab === 'Recent Battles') {
+      this.fetchRecentBattles();
+    } else if (tab === 'By Language') {
+      this.fetchLeaderboard(this.selectedLanguage !== 'All' ? this.selectedLanguage : undefined);
+    }
   }
 
-  applyFilters() {
-    let result = [...this.allPlayers];
-
-    // Filter by Tab
-    if (this.activeTab === 'Friends') {
-      // Mock friends subset
-      result = result.filter(p => ['NexusGod', 'AlgoKing99', 'NovaCoder', 'CodeGeek'].includes(p.name));
-    } else if (this.activeTab === 'This Week') {
-      // Shuffled/slightly different scores for week activity simulation
-      result = result.map(p => ({
-        ...p,
-        points: Math.max(0, p.points - Math.floor(Math.random() * 20))
-      })).sort((a, b) => b.points - a.points);
-    } else if (this.activeTab === 'By Language') {
-      // Grouped by current filter, or default list sorted by matching main language
-      if (this.selectedLanguage !== 'All') {
-        result = result.filter(p => p.lang === this.selectedLanguage);
-      }
+  onLanguageChange() {
+    if (this.activeTab === 'By Language') {
+      this.fetchLeaderboard(this.selectedLanguage !== 'All' ? this.selectedLanguage : undefined);
     }
+  }
 
-    // Filter by dropdown selectors
-    if (this.selectedCountry !== 'All') {
-      result = result.filter(p => p.country === this.selectedCountry);
+  private buildView(entries: LeaderboardEntry[]) {
+    // Re-rank
+    entries.forEach((p, idx) => p.rank = idx + 1);
+    this.filteredPlayers = entries;
+    if (!this.myStats) {
+      // Fallback: count from list
+      const currentUserId = this.authService.getCurrentUser()?.id;
+      const found = entries.find(p => p.isCurrentUser);
+      this.currentUserRank = found ? found.rank : null;
+      this.totalPlayers = entries.length;
     }
-
-    if (this.selectedLanguage !== 'All' && this.activeTab !== 'By Language') {
-      result = result.filter(p => p.lang === this.selectedLanguage);
-    }
-
-    // Re-rank items according to filters
-    result = result.sort((a, b) => b.points - a.points);
-    
-    const currentUsername = this.authService.getCurrentUser()?.username;
-
-    result.forEach((p, idx) => {
-      p.rank = idx + 1;
-      if (currentUsername && p.name.toLowerCase() === currentUsername.toLowerCase()) {
-        p.isCurrentUser = true;
-      } else {
-        p.isCurrentUser = false;
-      }
-    });
-
-    this.filteredPlayers = result;
-    this.totalPlayers = result.length;
-    
-    // Find current user rank
-    const currentUserIndex = result.findIndex(p => p.isCurrentUser);
-    this.currentUserRank = currentUserIndex !== -1 ? result[currentUserIndex].rank : null;
-
-    this.topThree = result.slice(0, 3);
-    this.remainingPlayers = result.slice(3);
+    this.topThree = entries.slice(0, 3);
+    this.remainingPlayers = entries.slice(3);
   }
 
   drawEloSparkline(): void {
@@ -193,12 +175,26 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     canvas.width = W;
     canvas.height = H;
 
-    const data = this.eloHistory;
+    // Build sparkline from myStats language breakdown (just use counts as proxy)
+    let data: { day: number; elo: number }[];
+    if (this.myStats && this.myStats.totalPoints > 0) {
+      // Simple synthetic trend based on rating
+      const base = Math.max(0, this.myStats.rating - 150);
+      data = [0, 5, 10, 15, 20, 25, 30].map((day, i) => ({
+        day,
+        elo: base + Math.round((this.myStats!.rating - base) * (i / 6))
+      }));
+    } else {
+      data = [
+        { day: 0, elo: 1500 }, { day: 5, elo: 1510 }, { day: 10, elo: 1505 },
+        { day: 15, elo: 1520 }, { day: 20, elo: 1515 }, { day: 25, elo: 1530 }, { day: 30, elo: 1500 }
+      ];
+    }
+
     const minElo = Math.min(...data.map(d => d.elo)) - 10;
     const maxElo = Math.max(...data.map(d => d.elo)) + 10;
     const padL = 5, padR = 5, padT = 10, padB = 10;
 
-    // Draw grid/background line
     ctx.clearRect(0, 0, W, H);
     ctx.strokeStyle = 'rgba(249,115,22,0.1)';
     ctx.lineWidth = 1;
@@ -207,19 +203,16 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     ctx.lineTo(W, H / 2);
     ctx.stroke();
 
-    // Map points to canvas dimensions
-    const points = data.map((d, index) => {
-      const x = padL + (index / (data.length - 1)) * (W - padL - padR);
-      const y = H - padB - ((d.elo - minElo) / (maxElo - minElo)) * (H - padT - padB);
-      return { x, y, elo: d.elo };
-    });
+    const points = data.map((d, index) => ({
+      x: padL + (index / (data.length - 1)) * (W - padL - padR),
+      y: H - padB - ((d.elo - minElo) / (maxElo - minElo)) * (H - padT - padB),
+      elo: d.elo
+    }));
 
-    // Create gradient fill below sparkline
     const grad = ctx.createLinearGradient(0, 0, 0, H);
     grad.addColorStop(0, 'rgba(249,115,22,0.2)');
     grad.addColorStop(1, 'rgba(249,115,22,0.0)');
 
-    // Fill area under sparkline
     ctx.beginPath();
     ctx.moveTo(points[0].x, H);
     points.forEach(p => ctx.lineTo(p.x, p.y));
@@ -228,17 +221,12 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Draw main line path
     ctx.beginPath();
-    points.forEach((p, idx) => {
-      if (idx === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-    ctx.strokeStyle = '#f97316'; // CodeClash orange ELO line
+    points.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = '#f97316';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Draw dots for each point
     points.forEach((p, idx) => {
       ctx.beginPath();
       ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
@@ -250,3 +238,4 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     });
   }
 }
+
