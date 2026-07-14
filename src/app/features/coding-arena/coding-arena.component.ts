@@ -198,6 +198,8 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   showVictoryModal = false;
   showDefeatModal = false;
   showExitConfirmModal = false;
+  victorySubtitle = 'You solved the challenge first and won the duel!';
+  defeatSubtitle = 'You were defeated in the duel. Keep practicing to climb the leaderboard!';
   private exitConfirmationPromiseResolver: ((value: boolean) => void) | null = null;
   battleEndData: any = null;
   activePanel: 'problem' | 'hints' = 'problem';
@@ -376,7 +378,13 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       clearInterval(this.timerInterval);
 
       if (data.winnerId === this.currentUser?.id) {
-        this.notificationService.showToast('VICTORY! You solved the challenge first!', 'success', 5000);
+        if (data.isSurrender) {
+          this.notificationService.showToast('VICTORY! The opponent surrendered!', 'success', 5000);
+          this.victorySubtitle = 'Your opponent surrendered the battle!';
+        } else {
+          this.notificationService.showToast('VICTORY! You solved the challenge first!', 'success', 5000);
+          this.victorySubtitle = 'You solved the challenge first and won the duel!';
+        }
         const elapsed = (30 * 60) - this.timeRemainingSeconds;
         const m = Math.floor(elapsed / 60);
         const s = elapsed % 60;
@@ -384,7 +392,13 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         this.victoryPoints = data.winnerDelta;
         this.showVictoryModal = true;
       } else {
-        this.notificationService.showToast(`DEFEAT! ${this.opponentName} solved the challenge first!`, 'error', 5000);
+        if (data.isSurrender) {
+          this.notificationService.showToast('DEFEAT! You surrendered the match!', 'error', 5000);
+          this.defeatSubtitle = 'You surrendered the match.';
+        } else {
+          this.notificationService.showToast(`DEFEAT! ${this.opponentName} solved the challenge first!`, 'error', 5000);
+          this.defeatSubtitle = 'You were defeated in the duel. Keep practicing to climb the leaderboard!';
+        }
         this.showDefeatModal = true;
       }
 
