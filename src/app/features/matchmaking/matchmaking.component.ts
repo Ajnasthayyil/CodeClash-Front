@@ -27,6 +27,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   userElo = 1200;
   userInitial = 'U';
   currentUser: any = null;
+  opponentName = '';
+  opponentElo = 1200;
 
   // Custom Friend Room States
   friendlyRoomId = ''; // Holds Guid Room ID
@@ -78,6 +80,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
       if (this.queueInterval) {
         clearInterval(this.queueInterval);
       }
+      this.opponentName = data.opponentName || 'Unknown Opponent';
+      this.opponentElo = data.opponentElo || 1200;
       this.queueStatus = 'matched';
       this.notificationService.showToast('Match found! Teleporting to coding arena...', 'success', 3000);
       this.notificationService.addNotification(
