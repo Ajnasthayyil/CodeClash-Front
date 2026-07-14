@@ -275,7 +275,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         this.roomId = roomParam;
         if (langParam) {
           this.preferredLanguage = langParam.toLowerCase();
-          this.selectedLanguage = this.preferredLanguage;
+          this.selectedLanguage = langParam.toLowerCase();
         }
         this.loadDuelRoomDetails(roomParam);
       } else {
