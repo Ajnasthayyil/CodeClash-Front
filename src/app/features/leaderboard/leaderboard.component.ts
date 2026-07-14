@@ -26,7 +26,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
   @ViewChild('eloSparkline') eloSparkline!: ElementRef<HTMLCanvasElement>;
 
   activeTab = 'Global';
-  tabs = ['Global', 'Recent Battles', 'This Week', 'By Language'];
+  tabs = ['Global', 'Friends', 'This Week', 'By Language'];
 
   selectedLanguage = 'All';
   languages = ['All', 'Python', 'JavaScript', 'C#', 'Java', 'C++'];
@@ -85,9 +85,9 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     });
   }
 
-  fetchRecentBattles() {
+  fetchFriends() {
     this.isLoading = true;
-    this.leaderboardService.getRecentBattles().subscribe({
+    this.leaderboardService.getFriends().subscribe({
       next: (res) => {
         this.isLoading = false;
         const currentUserId = this.authService.getCurrentUser()?.id;
@@ -136,8 +136,8 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
       this.fetchLeaderboard();
     } else if (tab === 'This Week') {
       this.fetchLeaderboard(undefined, 'weekly');
-    } else if (tab === 'Recent Battles') {
-      this.fetchRecentBattles();
+    } else if (tab === 'Friends') {
+      this.fetchFriends();
     } else if (tab === 'By Language') {
       this.fetchLeaderboard(this.selectedLanguage !== 'All' ? this.selectedLanguage : undefined);
     }

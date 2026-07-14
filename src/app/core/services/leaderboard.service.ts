@@ -47,7 +47,7 @@ export class LeaderboardService {
     return this.http.get<MyStatsDto>(`${this.apiUrl}/me`);
   }
 
-  getRecentBattles(): Observable<LeaderboardUserDto[]> {
-    return this.http.get<LeaderboardUserDto[]>(`${this.apiUrl}/recent-battles`);
+  getFriends(): Observable<LeaderboardUserDto[]> {
+    return this.http.get<LeaderboardUserDto[]>(`${this.apiUrl}/friends`);
   }
 }
