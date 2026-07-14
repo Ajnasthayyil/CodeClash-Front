@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked, HostListener } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ProblemService, ProblemDetailDto } from '../../core/services/problem.service';
@@ -804,5 +804,25 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
 
   getDifficultyClass(diff: string): string {
     return diff === 'Easy' ? 'difficulty-easy' : diff === 'Medium' ? 'difficulty-medium' : 'difficulty-hard';
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any): void {
+    if (!this.showVictoryModal && !this.showDefeatModal && this.matchId && !this.opponentLeft) {
+      $event.returnValue = true;
+    }
+  }
+
+  canDeactivate(): boolean {
+    if (this.showVictoryModal || this.showDefeatModal || !this.matchId || this.opponentLeft) {
+      return true;
+    }
+
+    const confirmExit = confirm('Are you sure you want to exit or surrender this game?');
+    if (confirmExit) {
+      this.confirmSurrender();
+      return true;
+    }
+    return false;
   }
 }
