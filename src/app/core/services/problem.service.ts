@@ -17,6 +17,11 @@ export interface ProblemSummaryDto {
   memoryLimitMb: number;
 }
 
+export interface LanguageTemplateDto {
+  language: string;
+  starterCode: string;
+}
+
 export interface TestCaseDto {
   id: string;
   input: string | null;
@@ -40,6 +45,7 @@ export interface ProblemDetailDto {
   createdBy: string;
   createdAt: string;
   testCases: TestCaseDto[];
+  languageTemplates: LanguageTemplateDto[];
 }
 
 export interface PaginatedList<T> {

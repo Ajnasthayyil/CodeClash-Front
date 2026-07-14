@@ -47,6 +47,7 @@ export class NotificationService implements OnDestroy {
 
   private hubConnection: signalR.HubConnection | null = null;
   private connectionInterval: any;
+  private activeRoomId: string | null = null; // track joined room for auto-rejoin on reconnect
 
   constructor(private authService: AuthService, private http: HttpClient) {
     this.startSignalRConnection();
@@ -84,6 +85,15 @@ export class NotificationService implements OnDestroy {
       .then(() => console.log('SignalR Notification Hub connected.'))
       .catch(err => console.error('Error while starting connection: ' + err));
 
+    // Re-join the room group if the connection auto-reconnects (new ConnectionId loses all groups)
+    this.hubConnection.onreconnected(() => {
+      console.log('SignalR reconnected — rejoining room group if active.');
+      if (this.activeRoomId && this.hubConnection) {
+        this.hubConnection.invoke('JoinRoom', this.activeRoomId)
+          .catch(err => console.error('Failed to rejoin room on reconnect:', err));
+      }
+    });
+
     this.hubConnection.on('ReceiveNotification', (data: { title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' }) => {
       this.addNotification(data.title, data.message, data.type);
       this.showToast(`New Notification: ${data.title}`, data.type);
@@ -120,6 +130,7 @@ export class NotificationService implements OnDestroy {
   }
 
   joinRoomGroup(roomId: string): void {
+    this.activeRoomId = roomId;
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       this.hubConnection.invoke('JoinRoom', roomId)
         .catch(err => console.error('Error joining room group:', err));
@@ -127,11 +138,19 @@ export class NotificationService implements OnDestroy {
   }
 
   leaveRoomGroup(roomId: string): void {
+    if (this.activeRoomId === roomId) {
+      this.activeRoomId = null;
+    }
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       this.hubConnection.invoke('LeaveRoom', roomId)
         .catch(err => console.error('Error leaving room group:', err));
     }
   }
+
+  public getHubConnection(): signalR.HubConnection | null {
+    return this.hubConnection;
+  }
+
 
   private loadNotifications(token: string): void {
     const headers = new HttpHeaders({

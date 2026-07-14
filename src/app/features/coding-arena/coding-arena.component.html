@@ -27,7 +27,7 @@
   <div class="arena-body" style="height: 100%;">
 
     <!-- ─── LEFT: Problem Description ─── -->
-    <aside class="panel panel-left" [class.panel-visible]="mobileActiveTab === 'description'">
+    <aside class="panel panel-left" [class.panel-visible]="mobileActiveTab === 'description'" *ngIf="problem">
       <div class="panel-tabs">
         <button (click)="activePanel = 'problem'" class="panel-tab" [class.tab-active]="activePanel === 'problem'">Description</button>
         <button (click)="activePanel = 'hints'"   class="panel-tab" [class.tab-active]="activePanel === 'hints'">Hints</button>
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Constraints -->
-        <div class="constraints-section">
+        <div class="constraints-section" *ngIf="problem.constraints && problem.constraints.length > 0">
           <p class="constraints-title">Constraints</p>
           <ul class="constraints-list">
             <li *ngFor="let c of problem.constraints">{{ c }}</li>
@@ -70,15 +70,7 @@
         <div *ngIf="activePanel === 'hints'" class="hints-wrap">
           <div class="hint-card">
             <div class="hint-label">Hint 1</div>
-            <p>A brute-force approach would be to search for all possible pairs, but that is O(n²).</p>
-          </div>
-          <div class="hint-card">
-            <div class="hint-label">Hint 2</div>
-            <p>Fix one number <code class="inline-code">x</code>, then search for <code class="inline-code">target - x</code> in the rest of the array.</p>
-          </div>
-          <div class="hint-card">
-            <div class="hint-label">Hint 3</div>
-            <p>Use a hash map so the lookup for the complement is O(1), making the whole solution O(n).</p>
+            <p>Optimize your runtime and space complexity; standard arrays can be optimized via hash-maps or maps for constant lookup.</p>
           </div>
         </div>
       </div>
@@ -91,6 +83,12 @@
         </div>
         <div class="prog-track"><div class="prog-fill prog-fill-blue" [style.width.%]="myFillPercent"></div></div>
       </div>
+    </aside>
+
+    <!-- PENDING LOAD SCREEN -->
+    <aside class="panel panel-left flex flex-col items-center justify-center text-center p-6" [class.panel-visible]="mobileActiveTab === 'description'" *ngIf="!problem">
+      <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+      <p class="text-sm text-slate-400">Loading problem details...</p>
     </aside>
 
     <!-- ─── CENTER: Code Editor ─── -->
@@ -115,22 +113,19 @@
         </div>
       </div>
 
-      <!-- Code editor: line numbers + textarea -->
-      <div class="editor-area">
-        <div #lineNums class="line-nums" aria-hidden="true">
-          <div *ngFor="let ln of codeLines; let i = index" class="ln">{{ i + 1 }}</div>
-        </div>
-        <textarea
-          #codeEditor
-          class="code-area"
-          [(ngModel)]="editorCode"
-          (ngModelChange)="onCodeChange($event)"
-          (scroll)="syncScroll($event)"
-          spellcheck="false"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-        ></textarea>
+      <!-- Code editor: Monaco with full syntax highlighting -->
+      <div class="editor-area monaco-area" [style.height.px]="editorHeight">
+        <app-monaco-editor
+          [value]="currentCode"
+          [language]="selectedLanguage"
+          (valueChange)="onCodeChange($event)"
+          style="width:100%;height:100%;display:block;"
+        ></app-monaco-editor>
+      </div>
+
+      <!-- Drag-resizable separator border -->
+      <div class="resize-divider" (mousedown)="startResize($event)" title="Drag to resize editor">
+        <div class="resize-handle-line"></div>
       </div>
 
       <!-- Terminal output -->
@@ -185,7 +180,7 @@
         </button>
         <button (click)="submitSolution()" [disabled]="!runCodeSuccess || isRunning || isSubmitting" class="btn-submit" title="Run Code successfully before submitting">
           <span *ngIf="isSubmitting" class="spin spin-white"></span>
-          {{ isSubmitting ? 'Submitting...' : 'Submit Solution' }}
+          {{ isSubmitting ? 'Submit Solution' : 'Submit Solution' }}
         </button>
       </div>
     </main>
@@ -193,26 +188,31 @@
     <!-- ─── RIGHT: AI + Opponent + Timer ─── -->
     <aside class="panel panel-right" [class.panel-visible]="mobileActiveTab === 'info'">
 
-
       <!-- Opponent card -->
-      <div class="opp-card">
+      <div class="opp-card" [class.opp-left]="opponentLeft">
         <div class="opp-row">
           <div class="player-avatar avatar-purple-sm">{{ opponentName[0] }}</div>
           <div class="opp-info">
             <span class="opp-name">{{ opponentName }}</span>
-            <span class="opp-elo">{{ opponentRating }} ELO</span>
+            <span class="opp-elo" *ngIf="!opponentLeft">{{ opponentRating }} ELO</span>
+            <span class="opp-elo text-red-400 font-bold" *ngIf="opponentLeft">LEFT BATTLE</span>
           </div>
-          <div *ngIf="opponentIsTyping" class="opp-typing">
+          <div *ngIf="opponentIsTyping && !opponentLeft" class="opp-typing">
             <span class="typing-dots-sm"><span></span><span></span><span></span></span>
             coding...
           </div>
         </div>
-        <div class="opp-progress">
+        <div class="opp-progress" *ngIf="!opponentLeft">
           <div class="prog-row-sm">
             <span class="prog-lbl">Tests Passed</span>
             <span class="prog-val">{{ opponentTestsPassed }} / {{ totalTests }}</span>
           </div>
           <div class="prog-track"><div class="prog-fill prog-fill-green" [style.width.%]="opponentFillPercent"></div></div>
+        </div>
+        <div class="bg-red-500/10 border border-red-500/20 rounded p-2.5 mt-2.5" *ngIf="opponentLeft">
+          <p class="text-[11px] text-red-400 font-semibold leading-relaxed">
+            ⚠️ Opponent has abandoned the battle. Submit a correct solution to win!
+          </p>
         </div>
       </div>
 
@@ -224,7 +224,7 @@
 
       <!-- Success toast -->
       <div *ngIf="showSubmitSuccess" class="toast-success">
-        🎉 All {{ totalTests }}/{{ totalTests }} tests passed — You win!
+        🎉 Solution Accepted! Checking duel status...
       </div>
 
       <!-- Surrender -->
@@ -237,7 +237,7 @@
     <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-icon">🏳️</div>
       <h3 class="modal-title">Surrender Battle?</h3>
-      <p class="modal-body">You will forfeit this match and lose ELO rating. This cannot be undone.</p>
+      <p class="modal-body">You will forfeit this match and lose leaderboard points. This cannot be undone.</p>
       <div class="modal-btns">
         <button (click)="showSurrenderModal = false" class="btn-keep">Keep Fighting</button>
         <button (click)="confirmSurrender()" class="btn-give-up">Yes, Surrender</button>
@@ -245,4 +245,77 @@
     </div>
   </div>
 
+  <!-- ══════════════════ VICTORY MODAL ══════════════════ -->
+  <div *ngIf="showVictoryModal" class="modal-bg victory-overlay">
+    <div class="victory-modal" (click)="$event.stopPropagation()">
+
+      <!-- Particle sparkles -->
+      <div class="victory-particles">
+        <span *ngFor="let p of [1,2,3,4,5,6,7,8,9,10,11,12]" class="particle" [style.--i]="p"></span>
+      </div>
+
+      <!-- Glow ring -->
+      <div class="victory-glow-ring"></div>
+
+      <!-- Trophy badge -->
+      <div class="victory-badge-wrap">
+        <div class="victory-badge">
+          <span class="trophy-emoji">🏆</span>
+        </div>
+        <div class="win-badge-label">WINNER</div>
+      </div>
+
+      <!-- Title -->
+      <h2 class="victory-title">Victory!</h2>
+      <p class="victory-subtitle">You solved the challenge first and won the duel!</p>
+
+      <!-- Stats grid -->
+      <div class="victory-stats">
+        <div class="victory-stat-card points-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value">+{{ victoryPoints }}</div>
+          <div class="stat-label">Points Earned</div>
+        </div>
+        <div class="victory-stat-card time-card">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-value">{{ victoryTime || timeDisplay }}</div>
+          <div class="stat-label">Time Taken</div>
+        </div>
+        <div class="victory-stat-card opponent-card">
+          <div class="stat-icon">⚔️</div>
+          <div class="stat-value opponent-name-val">{{ opponentName }}</div>
+          <div class="stat-label">Defeated</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="victory-actions">
+        <button (click)="router.navigate(['/arena'])" class="btn-victory-home">
+          🏠 Return to Arena
+        </button>
+        <button (click)="router.navigate(['/leaderboard'])" class="btn-victory-lb">
+          📊 View Leaderboard
+        </button>
+      </div>
+
+      <!-- Close X -->
+      <button class="victory-close-btn" (click)="showVictoryModal = false" title="Close">✕</button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════ DEFEAT MODAL ══════════════════ -->
+  <div *ngIf="showDefeatModal" class="modal-bg">
+    <div class="modal-box border border-red-500/30">
+      <div class="modal-icon text-5xl">💀</div>
+      <h3 class="modal-title text-red-500 text-2xl font-black">DEFEAT</h3>
+      <p class="modal-body text-slate-300">You were defeated in the duel. Keep practicing to climb the leaderboard!</p>
+      <div class="modal-btns">
+        <button (click)="router.navigate(['/arena'])" class="btn-give-up bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold w-full py-2.5">
+          Return to Arena
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+

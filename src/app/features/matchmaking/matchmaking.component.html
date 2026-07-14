@@ -42,7 +42,7 @@
       </div>
 
       <!-- CARD 2: PLAY WITH FRIENDS -->
-      <div class="mode-card friends-card">
+      <div class="mode-card friends-card" [class.active-mode]="lobbyStatus !== 'idle'">
         <div class="mode-badge-wrap">
           <span class="mode-badge friends-badge">Custom Duel</span>
         </div>
@@ -52,12 +52,32 @@
           </svg>
         </div>
         <h2 class="card-title">Play with Friends</h2>
-        <p class="card-desc">Invite a friend to a private duel room. Compete in real-time, side by side, on standard algorithms.</p>
+        <p class="card-desc">Challenge a friend to a private 1v1 duel. Pick a difficulty, search by username, and compete on the same problem.</p>
 
         <div class="interactive-area">
-          <button (click)="openInviteModal()" class="btn-primary-purple">
-            Create Custom Room
+          <!-- Idle: button opens search popup -->
+          <button *ngIf="lobbyStatus === 'idle'" (click)="showSearchPopup = true" class="btn-primary-purple">
+            Challenge Friend
           </button>
+
+          <!-- Active: status indicator + open lobby popup -->
+          <div *ngIf="lobbyStatus !== 'idle'" class="flex flex-col gap-2 w-full">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full animate-pulse"
+                [ngClass]="lobbyStatus === 'lobby' ? 'bg-green-400' : 'bg-orange-400'"></span>
+              <span class="text-xs font-semibold text-slate-300">
+                {{ lobbyStatus === 'invited'
+                  ? 'Waiting for ' + invitedFriend?.username + '...'
+                  : 'Lobby active — ' + invitedFriend?.username }}
+              </span>
+            </div>
+            <button (click)="showLobbyPopup = true" class="btn-primary-purple text-xs py-1.5">
+              Open Lobby
+            </button>
+            <button (click)="resetCustomRoom()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors text-center mt-1">
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -85,10 +105,277 @@
 
   </div>
 
-  <!-- Fullscreen Matchmaking Overlay -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- POPUP 1: SEARCH FRIEND MODAL                       -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div *ngIf="showSearchPopup" class="search-overlay" (click)="showSearchPopup = false">
+    <div class="search-overlay-content" style="max-width:440px; width:100%;" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-lg font-bold text-white">Challenge a Friend</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Search by username or email to send a duel invitation</p>
+        </div>
+        <button (click)="showSearchPopup = false" class="text-slate-500 hover:text-slate-300 transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-friend-input-wrapper relative mb-4">
+        <svg class="search-input-icon absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/80 pointer-events-none transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="searchUsers()"
+          placeholder="Search by username or email..."
+          class="search-friend-input pl-10 pr-9 text-sm h-11 w-full"
+          autofocus
+        />
+        <button *ngIf="searchQuery" (click)="searchQuery = ''; searchResults = []" class="clear-input-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 transition-colors p-1" title="Clear search">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search Results List -->
+      <div *ngIf="searchResults.length > 0" class="space-y-1.5 max-h-52 overflow-y-auto pr-1 mb-4">
+        <div
+          *ngFor="let res of searchResults"
+          class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700/30 hover:border-purple-500/30 transition-colors"
+        >
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-sm font-bold">
+              {{ res.username[0]?.toUpperCase() }}
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-slate-200">{{ res.username }}</p>
+              <p class="text-[10px] text-slate-500">{{ res.email }}</p>
+            </div>
+          </div>
+          <button
+            (click)="inviteFriendFromPopup(res)"
+            class="px-3 py-1.5 text-[11px] font-bold rounded-md bg-purple-600 hover:bg-purple-500 text-white transition-all"
+          >
+            Invite
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="searchQuery && searchResults.length === 0" class="text-center py-6 text-slate-500 text-sm">
+        No users found for "{{ searchQuery }}"
+      </div>
+
+      <!-- Prompt when nothing searched yet -->
+      <div *ngIf="!searchQuery" class="text-center py-4 text-slate-600 text-xs">
+        Start typing to search for players
+      </div>
+
+      <button (click)="showSearchPopup = false" class="w-full mt-2 text-xs text-slate-500 hover:text-slate-300 transition-colors py-2">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- POPUP 2: LOBBY MODAL (Ready States + Difficulty)   -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div *ngIf="showLobbyPopup && lobbyStatus === 'lobby'" class="search-overlay" (click)="showLobbyPopup = false">
+    <div class="search-overlay-content" style="max-width:440px; width:100%;" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-lg font-bold text-white">Duel Lobby</h2>
+          <p class="text-[11px] text-slate-400 font-mono mt-0.5">Room: <span class="text-purple-400 font-bold">{{ friendlyRoomCode }}</span></p>
+        </div>
+        <button (click)="showLobbyPopup = false" class="text-slate-500 hover:text-slate-300 transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+
+
+      <!-- Players Ready Grid -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <!-- Host Player -->
+        <div class="bg-slate-800/40 border rounded-lg p-3 text-center transition-colors"
+          [ngClass]="isHostReady ? 'border-green-500/30 bg-green-500/5' : 'border-slate-700/30'">
+          <div class="w-10 h-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-sm mx-auto mb-2">
+            {{ hostUser?.username?.[0]?.toUpperCase() || 'H' }}
+          </div>
+          <p class="text-xs font-semibold text-slate-300 truncate">{{ hostUser?.username }}</p>
+          <p class="text-[9px] text-purple-400 font-bold mb-1.5">(Host)</p>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+            [ngClass]="isHostReady ? 'bg-green-500/15 text-green-400' : 'bg-slate-700/50 text-slate-400'">
+            {{ isHostReady ? '✓ READY' : 'NOT READY' }}
+          </span>
+        </div>
+
+        <!-- Friend Player -->
+        <div class="bg-slate-800/40 border rounded-lg p-3 text-center transition-colors"
+          [ngClass]="isFriendReady ? 'border-green-500/30 bg-green-500/5' : 'border-slate-700/30'">
+          <div class="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm mx-auto mb-2">
+            {{ invitedFriend?.username?.[0]?.toUpperCase() || '?' }}
+          </div>
+          <p class="text-xs font-semibold text-slate-300 truncate">{{ invitedFriend?.username || 'Waiting...' }}</p>
+          <p class="text-[9px] text-slate-500 font-bold mb-1.5">(Challenger)</p>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+            [ngClass]="isFriendReady ? 'bg-green-500/15 text-green-400' : 'bg-slate-700/50 text-slate-400'">
+            {{ isFriendReady ? '✓ READY' : 'NOT READY' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Difficulty Picker (Host Only) -->
+      <div *ngIf="currentUser?.id === hostUser?.id" class="mb-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+          Select Difficulty <span class="text-purple-400 normal-case font-normal">(Host Only)</span>
+        </p>
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            (click)="setDifficulty('easy')"
+            class="py-2 rounded-lg text-xs font-bold border transition-all"
+            [ngClass]="selectedDifficulty === 'easy'
+              ? 'bg-green-500/15 border-green-500/40 text-green-400'
+              : 'bg-slate-800/40 border-slate-700/30 text-slate-400 hover:border-green-500/30 hover:text-green-400'"
+          >
+            Easy
+          </button>
+          <button
+            (click)="setDifficulty('medium')"
+            class="py-2 rounded-lg text-xs font-bold border transition-all"
+            [ngClass]="selectedDifficulty === 'medium'
+              ? 'bg-orange-500/15 border-orange-500/40 text-orange-400'
+              : 'bg-slate-800/40 border-slate-700/30 text-slate-400 hover:border-orange-500/30 hover:text-orange-400'"
+          >
+            Medium
+          </button>
+          <button
+            (click)="setDifficulty('hard')"
+            class="py-2 rounded-lg text-xs font-bold border transition-all"
+            [ngClass]="selectedDifficulty === 'hard'
+              ? 'bg-red-500/15 border-red-500/40 text-red-400'
+              : 'bg-slate-800/40 border-slate-700/30 text-slate-400 hover:border-red-500/30 hover:text-red-400'"
+          >
+            Hard
+          </button>
+        </div>
+      </div>
+
+      <!-- Language Picker (Host Only) -->
+      <div *ngIf="currentUser?.id === hostUser?.id" class="mb-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+          Select Language <span class="text-purple-400 normal-case font-normal">(Host Only)</span>
+        </p>
+        <select
+          [ngModel]="selectedLanguage"
+          (ngModelChange)="onLanguageChange($event)"
+          class="w-full bg-slate-800/80 border border-slate-700/60 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-300 focus:outline-none focus:border-purple-500 transition-colors"
+        >
+          <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
+        </select>
+      </div>
+
+      <!-- Difficulty and Language displays for guest -->
+      <div *ngIf="currentUser?.id !== hostUser?.id" class="flex flex-col gap-2 mb-4">
+        <div class="bg-slate-800/30 border border-slate-700/20 rounded-lg px-3 py-2 flex items-center justify-between">
+          <p class="text-xs text-slate-400 font-medium">Selected Difficulty:</p>
+          <span class="text-xs font-bold px-2 py-0.5 rounded border capitalize"
+            [ngClass]="selectedDifficulty === 'easy' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 
+                       selectedDifficulty === 'medium' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 
+                       'bg-red-500/10 border-red-500/20 text-red-400'">
+            {{ selectedDifficulty }}
+          </span>
+        </div>
+        <div class="bg-slate-800/30 border border-slate-700/20 rounded-lg px-3 py-2 flex items-center justify-between">
+          <p class="text-xs text-slate-400 font-medium">Selected Language:</p>
+          <span class="text-xs font-bold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded">
+            {{ selectedLanguage }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-2 mt-2">
+        <!-- Ready Toggle -->
+        <button
+          (click)="toggleReadyState()"
+          class="w-full py-2.5 rounded-lg text-sm font-bold transition-all text-white"
+          [ngClass]="amIReady ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'"
+        >
+          {{ amIReady ? '✗ Unready' : '✓ Set Ready' }}
+        </button>
+
+        <!-- Launch Duel (Host Only) -->
+        <button
+          *ngIf="currentUser?.id === hostUser?.id && lobbyStatus === 'lobby'"
+          (click)="startFriendlyDuel()"
+          [disabled]="!isHostReady || !isFriendReady"
+          class="w-full py-2.5 rounded-lg text-sm font-bold transition-all text-white"
+          [ngClass]="(isHostReady && isFriendReady) ? 'btn-start-duel' : 'bg-slate-700 text-slate-500 cursor-not-allowed'"
+        >
+          {{ (isHostReady && isFriendReady) ? '⚔️ Launch Duel' : 'Waiting for both players to be ready...' }}
+        </button>
+
+        <!-- Leave -->
+        <button (click)="resetCustomRoom()" class="w-full py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors">
+          Leave Lobby
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- POPUP 3: WAITING FOR FRIEND ACCEPTANCE MODAL      -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div *ngIf="lobbyStatus === 'invited'" class="search-overlay">
+    <div class="search-overlay-content bg-slate-900 border border-purple-500/30 p-6 rounded-lg max-w-sm text-center" style="max-width:400px; width:100%;">
+      <div class="flex items-center justify-center mb-5">
+        <!-- Pulsing Purple Ring -->
+        <div class="relative w-16 h-16 flex items-center justify-center">
+          <div class="absolute w-full h-full rounded-full border-2 border-purple-500/30 animate-ping"></div>
+          <div class="relative w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/35 flex items-center justify-center text-purple-400">
+            <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <h3 class="text-lg font-bold text-white mb-2">Challenging Friend</h3>
+      <p class="text-sm text-slate-300 mb-2">
+        Waiting for <strong class="text-purple-400">{{ invitedFriend?.username }}</strong> to accept...
+      </p>
+      <p class="text-xs text-slate-500 mb-6">
+        Room Code: <span class="font-mono font-bold text-slate-400">{{ friendlyRoomCode }}</span>
+      </p>
+
+      <div class="flex flex-col gap-2">
+        <button (click)="copyRoomLink()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition-colors">
+          {{ linkCopied ? 'Copied Link! ✓' : 'Copy Room Link' }}
+        </button>
+        <button (click)="resetCustomRoom()" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors">
+          Cancel Challenge
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- Fullscreen Ranked Matchmaking Overlay              -->
+  <!-- ══════════════════════════════════════════════════ -->
   <div *ngIf="queueStatus !== 'idle'" class="search-overlay">
     <div class="search-overlay-content">
-      
       <!-- Configuring Preferences State -->
       <ng-container *ngIf="queueStatus === 'configuring'">
         <h2 class="search-title">Battle Preferences</h2>
@@ -168,7 +455,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        
+
         <div class="matched-info-container">
           <h2 class="matched-title">MATCH FOUND!</h2>
           <p class="matched-opp-desc">Opponent: <strong class="text-orange-400">ByteWizard</strong> (1766 ELO)</p>
@@ -182,144 +469,5 @@
 
     </div>
   </div>
-</div>
 
-<!-- Invite Friend Modal -->
-<div *ngIf="inviteModalOpen" class="modal-overlay">
-  <div class="modal-card invite-friend-modal">
-    <div class="modal-header">
-      <h2>Invite Friend</h2>
-      <button (click)="closeInviteModal()" class="btn-close-modal">×</button>
-    </div>
-    <div class="modal-body">
-      <p class="search-hint">Search by Username or Email</p>
-      <div class="search-input-group">
-        <input type="text" [formControl]="searchControl" placeholder="Type username or email..." class="search-input" />
-        <span class="search-icon">🔍</span>
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="isSearchingUsers" class="spinner-container">
-        <div class="search-spinner"></div>
-        <p>Searching...</p>
-      </div>
-
-      <!-- Error State -->
-      <div *ngIf="searchErrorMessage" class="error-msg">
-        {{ searchErrorMessage }}
-      </div>
-
-      <!-- Search Results -->
-      <div *ngIf="!isSearchingUsers && searchControl.value && searchResults.length > 0" class="search-results-section">
-        <h3>Search Results</h3>
-        <div class="results-list">
-          <div *ngFor="let user of searchResults" class="result-item">
-            <div class="user-info">
-              <div class="avatar-placeholder">
-                <img *ngIf="user.profilePicture" [src]="user.profilePicture" alt="avatar" />
-                <span *ngIf="!user.profilePicture">{{ user.username[0] | uppercase }}</span>
-              </div>
-              <div class="details">
-                <span class="username">{{ user.username }}</span>
-                <span class="email">{{ user.email }}</span>
-              </div>
-            </div>
-            <button (click)="inviteUser(user.id)" class="btn-invite-user">Invite</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div *ngIf="!isSearchingUsers && searchControl.value && searchControl.value.length >= 2 && searchResults.length === 0" class="empty-state">
-        No users found.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Waiting Lobby Overlay -->
-<div *ngIf="lobbyRoomId" class="search-overlay lobby-overlay">
-  <div class="search-overlay-content lobby-card">
-    <div *ngIf="isLobbyLoading" class="spinner-container">
-      <div class="search-spinner"></div>
-      <p>Loading waiting lobby...</p>
-    </div>
-
-    <div *ngIf="!isLobbyLoading && lobbyRoom">
-      <!-- Lobby Header -->
-      <div class="lobby-header">
-        <span class="mode-badge lobby-badge">Custom Duel</span>
-        <h2>Waiting Lobby</h2>
-        <p class="lobby-code-label">Room Code: <span class="room-code-badge">{{ lobbyRoom.roomCode }}</span></p>
-      </div>
-
-      <!-- Players Grid -->
-      <div class="lobby-players-grid">
-        <!-- Player 1: Host -->
-        <div class="lobby-player-card" [class.ready-card]="lobbyRoom.isHostReady">
-          <div class="avatar-box">
-            <span class="avatar-initial">{{ lobbyRoom.hostUsername[0] | uppercase }}</span>
-            <div class="crown-badge">👑</div>
-          </div>
-          <div class="player-info">
-            <span class="role-lbl">Host</span>
-            <span class="name-lbl">{{ lobbyRoom.hostUsername }}</span>
-            <span class="ready-status" [class.ready]="lobbyRoom.isHostReady">
-              {{ lobbyRoom.isHostReady ? 'Ready' : 'Not Ready' }}
-            </span>
-          </div>
-        </div>
-
-        <!-- VS divider -->
-        <div class="vs-divider">VS</div>
-
-        <!-- Player 2: Invited Friend -->
-        <div class="lobby-player-card" [class.ready-card]="lobbyRoom.isFriendReady" [class.empty-card]="!lobbyRoom.friendUsername">
-          <div class="avatar-box">
-            <span *ngIf="lobbyRoom.friendUsername" class="avatar-initial">{{ lobbyRoom.friendUsername[0] | uppercase }}</span>
-            <span *ngIf="!lobbyRoom.friendUsername" class="avatar-initial">?</span>
-          </div>
-          <div class="player-info">
-            <span class="role-lbl">Guest</span>
-            <span class="name-lbl">{{ lobbyRoom.friendUsername || 'Invited Friend' }}</span>
-            <span class="ready-status" [class.ready]="lobbyRoom.isFriendReady">
-              {{ lobbyRoom.friendUsername ? (lobbyRoom.isFriendReady ? 'Ready' : 'Not Ready') : 'Pending Invitation...' }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Ready Status Panel -->
-      <div class="lobby-status-panel">
-        <div class="status-indicator">
-          Lobby Status: 
-          <strong *ngIf="!lobbyRoom.friendUsername" class="text-orange-400">Waiting for invited friend...</strong>
-          <strong *ngIf="lobbyRoom.friendUsername && (!lobbyRoom.isHostReady || !lobbyRoom.isFriendReady)" class="text-yellow-400">Waiting for players to get ready...</strong>
-          <strong *ngIf="lobbyRoom.friendUsername && lobbyRoom.isHostReady && lobbyRoom.isFriendReady" class="text-green-400">Ready to start!</strong>
-        </div>
-      </div>
-
-      <!-- Action Row -->
-      <div class="lobby-actions">
-        <!-- Ready Toggle -->
-        <button (click)="toggleReady()" class="btn-ready-toggle" [class.btn-ready-active]="isLobbyReady">
-          {{ isLobbyReady ? 'I\'m Ready!' : 'Click to Get Ready' }}
-        </button>
-
-        <!-- Start Duel (Host Only) -->
-        <button *ngIf="currentUser && currentUser.id === lobbyRoom.hostUserId" 
-                (click)="launchDuel()" 
-                [disabled]="!lobbyRoom.friendUsername || !lobbyRoom.isHostReady || !lobbyRoom.isFriendReady"
-                class="btn-launch-duel"
-                [class.btn-launch-enabled]="lobbyRoom.friendUsername && lobbyRoom.isHostReady && lobbyRoom.isFriendReady">
-          Launch Duel
-        </button>
-
-        <!-- Exit Lobby -->
-        <button (click)="exitLobby()" class="btn-exit-lobby">
-          Leave Lobby
-        </button>
-      </div>
-    </div>
-  </div>
 </div>
