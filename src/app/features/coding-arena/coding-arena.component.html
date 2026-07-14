@@ -290,6 +290,9 @@
 
       <!-- Actions -->
       <div class="victory-actions">
+        <button *ngIf="battleEndData" (click)="goToResults()" class="btn-victory-home" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; border: none;">
+          ⚔️ Match Summary
+        </button>
         <button (click)="router.navigate(['/arena'])" class="btn-victory-home">
           🏠 Return to Arena
         </button>
@@ -310,7 +313,10 @@
       <div class="modal-icon text-5xl">💀</div>
       <h3 class="modal-title text-red-500 text-2xl font-black">DEFEAT</h3>
       <p class="modal-body text-slate-300">You were defeated in the duel. Keep practicing to climb the leaderboard!</p>
-      <div class="modal-btns">
+      <div class="modal-btns" style="display:flex; flex-direction:column; gap:10px; width:100%;">
+        <button *ngIf="battleEndData" (click)="goToResults()" class="btn-give-up" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color:white; font-weight:bold; width:100%; padding: 10px 0; border: none; border-radius: 6px;">
+          ⚔️ View Match Summary
+        </button>
         <button (click)="router.navigate(['/arena'])" class="btn-give-up bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold w-full py-2.5">
           Return to Arena
         </button>
