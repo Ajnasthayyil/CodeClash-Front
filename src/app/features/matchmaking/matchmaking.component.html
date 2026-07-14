@@ -35,12 +35,8 @@
         <p class="card-desc">Face a random opponent of similar ELO standing. Gain points, rank up, and climb the global leaderboards.</p>
 
         <div class="interactive-area">
-          <!-- Idle Mode -->
-          <button *ngIf="queueStatus === 'idle'" (click)="startSearch()" class="btn-primary-shine">
+          <button (click)="openConfigOverlay()" class="btn-primary-shine">
             Find Opponent
-          </button>
-          <button *ngIf="queueStatus !== 'idle'" class="btn-primary-shine opacity-60 cursor-not-allowed" disabled>
-            Searching...
           </button>
         </div>
       </div>
@@ -93,6 +89,47 @@
   <div *ngIf="queueStatus !== 'idle'" class="search-overlay">
     <div class="search-overlay-content">
       
+      <!-- Configuring Preferences State -->
+      <ng-container *ngIf="queueStatus === 'configuring'">
+        <h2 class="search-title">Battle Preferences</h2>
+        <p class="search-wait-info" style="justify-content: center; margin-bottom: 28px;">Configure difficulty and language before entering matchmaking.</p>
+
+        <!-- Difficulty Selection -->
+        <div class="selector-section">
+          <span class="selector-label">Difficulty</span>
+          <div class="difficulty-buttons">
+            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'easy'" (click)="setDifficulty('easy')">Easy</button>
+            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'medium'" (click)="setDifficulty('medium')">Medium</button>
+            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'hard'" (click)="setDifficulty('hard')">Hard</button>
+          </div>
+        </div>
+
+        <!-- Language Selection -->
+        <div class="selector-section mt-4">
+          <span class="selector-label">Language</span>
+          <div class="language-dropdown-wrapper">
+            <select class="lang-select" [ngModel]="selectedLanguage" (ngModelChange)="onLanguageChange($event)">
+              <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
+            </select>
+            <div class="select-chevron">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 24px; align-items: center;">
+          <button type="button" class="btn-primary-shine" style="max-width: 340px;" (click)="startSearch()">
+            Start Matchmaking
+          </button>
+          <button type="button" class="btn-cancel-search" style="border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.05); color: #cbd5e1;" (click)="closeConfigOverlay()">
+            Back
+          </button>
+        </div>
+      </ng-container>
+
       <!-- Searching State -->
       <ng-container *ngIf="queueStatus === 'searching'">
         <!-- Radar Widget -->
@@ -109,37 +146,13 @@
 
         <!-- Search Status Details -->
         <h2 class="search-title">Searching for opponent...</h2>
-        <p class="search-wait-info">~23 sec avg wait &middot; {{ queueSeconds }}s elapsed</p>
+        <p class="search-wait-info" style="justify-content: center;">~23 sec avg wait &middot; {{ queueSeconds }}s elapsed</p>
 
         <!-- Status Badges -->
         <div class="search-badges">
           <span class="badge-elo">{{ userElo }} ELO</span>
           <span class="badge-lang">{{ selectedLanguage }}</span>
-        </div>
-
-        <!-- Difficulty Selection -->
-        <div class="selector-section">
-          <span class="selector-label">Difficulty</span>
-          <div class="difficulty-buttons">
-            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'easy'" (click)="setDifficulty('easy')">Easy</button>
-            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'medium'" (click)="setDifficulty('medium')">Medium</button>
-            <button type="button" class="diff-btn" [class.active]="selectedDifficulty === 'hard'" (click)="setDifficulty('hard')">Hard</button>
-          </div>
-        </div>
-
-        <!-- Language Selection -->
-        <div class="selector-section">
-          <span class="selector-label">Language</span>
-          <div class="language-dropdown-wrapper">
-            <select class="lang-select" [ngModel]="selectedLanguage" (ngModelChange)="onLanguageChange($event)">
-              <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
-            </select>
-            <div class="select-chevron">
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+          <span class="badge-diff">{{ selectedDifficulty | titlecase }}</span>
         </div>
 
         <!-- Cancel Search Button -->

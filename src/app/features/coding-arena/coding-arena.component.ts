@@ -1,6 +1,11 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
-import { Router } from '@angular/router';
-import { SubmissionResponseDto } from '../../core/services/submissions.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { SubmissionResponseDto, SubmissionsService } from '../../core/services/submissions.service';
+import { ProblemService } from '../../core/services/problem.service';
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../shared/notifications/notification.service';
+import { environment } from '../../../environments/environment';
+import * as signalR from '@microsoft/signalr';
 
 interface Problem {
   title: string;
@@ -25,7 +30,35 @@ interface TestResult {
   got?: string;
 }
 
-type Language = 'Python' | 'JavaScript' | 'C++' | 'Go';
+type Language = string;
+
+/** Maps display names → submission identifiers used by the judge. */
+const LANGUAGE_DISPLAY_MAP: Record<string, string> = {
+  'python':     'Python',
+  'javascript': 'JavaScript',
+  'typescript': 'TypeScript',
+  'csharp':     'C#',
+  'c#':         'C#',
+  'cpp':        'C++',
+  'c++':        'C++',
+  'java':       'Java',
+  'go':         'Go',
+  'rust':       'Rust',
+};
+
+/** Returns a minimal valid starter template for a language. */
+function starterTemplate(lang: string): string {
+  const l = lang.toLowerCase();
+  if (l === 'python')     return '# Write your solution here\n\n';
+  if (l === 'javascript') return '// Write your solution here\n\n';
+  if (l === 'typescript') return '// Write your solution here\n\n';
+  if (l === 'csharp' || l === 'c#') return 'using System;\n\nclass Solution {\n    // Write your solution here\n}\n';
+  if (l === 'cpp'   || l === 'c++') return '#include <bits/stdc++.h>\nusing namespace std;\n\n// Write your solution here\n';
+  if (l === 'java')       return 'class Solution {\n    // Write your solution here\n}\n';
+  if (l === 'go')         return 'package main\n\n// Write your solution here\n';
+  if (l === 'rust')       return 'fn main() {\n    // Write your solution here\n}\n';
+  return '// Write your solution here\n';
+}
 
 @Component({
   selector: 'app-coding-arena',
@@ -49,6 +82,10 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   opponentTotal = 18;
 
   matchId = 'CODE-CLASH-542';
+  problemId = '';
+  opponentCode = '';
+  private battleHub: signalR.HubConnection | null = null;
+  private typingTimeout: any;
 
   // ─── Problem ───────────────────────────────────────────────────────────────
   problem: Problem = {
@@ -70,64 +107,31 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   };
 
   // ─── Code Editor ───────────────────────────────────────────────────────────
-  languages: Language[] = ['Python', 'JavaScript', 'C++', 'Go'];
+  /** The language locked for this battle — set from route param. */
+  battleLanguage: string = 'Python';
+  /** Display-friendly label shown in the UI badge. */
+  get battleLanguageLabel(): string {
+    return LANGUAGE_DISPLAY_MAP[this.battleLanguage.toLowerCase()] ?? this.battleLanguage;
+  }
   selectedLanguage: Language = 'Python';
   autoSave = true;
   autoSaveIndicator = false;
-
-  codeSnippets: Record<Language, string> = {
-    'Python': `def two_sum(nums, target):
-    seen = {}
-    for i, n in enumerate(nums):
-        comp = target - n
-        if comp in seen:
-            return [seen[comp], i]
-        seen[n] = i
-    return []`,
-    'JavaScript': `function twoSum(nums, target) {
-    const seen = new Map();
-    for (let i = 0; i < nums.length; i++) {
-        const comp = target - nums[i];
-        if (seen.has(comp)) {
-            return [seen.get(comp), i];
-        }
-        seen.set(nums[i], i);
-    }
-    return [];
-}`,
-    'C++': `class Solution {
-public:
-    vector<int> twoSum(vector<int>& nums, int target) {
-        unordered_map<int, int> seen;
-        for (int i = 0; i < nums.size(); i++) {
-            int comp = target - nums[i];
-            if (seen.count(comp)) {
-                return {seen[comp], i};
-            }
-            seen[nums[i]] = i;
-        }
-        return {};
-    }
-};`,
-    'Go': `func twoSum(nums []int, target int) []int {
-    seen := make(map[int]int)
-    for i, n := range nums {
-        comp := target - n
-        if j, ok := seen[comp]; ok {
-            return []int{j, i}
-        }
-        seen[n] = i
-    }
-    return nil
-}`
-  };
 
   runCodeSuccess = false;
   editorCode = '';
 
   onCodeChange(val: string): void {
-    this.codeSnippets[this.selectedLanguage] = val;
     this.runCodeSuccess = false;
+
+    if (this.battleHub && this.matchId) {
+      this.battleHub.invoke('SendTypingStatus', this.matchId, true);
+      this.battleHub.invoke('SendCodeMirror', this.matchId, val);
+
+      if (this.typingTimeout) clearTimeout(this.typingTimeout);
+      this.typingTimeout = setTimeout(() => {
+        this.battleHub?.invoke('SendTypingStatus', this.matchId, false);
+      }, 1500);
+    }
   }
 
   get codeLines(): string[] { return this.editorCode.split('\n'); }
@@ -206,10 +210,16 @@ public:
   private opponentInterval: any;
   private autoSaveInterval: any;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private submissionsService: SubmissionsService,
+    private problemService: ProblemService,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
-    this.editorCode = this.codeSnippets[this.selectedLanguage];
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
@@ -217,21 +227,64 @@ public:
       this.playerRating = parsed.rating || this.playerRating;
     }
 
+    // 1. Subscribe to route params and load active battle state
+    this.route.queryParams.subscribe(params => {
+      const battleId  = params['battleId'];
+      const problemId = params['problemId'];
+      const language  = params['language'];
+      const opName    = params['opponentName'];
+      const opElo     = params['opponentElo'];
+
+      if (opName) {
+        this.opponentName = opName;
+      }
+      if (opElo) {
+        this.opponentRating = parseInt(opElo, 10);
+      }
+
+      // Lock the editor to the language chosen during matchmaking
+      if (language) {
+        this.battleLanguage  = language;
+        this.selectedLanguage = this.battleLanguageLabel;
+        this.editorCode = starterTemplate(language);
+      } else {
+        this.editorCode = starterTemplate(this.battleLanguage);
+      }
+
+      if (problemId) {
+        this.problemId = problemId;
+        this.problemService.getProblemById(problemId).subscribe({
+          next: (p) => {
+            this.problem = {
+              title: p.title,
+              difficulty: p.difficulty as any,
+              description: p.statementMarkdown,
+              examples: p.testCases.filter(tc => !tc.isHidden).map(tc => ({
+                input: tc.input || '',
+                output: tc.expectedOutput || ''
+              })),
+              constraints: p.constraints,
+              tags: [p.category]
+            };
+          },
+          error: (err) => {
+            console.error('Failed to load problem:', err);
+          }
+        });
+      }
+
+      if (battleId) {
+        this.matchId = battleId;
+        this.connectToBattleRoom(battleId);
+      }
+    });
+
     // Countdown timer
     this.timerInterval = setInterval(() => {
       if (this.timeRemainingSeconds > 0) {
         this.timeRemainingSeconds--;
       }
     }, 1000);
-
-    // Opponent simulated progress
-    this.opponentInterval = setInterval(() => {
-      if (this.opponentTestsPassed < this.totalTests && Math.random() > 0.65) {
-        this.opponentTestsPassed = Math.min(this.opponentTestsPassed + 1, this.totalTests);
-        this.opponentIsTyping = true;
-        setTimeout(() => { this.opponentIsTyping = false; }, 2000);
-      }
-    }, 7000);
 
     // Auto-save flash indicator
     this.autoSaveInterval = setInterval(() => {
@@ -242,10 +295,58 @@ public:
     }, 30000);
   }
 
+  private connectToBattleRoom(battleId: string): void {
+    const token = this.authService.getAccessToken();
+    this.battleHub = new signalR.HubConnectionBuilder()
+      .withUrl(`${environment.backendUrl}/hubs/battle`, {
+        accessTokenFactory: () => token || ''
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.battleHub.on('PlayerConnected', (userId) => {
+      console.log('Opponent player connected:', userId);
+    });
+
+    this.battleHub.on('OpponentTyping', (isTyping) => {
+      this.opponentIsTyping = isTyping;
+    });
+
+    this.battleHub.on('OpponentCodeUpdated', (code) => {
+      this.opponentCode = code;
+    });
+
+    this.battleHub.on('BattleEnded', (data: any) => {
+      this.notificationService.showToast('Battle Concluded!', 'success');
+      this.router.navigate(['/arena/result'], {
+        state: {
+          battleId: battleId,
+          winnerId: data.winnerId,
+          winnerDelta: data.winnerDelta,
+          loserDelta: data.loserDelta
+        }
+      });
+    });
+
+    this.battleHub.on('BattleCancelled', () => {
+      this.notificationService.showToast('Battle cancelled by server.', 'warning');
+      this.router.navigate(['/arena']);
+    });
+
+    this.battleHub.start().then(() => {
+      this.battleHub?.invoke('JoinBattleRoom', battleId);
+    }).catch(err => {
+      console.error('Failed to connect to BattleHub SignalR:', err);
+    });
+  }
+
   ngOnDestroy(): void {
     clearInterval(this.timerInterval);
-    clearInterval(this.opponentInterval);
     clearInterval(this.autoSaveInterval);
+    if (this.typingTimeout) clearTimeout(this.typingTimeout);
+    if (this.battleHub) {
+      this.battleHub.stop();
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -256,67 +357,65 @@ public:
     }
   }
 
-  // ─── Language ──────────────────────────────────────────────────────────────
-  selectLanguage(lang: Language): void {
-    this.selectedLanguage = lang;
-    this.editorCode = this.codeSnippets[lang];
+  // ─── Language — locked for ranked battles ──────────────────────────────────
+  selectLanguage(_lang: Language): void {
+    // Language is locked to the one chosen during matchmaking — no-op.
   }
 
   // ─── Run Code ──────────────────────────────────────────────────────────────
   runCode(): void {
-    if (this.isRunning || !this.problem) return;
+    if (this.isRunning || !this.problemId) return;
     this.isRunning = true;
     this.lastExecutionResult = null;
     this.terminalOutput = '$ Submitting code to remote execution engine...\n';
 
-    setTimeout(() => {
-      const passed = Math.random() > 0.3;
-      this.terminalOutput = `$ Running test cases...\n\n`;
-      this.terminalOutput += `✓ Test 1 passed: [0,1]\n`;
-      this.terminalOutput += `✓ Test 2 passed: [1,2]\n`;
-      if (passed) {
+    this.submissionsService.runCode(this.problemId, this.battleLanguageLabel, this.editorCode).subscribe({
+      next: (res) => {
+        this.isRunning = false;
         this.runCodeSuccess = true;
-        this.terminalOutput += `✓ Test 3 passed: [0,1]\n\n`;
-        this.terminalOutput += `All sample tests passed! Runtime: 52ms | Memory: 16.2 MB`;
-        this.handleExecutionResult({ submissionId: 'mock', status: 'Accepted', passed: 3, total: 3, executionTime: 52, memory: 16, testCases: [
-          { id: '1', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
-          { id: '2', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
-          { id: '3', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false }
-        ] });
-      } else {
-        this.terminalOutput += `✗ Test 3 failed: expected [0,1], got [1,0]\n\n`;
-        this.terminalOutput += `1/3 tests failed. Check your output order.`;
-        this.handleExecutionResult({ submissionId: 'mock', status: 'WrongAnswer', passed: 2, total: 3, executionTime: 52, memory: 16, testCases: [
-          { id: '1', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
-          { id: '2', status: 'Passed', input: 'mock', expectedOutput: 'mock', isHidden: false },
-          { id: '3', status: 'Failed', input: 'mock', expectedOutput: '[0,1]', actualOutput: '[1,0]', isHidden: false }
-        ] });
+        this.terminalOutput = `$ Running sample tests...\n\nVerdict: ${res.status}\n`;
+        if (res.compileOutput) {
+          this.terminalOutput += `Compile Output:\n${res.compileOutput}\n\n`;
+        }
+        res.testCases.forEach((tc, idx) => {
+          this.terminalOutput += `Test ${idx + 1} (${tc.status}): expected "${tc.expectedOutput}", got "${tc.actualOutput}"\n`;
+        });
+        this.myTestsPassed = res.passed;
+        this.totalTests = res.total;
+      },
+      error: (err) => {
+        this.isRunning = false;
+        this.terminalOutput = `$ Execution Error: ${err.error?.message || 'Unknown error occurred.'}`;
       }
-      this.isRunning = false;
-    }, 1600);
+    });
   }
 
   // ─── Submit ────────────────────────────────────────────────────────────────
   submitSolution(): void {
-    if (this.isSubmitting || !this.problem) return;
+    if (this.isSubmitting || !this.problemId) return;
     this.isSubmitting = true;
     this.lastExecutionResult = null;
-    this.terminalOutput = '$ Submitting solution against test suite...\n';
+    this.terminalOutput = '$ Submitting solution to validation suite...\n';
 
-    setTimeout(() => {
-      this.myTestsPassed = this.totalTests;
-      this.terminalOutput = `$ Evaluating against all ${this.totalTests} test cases...\n\n`;
-      for (let i = 1; i <= this.totalTests; i++) {
-        this.terminalOutput += `✓ Test ${i} passed\n`;
+    this.submissionsService.submitCode(this.problemId, this.battleLanguageLabel, this.editorCode, this.matchId).subscribe({
+      next: (res) => {
+        this.isSubmitting = false;
+        this.myTestsPassed = res.passed;
+        this.totalTests = res.total;
+        this.terminalOutput = `$ Evaluating against all ${res.total} test cases...\n\nVerdict: ${res.status}\n`;
+        
+        if (res.status === 'Accepted') {
+          this.terminalOutput += `🎉 All test cases passed! Battle Won!`;
+          this.showSubmitSuccess = true;
+        } else {
+          this.terminalOutput += `✗ Failed: ${res.status}. Passed ${res.passed}/${res.total} test cases.`;
+        }
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.terminalOutput = `$ Submission Error: ${err.error?.message || 'Unknown error occurred.'}`;
       }
-      this.terminalOutput += `\n🎉 All ${this.totalTests}/${this.totalTests} tests passed!\nRuntime: 48ms (beats 94.3%) | Memory: 15.8 MB (beats 87.1%)`;
-      this.isSubmitting = false;
-      this.showSubmitSuccess = true;
-      setTimeout(() => {
-        this.showSubmitSuccess = false;
-        this.router.navigate(['/arena/result']);
-      }, 2000);
-    }, 2500);
+    });
   }
 
   // ─── AI Chat ───────────────────────────────────────────────────────────────
@@ -369,8 +468,11 @@ public:
   // ─── Surrender ─────────────────────────────────────────────────────────────
   confirmSurrender(): void {
     this.showSurrenderModal = false;
-    // In real app: navigate away or emit event
-    window.location.href = '/dashboard';
+    if (this.battleHub && this.matchId) {
+      this.battleHub.invoke('Surrender', this.matchId);
+    } else {
+      this.router.navigate(['/arena']);
+    }
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────

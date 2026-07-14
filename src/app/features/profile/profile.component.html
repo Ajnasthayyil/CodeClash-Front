@@ -17,7 +17,7 @@
               </svg>
             </div>
           </div>
-          <span class="tier-badge">{{ user.tier }}</span>
+          <span class="tier-badge" [style.background]="getTierBg(user.eloRating)">{{ user.tier }}</span>
           <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
         </div>
 
@@ -95,9 +95,9 @@
         <span class="elo-label">ELO Rating</span>
         <span class="elo-value">{{ user.eloRatingDisplay }}</span>
         <div class="elo-track">
-          <div class="elo-fill"></div>
+          <div class="elo-fill" [style.width.%]="getTierProgress(user.eloRating)" [style.background]="getTierBg(user.eloRating)"></div>
         </div>
-        <span class="elo-rank">Rank #422</span>
+        <span class="elo-rank" [style.color]="getTierColor(user.eloRating)">{{ user.tier }} League</span>
       </div>
     </div>
   </section>

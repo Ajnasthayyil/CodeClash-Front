@@ -6,6 +6,7 @@ import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/o
 import { NotificationService } from '../../shared/notifications/notification.service';
 import { CustomDuelService, UserSearchResultDto, CustomDuelRoomDto } from '../../core/services/custom-duel.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MatchmakingService } from '../../core/services/matchmaking.service';
 
 @Component({
   selector: 'app-matchmaking',
@@ -14,13 +15,13 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class MatchmakingComponent implements OnInit, OnDestroy {
   // ─── Ranked Duel Queue States ──────────────────────────────────────────────
-  queueStatus: 'idle' | 'searching' | 'matched' = 'idle';
+  queueStatus: 'idle' | 'configuring' | 'searching' | 'matched' = 'idle';
   queueSeconds = 0;
   private queueInterval: any;
 
   selectedDifficulty: 'easy' | 'medium' | 'hard' = 'medium';
   selectedLanguage = 'Python';
-  languages: string[] = ['Python', 'JavaScript', 'TypeScript', 'C++', 'Java', 'Go', 'Rust'];
+  languages: string[] = ['Python', 'JavaScript', 'TypeScript', 'C++', 'C#', 'Java', 'Go', 'Rust'];
   userElo = 1842;
   userInitial = 'N';
 
@@ -44,7 +45,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private notificationService: NotificationService,
     private customDuelService: CustomDuelService,
-    private authService: AuthService
+    private authService: AuthService,
+    private matchmakingService: MatchmakingService
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +66,40 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
       } else {
         this.leaveLobby();
       }
+    });
+
+    // 2.5 Real-time 1v1 Ranked Matchmaking subscriptions
+    this.matchmakingService.opponentFound$.pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      if (this.queueInterval) {
+        clearInterval(this.queueInterval);
+      }
+      this.queueStatus = 'matched';
+      this.notificationService.showToast('Match found! Teleporting to coding arena...', 'success', 3000);
+      this.notificationService.addNotification(
+        'Match Found! ⚔️',
+        `Opponent found for ${this.selectedLanguage} (${this.selectedDifficulty.toUpperCase()}).`,
+        'success'
+      );
+      setTimeout(() => {
+        this.router.navigate(['/arena/battle'], {
+          queryParams: {
+            battleId: data.battleId,
+            problemId: data.problemId,
+            language: data.language,
+            opponentName: data.opponentName,
+            opponentElo: data.opponentElo,
+            mode: '1v1'
+          }
+        });
+      }, 2000);
+    });
+
+    this.matchmakingService.queueLeft$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.queueInterval) {
+        clearInterval(this.queueInterval);
+      }
+      this.queueStatus = 'configuring';
+      this.queueSeconds = 0;
     });
 
     // 3. Debounced friend search
@@ -146,41 +182,52 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     this.notificationService.showToast(`Language filter set to ${lang}`, 'info', 2000);
   }
 
+  openConfigOverlay(): void {
+    this.queueStatus = 'configuring';
+  }
+
+  closeConfigOverlay(): void {
+    this.queueStatus = 'idle';
+  }
+
   startSearch(): void {
-    if (this.queueStatus !== 'idle') return;
+    if (this.queueStatus !== 'configuring') return;
     this.queueStatus = 'searching';
     this.queueSeconds = 0;
-    this.notificationService.showToast('Matchmaking search started...', 'info', 2500);
+    this.notificationService.showToast('Entering matchmaking queue...', 'info', 2500);
 
-    this.queueInterval = setInterval(() => {
-      this.queueSeconds++;
-
-      if (this.queueSeconds >= 15) {
-        clearInterval(this.queueInterval);
-        this.queueStatus = 'matched';
-
-        this.notificationService.showToast('Match found! Teleporting to arena...', 'success', 3000);
-        this.notificationService.addNotification(
-          'Match Found! ⚔️',
-          `Opponent: ByteWizard (1766 ELO) matched for ${this.selectedLanguage} (${this.selectedDifficulty.toUpperCase()}).`,
-          'success'
-        );
-
-        setTimeout(() => {
-          this.router.navigate(['/arena/battle']);
-        }, 2000);
+    this.matchmakingService.getQueueTicket().subscribe({
+      next: () => {
+        this.matchmakingService.initConnection().then(() => {
+          this.matchmakingService.joinQueue(this.selectedLanguage, this.selectedDifficulty);
+          this.queueInterval = setInterval(() => {
+            this.queueSeconds++;
+          }, 1000);
+        }).catch(err => {
+          this.notificationService.showToast('Failed to connect to matchmaking server.', 'error');
+          this.queueStatus = 'configuring';
+          console.error(err);
+        });
+      },
+      error: (err) => {
+        this.notificationService.showToast('Failed to acquire matchmaking ticket.', 'error');
+        this.queueStatus = 'configuring';
+        console.error(err);
       }
-    }, 1000);
+    });
   }
 
   cancelSearch(): void {
     if (this.queueStatus === 'searching') {
       this.notificationService.showToast('Matchmaking search cancelled.', 'warning', 2500);
     }
+    this.matchmakingService.leaveQueue();
+    this.matchmakingService.stopConnection();
     if (this.queueInterval) {
       clearInterval(this.queueInterval);
+      this.queueInterval = null;
     }
-    this.queueStatus = 'idle';
+    this.queueStatus = 'configuring';
     this.queueSeconds = 0;
   }
 
