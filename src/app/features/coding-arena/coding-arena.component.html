@@ -267,7 +267,7 @@
 
       <!-- Title -->
       <h2 class="victory-title">Victory!</h2>
-      <p class="victory-subtitle">You solved the challenge first and won the duel!</p>
+      <p class="victory-subtitle">{{ victorySubtitle }}</p>
 
       <!-- Stats grid -->
       <div class="victory-stats">
@@ -312,7 +312,7 @@
     <div class="modal-box border border-red-500/30">
       <div class="modal-icon text-5xl">💀</div>
       <h3 class="modal-title text-red-500 text-2xl font-black">DEFEAT</h3>
-      <p class="modal-body text-slate-300">You were defeated in the duel. Keep practicing to climb the leaderboard!</p>
+      <p class="modal-body text-slate-300">{{ defeatSubtitle }}</p>
       <div class="modal-btns" style="display:flex; flex-direction:column; gap:10px; width:100%;">
         <button *ngIf="battleEndData" (click)="goToResults()" class="btn-give-up" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color:white; font-weight:bold; width:100%; padding: 10px 0; border: none; border-radius: 6px;">
           ⚔️ View Match Summary
