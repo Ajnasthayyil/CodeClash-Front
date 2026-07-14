@@ -364,6 +364,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       this.opponentCode = code;
     });
 
+    this.battleHub.on('OpponentProgressUpdated', (passedCount: number, totalCount: number) => {
+      this.opponentTestsPassed = passedCount;
+      this.opponentTotal = totalCount;
+    });
+
     this.battleHub.on('BattleEnded', (data: any) => {
       this.battleEndData = data;
       clearInterval(this.timerInterval);
@@ -637,6 +642,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
             this.runCodeSuccess = false;
             this.terminalOutput += `\n✗ Some test cases failed or encountered runtime errors.`;
           }
+
+          if (this.battleHub && this.matchId) {
+            this.battleHub.invoke('SendProgressUpdate', this.matchId, res.passed, res.total)
+              .catch(err => console.error('Failed to send progress update:', err));
+          }
         },
         error: (err) => {
           this.isRunning = false;
@@ -684,6 +694,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
             }
           } else {
             this.terminalOutput += `\n✗ Solution Rejected. Keep trying to fix bugs!`;
+          }
+
+          if (this.battleHub && this.matchId) {
+            this.battleHub.invoke('SendProgressUpdate', this.matchId, res.passed, res.total)
+              .catch(err => console.error('Failed to send progress update:', err));
           }
         },
         error: (err) => {
