@@ -197,6 +197,8 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   showSubmitSuccess = false;
   showVictoryModal = false;
   showDefeatModal = false;
+  showExitConfirmModal = false;
+  private exitConfirmationPromiseResolver: ((value: boolean) => void) | null = null;
   battleEndData: any = null;
   activePanel: 'problem' | 'hints' = 'problem';
   mobileActiveTab: 'description' | 'editor' | 'info' = 'editor';
@@ -813,16 +815,31 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     }
   }
 
-  canDeactivate(): boolean {
+  canDeactivate(): Promise<boolean> | boolean {
     if (this.showVictoryModal || this.showDefeatModal || !this.matchId || this.opponentLeft) {
       return true;
     }
 
-    const confirmExit = confirm('Are you sure you want to exit or surrender this game?');
-    if (confirmExit) {
-      this.confirmSurrender();
-      return true;
+    this.showExitConfirmModal = true;
+    return new Promise<boolean>((resolve) => {
+      this.exitConfirmationPromiseResolver = resolve;
+    });
+  }
+
+  onConfirmExit(): void {
+    this.showExitConfirmModal = false;
+    this.confirmSurrender();
+    if (this.exitConfirmationPromiseResolver) {
+      this.exitConfirmationPromiseResolver(true);
+      this.exitConfirmationPromiseResolver = null;
     }
-    return false;
+  }
+
+  onCancelExit(): void {
+    this.showExitConfirmModal = false;
+    if (this.exitConfirmationPromiseResolver) {
+      this.exitConfirmationPromiseResolver(false);
+      this.exitConfirmationPromiseResolver = null;
+    }
   }
 }

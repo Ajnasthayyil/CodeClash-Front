@@ -323,5 +323,18 @@
       </div>
     </div>
   </div>
+
+  <!-- ══════════════════ EXIT CONFIRM MODAL ══════════════════ -->
+  <div *ngIf="showExitConfirmModal" class="modal-bg" (click)="onCancelExit()">
+    <div class="modal-box border border-yellow-500/30" (click)="$event.stopPropagation()">
+      <div class="modal-icon text-5xl text-yellow-500">⚠️</div>
+      <h3 class="modal-title text-yellow-500 text-2xl font-black">Abandon Battle?</h3>
+      <p class="modal-body text-slate-300">Are you sure you want to exit or surrender this game? You will forfeit this match and lose leaderboard points.</p>
+      <div class="modal-btns">
+        <button (click)="onCancelExit()" class="btn-keep">Keep Fighting</button>
+        <button (click)="onConfirmExit()" class="btn-give-up">Yes, Abandon</button>
+      </div>
+    </div>
+  </div>
 </div>
 
