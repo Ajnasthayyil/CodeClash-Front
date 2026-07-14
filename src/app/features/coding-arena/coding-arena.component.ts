@@ -403,7 +403,10 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       this.battleEndData = data;
       clearInterval(this.timerInterval);
 
-      if (data.winnerId === this.currentUser?.id) {
+      const isWinner = data.winnerId && this.currentUser?.id &&
+                       data.winnerId.toString().toLowerCase() === this.currentUser.id.toString().toLowerCase();
+
+      if (isWinner) {
         if (data.isSurrender) {
           this.notificationService.showToast('VICTORY! The opponent surrendered!', 'success', 5000);
           this.victoryTitle = 'Opponent Surrendered';
@@ -433,7 +436,9 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       }
 
       if (this.currentUser) {
-        const ratingChange = (data.winnerId === this.currentUser.id) ? data.winnerDelta : data.loserDelta;
+        const isWinner = data.winnerId && this.currentUser.id &&
+                         data.winnerId.toString().toLowerCase() === this.currentUser.id.toString().toLowerCase();
+        const ratingChange = isWinner ? data.winnerDelta : data.loserDelta;
         this.currentUser.rating = (this.currentUser.rating || 1200) + ratingChange;
         this.playerRating = this.currentUser.rating;
         localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
@@ -615,7 +620,9 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         handler: (data: any) => {
           if (data.roomId === this.roomId) {
             clearInterval(this.timerInterval);
-            if (data.winnerId === this.currentUser?.id) {
+            const isWinner = data.winnerId && this.currentUser?.id &&
+                             data.winnerId.toString().toLowerCase() === this.currentUser.id.toString().toLowerCase();
+            if (isWinner) {
               // Calculate elapsed time
               const elapsed = (30 * 60) - this.timeRemainingSeconds;
               const m = Math.floor(elapsed / 60);
