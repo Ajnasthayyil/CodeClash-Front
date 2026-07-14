@@ -799,20 +799,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   goToResults(): void {
-    if (this.battleEndData) {
-      this.router.navigate(['/arena/result'], {
-        state: {
-          battleId: this.matchId,
-          winnerId: this.battleEndData.winnerId,
-          winnerDelta: this.battleEndData.winnerDelta,
-          loserDelta: this.battleEndData.loserDelta,
-          opponentName: this.opponentName,
-          opponentRating: this.opponentRating
-        }
-      });
-    } else {
-      this.router.navigate(['/arena']);
-    }
+    this.router.navigate(['/arena']);
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
