@@ -48,6 +48,7 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
 
   onCodeChange(val: string): void {
     this.codeSnippets[this.selectedLanguage] = val;
+    this.editorCode = val;
     this.runCodeSuccess = false;
   }
 
@@ -251,7 +252,11 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
       },
       error: (err) => {
         this.isRunning = false;
-        this.terminalOutput += `\nHTTP Error: Could not connect to the execution server.\n`;
+        let errMsg = err.error?.message || err.message;
+        if (err.error?.errors && Array.isArray(err.error.errors) && err.error.errors.length > 0) {
+          errMsg += '\nDetails:\n- ' + err.error.errors.join('\n- ');
+        }
+        this.terminalOutput += `\nHTTP Error: ${errMsg}\n`;
         console.error(err);
       }
     });
@@ -281,7 +286,11 @@ export class PracticeArenaComponent implements OnInit, OnDestroy, AfterViewCheck
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.terminalOutput += `\nHTTP Error: Could not connect to the execution server.\n`;
+        let errMsg = err.error?.message || err.message;
+        if (err.error?.errors && Array.isArray(err.error.errors) && err.error.errors.length > 0) {
+          errMsg += '\nDetails:\n- ' + err.error.errors.join('\n- ');
+        }
+        this.terminalOutput += `\nHTTP Error: ${errMsg}\n`;
         console.error(err);
       }
     });
