@@ -82,6 +82,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
   opponentTotal = 10;
 
   matchId = 'CODE-CLASH-542';
+  battleMode = 'Ranked';
   problemId = '';
   opponentCode = '';
   roomId = '';
@@ -280,6 +281,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
       const language  = params['language'];
       const opName    = params['opponentName'];
       const opElo     = params['opponentElo'];
+      const modeParam = params['mode'];
+
+      if (modeParam) {
+        this.battleMode = modeParam;
+      }
 
       if (opName) {
         this.opponentName = opName;
@@ -458,7 +464,11 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
     this.battleHub.on('BattleCancelled', () => {
       this.cleanupLocalStorageCode();
       this.notificationService.showToast('Battle cancelled by server.', 'warning');
-      this.router.navigate(['/arena']);
+      if (this.battleMode === 'Tournament') {
+        this.router.navigate(['/tournament']);
+      } else {
+        this.router.navigate(['/arena']);
+      }
     });
 
     this.battleHub.start().then(() => {
@@ -826,24 +836,40 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         next: () => {
           this.showDefeatModal = true;
           setTimeout(() => {
-            this.router.navigate(['/arena']);
+            if (this.battleMode === 'Tournament') {
+              this.router.navigate(['/tournament']);
+            } else {
+              this.router.navigate(['/arena']);
+            }
           }, 2000);
         },
         error: (err) => {
           console.error(err);
-          this.router.navigate(['/arena']);
+          if (this.battleMode === 'Tournament') {
+            this.router.navigate(['/tournament']);
+          } else {
+            this.router.navigate(['/arena']);
+          }
         }
       });
     } else if (this.battleHub && this.matchId) {
       this.battleHub.invoke('Surrender', this.matchId);
     } else {
-      this.router.navigate(['/arena']);
+      if (this.battleMode === 'Tournament') {
+        this.router.navigate(['/tournament']);
+      } else {
+        this.router.navigate(['/arena']);
+      }
     }
   }
 
   goToResults(): void {
     this.cleanupLocalStorageCode();
-    this.router.navigate(['/arena']);
+    if (this.battleMode === 'Tournament') {
+      this.router.navigate(['/tournament']);
+    } else {
+      this.router.navigate(['/arena']);
+    }
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────

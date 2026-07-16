@@ -14,7 +14,8 @@
     <!-- List -->
     <div *ngIf="(notifications$ | async)?.length; else emptyState" class="notifications-list">
       <div *ngFor="let notif of notifications$ | async" 
-           class="notification-item border-b border-slate-900/30" 
+           (click)="onNotificationClick(notif, $event)"
+           class="notification-item border-b border-slate-900/30 cursor-pointer" 
            [class.unread]="!notif.read"
            [class]="notif.type">
         
