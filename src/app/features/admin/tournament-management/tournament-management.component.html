@@ -23,51 +23,286 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-900 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400 font-bold">
-          <th class="py-4 px-6">Name</th>
+          <th class="py-4 px-6">Title</th>
           <th class="py-4 px-6">Status</th>
           <th class="py-4 px-6">Start Date</th>
+          <th class="py-4 px-6">ELO Limit</th>
           <th class="py-4 px-6">Capacity</th>
           <th class="py-4 px-6 text-right">Actions</th>
         </tr>
       </thead>
       <tbody class="text-sm text-slate-300">
-        <tr *ngFor="let t of filteredTournaments" class="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-          <td class="py-4 px-6">
-            <div class="font-bold text-slate-200">{{ t.name }}</div>
-            <div class="text-xs text-slate-500 font-mono mt-1">{{ t.id }}</div>
-          </td>
-          <td class="py-4 px-6">
-            <span class="px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider" [ngClass]="getStatusClass(t.status)">
-              {{ t.status }}
-            </span>
-          </td>
-          <td class="py-4 px-6">{{ t.startDate }}</td>
-          <td class="py-4 px-6">
-            <div class="flex items-center gap-2">
-              <div class="w-20 bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                <div class="bg-blue-500 h-full" [style.width.%]="(t.registered / t.capacity) * 100"></div>
+        <ng-container *ngFor="let t of filteredTournaments">
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
+            <td class="py-4 px-6">
+              <div class="font-bold text-slate-200">{{ t.title }}</div>
+              <div class="text-xs text-slate-500 font-mono mt-1">{{ t.id }}</div>
+            </td>
+            <td class="py-4 px-6">
+              <span class="px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider" [ngClass]="getStatusClass(t.status)">
+                {{ t.status }}
+              </span>
+            </td>
+            <td class="py-4 px-6">{{ t.startDate | date:'MMM d, y, h:mm a' }}</td>
+            <td class="py-4 px-6 font-mono text-xs">
+              <span *ngIf="t.minRating || t.maxRating">
+                {{ t.minRating || 0 }} - {{ t.maxRating || '∞' }}
+              </span>
+              <span class="text-slate-500" *ngIf="!t.minRating && !t.maxRating">None</span>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center gap-2">
+                <div class="w-20 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-blue-500 h-full" [style.width.%]="(t.participantCount / t.maxParticipants) * 100"></div>
+                </div>
+                <span class="text-xs font-mono">{{ t.participantCount }}/{{ t.maxParticipants }}</span>
               </div>
-              <span class="text-xs font-mono">{{ t.registered }}/{{ t.capacity }}</span>
-            </div>
-          </td>
-          <td class="py-4 px-6 text-right">
-            <div class="flex items-center justify-end gap-2">
-              
-              <button *ngIf="t.status === 'Draft'" (click)="publishTournament(t)" class="text-xs font-bold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 px-3 py-1.5 rounded transition-colors">Publish</button>
-              
-              <button *ngIf="t.status === 'Published'" (click)="openRegistration(t)" class="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded transition-colors">Open Reg</button>
-              
-              <button *ngIf="t.status === 'RegistrationOpen' || t.status === 'RegistrationClosed'" (click)="generateBracket(t)" class="text-xs font-bold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/20 px-3 py-1.5 rounded transition-colors">Generate Bracket</button>
+            </td>
+            <td class="py-4 px-6 text-right">
+              <div class="flex items-center justify-end gap-2">
+                
+                <button *ngIf="t.status === 'Draft'" (click)="publishTournament(t)" class="text-xs font-bold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 px-3 py-1.5 rounded transition-colors">Publish</button>
+                
+                <button *ngIf="t.status === 'Published'" (click)="openRegistration(t)" class="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded transition-colors">Open Reg</button>
+                
+                <button *ngIf="t.status === 'RegistrationOpen'" (click)="closeRegistrationEarly(t)" class="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded transition-colors">Close Reg</button>
+                
+                <button *ngIf="t.status === 'RegistrationOpen' || t.status === 'RegistrationClosed'" (click)="generateBracket(t)" class="text-xs font-bold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/20 px-3 py-1.5 rounded transition-colors">Generate Bracket</button>
+                
+                <button (click)="toggleMatchPanel(t)" *ngIf="t.status === 'Live' || t.status === 'RegistrationClosed' || t.status === 'Completed'"
+                  class="text-xs font-bold text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded transition-colors flex items-center gap-1">
+                  Matches
+                  <svg class="w-3 h-3 transition-transform duration-200" [class.rotate-180]="isMatchPanelOpen(t.id)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
 
-              <button *ngIf="t.status !== 'Completed' && t.status !== 'Cancelled'" (click)="cancelTournament(t)" class="text-slate-500 hover:text-red-400 p-1.5 rounded hover:bg-red-500/10 transition-colors" title="Cancel Tournament">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
+                <button (click)="toggleRoster(t)" class="text-xs font-bold text-slate-400 hover:text-slate-200 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded transition-colors flex items-center gap-1">
+                  Roster
+                  <svg class="w-3 h-3 transition-transform duration-200" [class.rotate-180]="isRosterOpen(t.id)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+
+                <button *ngIf="t.status !== 'Completed' && t.status !== 'Cancelled'" (click)="cancelTournament(t)" class="text-slate-500 hover:text-red-400 p-1.5 rounded hover:bg-red-500/10 transition-colors" title="Cancel Tournament">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <button (click)="deleteTournament(t)" class="text-slate-500 hover:text-red-500 p-1.5 rounded hover:bg-red-500/10 transition-colors" title="Delete Tournament">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Expanded Roster Row -->
+          <tr *ngIf="isRosterOpen(t.id)" class="bg-slate-900/30 border-b border-slate-800/50">
+            <td colspan="6" class="p-6">
+              <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                  <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    Registrants Roster ({{ rosterMap[t.id]?.length || 0 }} players)
+                  </h4>
+                  
+                  <div class="flex gap-2">
+                    <button *ngIf="t.status === 'RegistrationOpen'" (click)="closeRegistrationEarly(t)" class="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded transition-colors">
+                      Close Registration Early
+                    </button>
+                    <button *ngIf="t.status === 'Published'" (click)="openRegistration(t)" class="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded transition-colors">
+                      Open Registration
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div *ngIf="rosterLoading[t.id]" class="py-8 text-center text-slate-500 text-xs">
+                  <svg class="animate-spin h-5 w-5 text-orange-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading roster...
+                </div>
+
+                <!-- Empty State -->
+                <div *ngIf="!rosterLoading[t.id] && (!rosterMap[t.id] || rosterMap[t.id]?.length === 0)" class="py-6 text-center text-slate-500 text-sm">
+                  No players registered yet.
+                </div>
+
+                <!-- Registrants Grid -->
+                <div *ngIf="!rosterLoading[t.id] && rosterMap[t.id] && (rosterMap[t.id]?.length || 0) > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div *ngFor="let p of rosterMap[t.id]" class="bg-[#161b22] border border-slate-800 rounded-lg p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full border border-slate-700 bg-slate-800 flex items-center justify-center text-xs font-bold text-white uppercase">
+                        {{ p.username.substring(0, 2) }}
+                      </div>
+                      <div>
+                        <div class="font-bold text-slate-200 text-sm">{{ p.username }}</div>
+                        <div class="text-xs text-slate-500">{{ p.fullName }}</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xs font-bold text-orange-400 font-mono">{{ p.rating }} ELO</div>
+                      <div class="text-[10px] text-slate-500 mt-0.5">{{ p.registeredAt | date:'shortTime' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── Match Management Panel ── -->
+          <tr *ngIf="isMatchPanelOpen(t.id)" class="bg-[#0d1117]/60 border-b border-purple-900/30">
+            <td colspan="6" class="p-6">
+              <div class="bg-[#0d1117] border border-purple-900/40 rounded-xl p-4">
+
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                  <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Match Schedule &amp; Control
+                    <span class="text-purple-400 font-mono">({{ matchesMap[t.id]?.length || 0 }} matches)</span>
+                  </h4>
+                  <button (click)="loadMatches(t.id)" class="text-xs text-slate-500 hover:text-slate-300 flex items-center gap-1 transition-colors">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Refresh
+                  </button>
+                </div>
+
+                <!-- Loading -->
+                <div *ngIf="matchesLoading[t.id]" class="py-6 text-center text-slate-500 text-xs">
+                  <svg class="animate-spin h-5 w-5 text-purple-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading matches...
+                </div>
+
+                <!-- No matches -->
+                <div *ngIf="!matchesLoading[t.id] && (!matchesMap[t.id] || matchesMap[t.id]?.length === 0)"
+                  class="py-6 text-center text-slate-500 text-sm">
+                  No matches yet. Generate the bracket first.
+                </div>
+
+                <!-- Match list -->
+                <div *ngIf="!matchesLoading[t.id] && matchesMap[t.id]?.length" class="space-y-3">
+                  <div *ngFor="let m of matchesMap[t.id]"
+                    class="bg-[#161b22] border rounded-xl p-4 transition-colors"
+                    [ngClass]="getMatchStatusString(m.status) === 'InProgress' ? 'border-green-800/50' : getMatchStatusString(m.status) === 'Completed' ? 'border-purple-800/30' : 'border-slate-800'">
+
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+
+                      <!-- Left: Round + Players + Status -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1.5">
+                          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">{{ getMatchRoundString(m.round) }}</span>
+                          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
+                            [ngClass]="getMatchStatusClass(m.status)">{{ getMatchStatusString(m.status) }}</span>
+                        </div>
+
+                        <div class="font-bold text-slate-100 text-base mb-1">
+                          {{ getMatchPlayerLabel(t.id, m) }}
+                        </div>
+
+                        <div class="text-xs text-slate-400 flex items-center gap-1.5">
+                          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>Scheduled: {{ (m.scheduledTime && !m.scheduledTime.startsWith('0001-01-01')) ? (m.scheduledTime | date:'MMM d, y, h:mm a') : 'Not scheduled' }}</span>
+                          <span *ngIf="m.startTime" class="ml-2 text-green-500 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            Started: {{ m.startTime | date:'shortTime' }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Right: Controls (only for Scheduled matches) -->
+                      <div *ngIf="getMatchStatusString(m.status) === 'Scheduled'" class="flex items-center gap-3 shrink-0">
+
+                        <!-- Custom 12-Hour Datetime Picker Capsule -->
+                        <div class="flex items-center gap-1.5 bg-[#0d1117] border border-slate-700/80 rounded-lg p-1.5 focus-within:border-purple-500/80 transition-all">
+                          <!-- Date Selector -->
+                          <input type="date"
+                            [(ngModel)]="matchDateInputs[m.id]"
+                            [id]="'admin-date-' + m.id"
+                            class="bg-transparent border-0 text-xs text-slate-200 focus:outline-none focus:ring-0 px-1 py-1 w-28" />
+                          
+                          <div class="h-4 w-px bg-slate-800"></div>
+
+                          <!-- Hour Selector -->
+                          <select [(ngModel)]="matchHourInputs[m.id]"
+                            class="bg-[#0d1117] border-0 text-xs text-slate-200 focus:outline-none focus:ring-0 px-1 py-0.5 w-12 cursor-pointer">
+                            <option *ngFor="let h of hoursList" [value]="h">{{ h }}</option>
+                          </select>
+
+                          <span class="text-slate-500 text-xs">:</span>
+
+                          <!-- Minute Selector -->
+                          <select [(ngModel)]="matchMinuteInputs[m.id]"
+                            class="bg-[#0d1117] border-0 text-xs text-slate-200 focus:outline-none focus:ring-0 px-1 py-0.5 w-12 cursor-pointer">
+                            <option *ngFor="let min of minutesList" [value]="min">{{ min }}</option>
+                          </select>
+
+                          <!-- AM/PM Selector -->
+                          <select [(ngModel)]="matchAmPmInputs[m.id]"
+                            class="bg-[#0d1117] border-0 text-xs text-slate-200 focus:outline-none focus:ring-0 px-1 py-0.5 w-14 cursor-pointer font-semibold text-purple-400">
+                            <option *ngFor="let ampm of ampmList" [value]="ampm">{{ ampm }}</option>
+                          </select>
+
+                          <button (click)="scheduleMatch(t.id, m.id)"
+                            class="text-[11px] font-bold text-purple-400 hover:text-white bg-purple-500/10 hover:bg-purple-500/30 border border-purple-500/20 hover:border-purple-400 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+                            Set Time
+                          </button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-6 w-px bg-slate-800"></div>
+
+                        <!-- Force Start -->
+                        <button [disabled]="!canForceStart(t.id, m)" (click)="forceStartMatch(t.id, m.id)"
+                          [title]="!canForceStart(t.id, m) ? 'Cannot start: Players TBD or lower round matches unfinished' : 'Force start match'"
+                          class="text-xs font-bold px-4 py-2.5 rounded-lg transition-all flex items-center gap-1.5 border"
+                          [ngClass]="canForceStart(t.id, m) 
+                            ? 'text-orange-400 hover:text-white bg-orange-500/10 hover:bg-orange-500/30 border-orange-500/20 hover:border-orange-400' 
+                            : 'text-slate-600 bg-slate-800/20 border-slate-800 cursor-not-allowed'">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Force Start
+                        </button>
+                      </div>
+
+                      <!-- In-progress indicator -->
+                      <div *ngIf="getMatchStatusString(m.status) === 'InProgress'" class="flex items-center gap-2 shrink-0">
+                        <span class="flex items-center gap-1.5 text-xs font-bold text-green-400">
+                          <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                          </span>
+                          LIVE
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+            </td>
+          </tr>
+
+        </ng-container>
         
         <tr *ngIf="filteredTournaments.length === 0">
-          <td colspan="5" class="py-8 text-center text-slate-500 font-medium">
+          <td colspan="6" class="py-8 text-center text-slate-500 font-medium">
             No tournaments found.
           </td>
         </tr>
@@ -78,22 +313,27 @@
 
 <!-- Create Modal -->
 <div *ngIf="showCreateModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div class="bg-[#161b22] border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+  <div class="bg-[#161b22] border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
     <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
       <h3 class="text-lg font-bold text-white">Create Tournament</h3>
       <button (click)="closeCreateModal()" class="text-slate-400 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="p-6 space-y-4">
+    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
       <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tournament Name</label>
-        <input type="text" [(ngModel)]="newTournament.name" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tournament Title *</label>
+        <input type="text" [(ngModel)]="newTournament.title" placeholder="e.g. Violet Autumn Cup S1" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</label>
+        <textarea [(ngModel)]="newTournament.description" placeholder="Specify tournament format, rules, and ELO requirements..." rows="3" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all"></textarea>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Capacity</label>
-          <select [(ngModel)]="newTournament.capacity" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Capacity (Max Participants) *</label>
+          <select [(ngModel)]="newTournament.maxParticipants" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+            <option [value]="8">8 Players</option>
             <option [value]="16">16 Players</option>
             <option [value]="32">32 Players</option>
             <option [value]="64">64 Players</option>
@@ -102,8 +342,36 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Start Date</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Min Rating Requirement</label>
+          <input type="number" [(ngModel)]="newTournament.minRating" placeholder="e.g. 1200" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Rating Limit</label>
+          <input type="number" [(ngModel)]="newTournament.maxRating" placeholder="e.g. 2000" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Language Constraint</label>
+          <select [(ngModel)]="newTournament.language" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+            <option value="">Any Language</option>
+            <option value="Python">Python</option>
+            <option value="JavaScript">JavaScript</option>
+            <option value="CSharp">C#</option>
+            <option value="Java">Java</option>
+            <option value="Cpp">C++</option>
+            <option value="Go">Go</option>
+            <option value="Rust">Rust</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Start Date *</label>
           <input type="date" [(ngModel)]="newTournament.startDate" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">End Date *</label>
+          <input type="date" [(ngModel)]="newTournament.endDate" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
         </div>
       </div>
     </div>
