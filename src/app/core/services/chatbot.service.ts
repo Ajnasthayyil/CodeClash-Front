@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -27,7 +28,7 @@ export interface ChatMessageDto {
 
 @Injectable({ providedIn: 'root' })
 export class ChatbotService {
-  private readonly base = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/chatbot';
+  private readonly base = `${environment.apiUrl}/chatbot`;
 
   constructor(private http: HttpClient) {}
 
