@@ -1,129 +1,76 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-tournament-match',
-  templateUrl: './tournament-match.component.html',
-  styleUrls: ['./tournament-match.component.scss'],
+  template: `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0d1117; color: #c9d1d9; font-family: sans-serif;">
+      <div style="border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: #a855f7; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+      <p style="font-size: 16px; font-weight: 500;">Connecting to tournament arena room...</p>
+      <style>
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      </style>
+    </div>
+  `,
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule]
 })
 export class TournamentMatchComponent implements OnInit, OnDestroy {
-  @ViewChild('codeEditor') codeEditor!: ElementRef;
-
-  // Metadata
   tournamentId = '';
   matchId = '';
-  
-  // Timer
-  matchDurationSeconds = 45 * 60; // 45 minutes
-  timeRemaining = this.matchDurationSeconds;
-  private timerInterval: any;
 
-  // Opponent Status
-  opponentName = 'AlgoKing99';
-  opponentStatus = 'Coding...';
-  opponentTestsPassed = 0;
-  totalTests = 10;
-  private opponentSimInterval: any;
-
-  // Editor & Execution
-  languages = ['Python', 'JavaScript', 'C++', 'Go'];
-  selectedLanguage = 'Python';
-  currentCode = 'def longest_valid_parentheses(s):\n    # Write your solution here\n    pass';
-  
-  isRunning = false;
-  isSubmitting = false;
-  terminalOutput = '$ Waiting for execution...\n\nClick "Run Code" to test your solution.';
-  
-  myTestsPassed = 0;
-  runCodeSuccess = false;
-  showSubmitSuccess = false;
-
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.tournamentId = params.get('id') || '';
       this.matchId = params.get('matchId') || '';
+
+      const token = this.authService.getAccessToken();
+      const currentUser = this.authService.getCurrentUser();
+      const currentUserId = currentUser?.id || '';
+
+      this.http.get<any[]>(`${environment.apiUrl}/tournaments/${this.tournamentId}/matches`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).subscribe({
+        next: (matches) => {
+          const match = matches.find(m => m.id === this.matchId);
+          if (match && match.battleId) {
+            const isP1 = match.player1Id && match.player1Id.toLowerCase() === currentUserId.toLowerCase();
+            const oppUsername = isP1 ? match.player2Username : match.player1Username;
+            
+            this.router.navigate(['/arena/battle'], {
+              queryParams: {
+                battleId: match.battleId,
+                problemId: match.assignedProblemId,
+                language: match.language || 'Python',
+                opponentName: oppUsername || 'Opponent',
+                opponentElo: 1200,
+                mode: 'Tournament'
+              }
+            });
+          } else {
+            this.router.navigate(['/tournament', this.tournamentId]);
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load tournament match for redirection:', err);
+          this.router.navigate(['/tournament', this.tournamentId]);
+        }
+      });
     });
-
-    // Start timer
-    this.timerInterval = setInterval(() => {
-      if (this.timeRemaining > 0) this.timeRemaining--;
-    }, 1000);
-
-    // Simulate opponent progress
-    this.simulateOpponent();
   }
 
-  ngOnDestroy(): void {
-    clearInterval(this.timerInterval);
-    clearInterval(this.opponentSimInterval);
-  }
-
-  getDisplayTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  }
-
-  get myFillPercent(): number {
-    return Math.round((this.myTestsPassed / this.totalTests) * 100);
-  }
-
-  get oppFillPercent(): number {
-    return Math.round((this.opponentTestsPassed / this.totalTests) * 100);
-  }
-
-  selectLanguage(lang: string): void {
-    this.selectedLanguage = lang;
-  }
-
-  get codeLines(): string[] { return this.currentCode.split('\n'); }
-
-  runCode(): void {
-    if (this.isRunning) return;
-    this.isRunning = true;
-    this.terminalOutput = '$ Submitting code to remote execution engine...\n';
-    
-    setTimeout(() => {
-      this.isRunning = false;
-      this.myTestsPassed = 7;
-      this.runCodeSuccess = true;
-      this.terminalOutput += '🎉 7/10 tests passed!\nRuntime: 45ms | Memory: 14.2 MB';
-    }, 1500);
-  }
-
-  submitSolution(): void {
-    if (this.isSubmitting) return;
-    this.isSubmitting = true;
-    this.terminalOutput = '$ Submitting final solution...\n';
-
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.myTestsPassed = 10;
-      this.terminalOutput += '🎉 All 10/10 tests passed! You won the match!\n';
-      this.showSubmitSuccess = true;
-      
-      // Stop opponent simulation since we won
-      clearInterval(this.opponentSimInterval);
-      this.opponentStatus = 'Defeated';
-      
-      setTimeout(() => { this.showSubmitSuccess = false; }, 5000);
-    }, 2000);
-  }
-
-  private simulateOpponent(): void {
-    this.opponentSimInterval = setInterval(() => {
-      if (this.opponentTestsPassed < 8) {
-        this.opponentTestsPassed++;
-        this.opponentStatus = `Passed ${this.opponentTestsPassed}/10 tests`;
-      } else {
-        this.opponentStatus = 'Debugging...';
-      }
-    }, 8000); // Opponent passes a test every 8 seconds
-  }
+  ngOnDestroy(): void {}
 }

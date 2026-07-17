@@ -63,6 +63,8 @@
                 
                 <button *ngIf="t.status === 'Draft'" (click)="publishTournament(t)" class="text-xs font-bold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 px-3 py-1.5 rounded transition-colors">Publish</button>
                 
+                <button *ngIf="t.status === 'Draft' || t.status === 'Published' || t.status === 'RegistrationOpen'" (click)="openEditModal(t)" class="text-xs font-bold text-yellow-400 hover:text-yellow-300 bg-yellow-500/10 hover:bg-yellow-500/20 px-3 py-1.5 rounded transition-colors">Edit</button>
+                
                 <button *ngIf="t.status === 'Published'" (click)="openRegistration(t)" class="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded transition-colors">Open Reg</button>
                 
                 <button *ngIf="t.status === 'RegistrationOpen'" (click)="closeRegistrationEarly(t)" class="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded transition-colors">Close Reg</button>
@@ -315,7 +317,7 @@
 <div *ngIf="showCreateModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
   <div class="bg-[#161b22] border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
     <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-      <h3 class="text-lg font-bold text-white">Create Tournament</h3>
+      <h3 class="text-lg font-bold text-white">{{ isEditing ? 'Edit Tournament' : 'Create Tournament' }}</h3>
       <button (click)="closeCreateModal()" class="text-slate-400 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
@@ -377,7 +379,7 @@
     </div>
     <div class="px-6 py-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-900/50">
       <button (click)="closeCreateModal()" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">Cancel</button>
-      <button (click)="createTournament()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-orange-500/20 transition-all">Create</button>
+      <button (click)="saveTournament()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-orange-500/20 transition-all">{{ isEditing ? 'Save' : 'Create' }}</button>
     </div>
   </div>
 </div>

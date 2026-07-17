@@ -54,7 +54,7 @@
       <!-- Desktop CTAs (hidden on small devices) -->
       <ng-container *ngIf="!isLoggedIn">
         <a routerLink="/auth/login" class="hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
-          Request Demo
+          Log In
         </a>
         <a routerLink="/auth/register" class="hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-bold bg-orange-600 text-white hover:bg-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.35)] transition duration-300">
           Sign Up
@@ -95,7 +95,7 @@
     <div class="h-px bg-slate-900 my-4"></div>
     <div class="flex flex-col gap-3" *ngIf="!isLoggedIn">
       <a routerLink="/auth/login" (click)="isMobileMenuOpen = false" class="w-full text-center py-3 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
-        Request Demo
+        Log In
       </a>
       <a routerLink="/auth/register" (click)="isMobileMenuOpen = false" class="w-full text-center py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition duration-200">
         Sign Up
