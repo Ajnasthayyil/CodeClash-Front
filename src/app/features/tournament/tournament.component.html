@@ -1,349 +1,391 @@
 <div class="tournament-root">
-  <div class="tournament-container" *ngIf="selectedTournament; else noTournamentState">
+  <div class="tournament-container">
 
-    <!-- ═════ Top Banner Header ═════ -->
-    <div class="tournament-banner">
-      <div class="banner-left">
-        <!-- Event selector dropdown -->
-        <div class="event-dropdown-wrap" *ngIf="tournaments.length > 0">
-          <div class="dropdown-trigger">
-            <svg class="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-            <select [ngModel]="selectedTournamentId" (ngModelChange)="onTournamentSelect($event)" class="dropdown-select">
-              <option *ngFor="let t of tournaments" [value]="t.id">{{ t.title }}</option>
-            </select>
-            <svg class="chevron-sm" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-          </div>
-        </div>
-
-        <span class="live-tournament-badge" *ngIf="selectedTournament.status === 'Live'">
-          <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-          LIVE TOURNAMENT
-        </span>
-        <span class="live-tournament-badge registration-badge" *ngIf="selectedTournament.status === 'RegistrationOpen'">
-          <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-          REGISTRATION OPEN
-        </span>
-        
-        <h1 class="tournament-title">{{ selectedTournament.title }}</h1>
-        
-        <div class="banner-meta">
-          <span class="meta-item">
-            <svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            {{ selectedTournament.startDate | date:'MMM d' }} – {{ selectedTournament.endDate | date:'MMM d, y, h:mm a' }}
-          </span>
-          <span class="meta-item">
-            <svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-            {{ participants.length }} / {{ selectedTournament.maxParticipants }} participants
-          </span>
-          <span class="meta-item" *ngIf="selectedTournament.minRating || selectedTournament.maxRating">
-            <svg class="meta-icon text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4m-4 0H8m12 9a2 2 0 11-4 0v-2h4v2zm-12-2v2a2 2 0 11-4 0v-2h4z" /></svg>
-            ELO range: {{ selectedTournament.minRating || 0 }} – {{ selectedTournament.maxRating || '∞' }}
-          </span>
-          <span class="meta-item" *ngIf="selectedTournament.language">
-            <svg class="meta-icon text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-            Language: <strong class="text-orange-500 ml-1">{{ selectedTournament.language }}</strong>
-          </span>
-        </div>
-      </div>
-
-      <div class="banner-right">
-        <ng-container *ngIf="selectedTournament.status === 'RegistrationOpen'; else stateBadge">
-          <button (click)="isRegistered ? unregister() : register()" class="btn-register" [class.registered]="isRegistered" [disabled]="isLoading">
-            <svg class="reg-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-            {{ isRegistered ? 'Unregister' : 'Register Now' }}
-          </button>
-        </ng-container>
-        <ng-template #stateBadge>
-          <span class="status-badge-static" [attr.data-status]="selectedTournament.status">
-            {{ selectedTournament.status }}
-          </span>
-        </ng-template>
-      </div>
-    </div>
-
-    <!-- ═════ Main Bracket Columns ═════ -->
-    <div class="tournament-grid">
-
-      <!-- COLUMN 1: Tournament Bracket (Left Column) -->
-      <div class="bracket-area-container">
-        <h2 class="section-label">Tournament Bracket</h2>
-
-        <!-- FINAL STANDINGS DISPLAY -->
-        <div *ngIf="selectedTournament.status === 'Completed' && tournamentResults.length > 0" class="final-standings-card">
-          <div class="standings-header">
-            <svg class="h-6 w-6 text-yellow-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4m-4 0H8m12 9a2 2 0 11-4 0v-2h4v2zm-12-2v2a2 2 0 11-4 0v-2h4z" />
-            </svg>
-            <h3>Final Standings & Rewards</h3>
-          </div>
-          <div class="standings-grid">
-            <div *ngFor="let res of tournamentResults | slice:0:5" class="standing-item" [class.winner-item]="res.rank === 1">
-              <div class="rank-badge" [attr.data-rank]="res.rank">
-                {{ res.rank === 1 ? '🥇' : res.rank === 2 ? '🥈' : res.rank === 3 ? '🥉' : res.rank }}
-              </div>
-              <div class="player-info">
-                <span class="p-username">{{ res.username }}</span>
-                <span class="p-fullname">{{ res.fullName }}</span>
-              </div>
-              <div class="reward-points">
-                +{{ res.totalPoints }} XP
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bracket-columns" *ngIf="bracketMatches.length > 0; else emptyBracketState">
-          
-          <!-- QUARTER FINALS -->
-          <div class="bracket-col col-quarter" *ngIf="hasStage('quarter')">
-            <div class="stage-header">QUARTER FINALS</div>
-            
-            <div class="match-list">
-              <ng-container *ngFor="let m of bracketMatches">
-                <div *ngIf="m.stage === 'quarter'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
-                  
-                  <div class="match-top-status">
-                    <span class="status-lbl">{{ m.status }}</span>
-                    <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
-                  </div>
-
-                  <div class="match-players">
-                    <div class="player-row" [class.winner]="m.p1Score !== undefined && m.p1Score > (m.p2Score || 0)">
-                      <span class="avatar avatar-indigo" [class.avatar-tbd]="m.p1 === 'TBD'">{{ m.p1 === 'TBD' ? '' : m.p1[0] }}</span>
-                      <span class="p-name">{{ m.p1 }}</span>
-                      <span class="p-score">{{ m.p1Score !== undefined ? m.p1Score : '-' }}</span>
-                    </div>
-                    <div class="player-row" [class.winner]="m.p2Score !== undefined && m.p2Score > (m.p1Score || 0)">
-                      <span class="avatar avatar-purple" [class.avatar-tbd]="m.p2 === 'TBD'">{{ m.p2 === 'TBD' ? '' : m.p2[0] }}</span>
-                      <span class="p-name">{{ m.p2 }}</span>
-                      <span class="p-score">{{ m.p2Score !== undefined ? m.p2Score : '-' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Spectate (live, any user) -->
-                  <div *ngIf="m.status === 'live'" class="match-actions">
-                    <button (click)="watchLiveMatch(m)" class="btn-watch-live">
-                      <svg class="play-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Spectate
-                    </button>
-                  </div>
-
-                  <!-- Admin controls (upcoming matches with both players) -->
-                  <div *ngIf="m.status === 'upcoming' && isAdmin && m.p1 !== 'TBD' && m.p2 !== 'TBD'" class="match-actions admin-match-actions">
-                    <div class="schedule-row">
-                      <input type="datetime-local" class="schedule-input"
-                             [(ngModel)]="adminScheduleInputs[m.id]"
-                             [id]="'sched-' + m.id" />
-                      <button (click)="scheduleMatchTime(m.id)" class="btn-save-schedule" title="Save scheduled time">
-                        🕐 Set Time
-                      </button>
-                    </div>
-                    <button (click)="manuallyStartMatch(m.id)" class="btn-start-match">
-                      <svg class="play-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Force Start
-                    </button>
-                  </div>
-                </div>
-              </ng-container>
-            </div>
-          </div>
-
-          <!-- SEMI FINALS -->
-          <div class="bracket-col col-semi" *ngIf="hasStage('semi')">
-            <div class="stage-header">SEMI FINALS</div>
-
-            <div class="match-list">
-              <ng-container *ngFor="let m of bracketMatches">
-                <div *ngIf="m.stage === 'semi'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
-                  
-                  <div class="match-top-status">
-                    <span class="status-lbl">{{ m.status }}</span>
-                    <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
-                  </div>
-
-                  <div class="match-players">
-                    <div class="player-row" [class.winner]="m.p1Score !== undefined && m.p1Score > (m.p2Score || 0)">
-                      <span class="avatar avatar-indigo" [class.avatar-tbd]="m.p1 === 'TBD'">{{ m.p1 === 'TBD' ? '' : m.p1[0] }}</span>
-                      <span class="p-name">{{ m.p1 }}</span>
-                      <span class="p-score">{{ m.p1Score !== undefined ? m.p1Score : '-' }}</span>
-                    </div>
-                    <div class="player-row" [class.winner]="m.p2Score !== undefined && m.p2Score > (m.p1Score || 0)">
-                      <span class="avatar avatar-purple" [class.avatar-tbd]="m.p2 === 'TBD'">{{ m.p2 === 'TBD' ? '' : m.p2[0] }}</span>
-                      <span class="p-name">{{ m.p2 }}</span>
-                      <span class="p-score">{{ m.p2Score !== undefined ? m.p2Score : '-' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Spectate (live, any user) -->
-                  <div *ngIf="m.status === 'live'" class="match-actions">
-                    <button (click)="watchLiveMatch(m)" class="btn-watch-live">
-                      <svg class="play-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Spectate
-                    </button>
-                  </div>
-
-                  <!-- Admin controls (upcoming matches with both players) -->
-                  <div *ngIf="m.status === 'upcoming' && isAdmin && m.p1 !== 'TBD' && m.p2 !== 'TBD'" class="match-actions admin-match-actions">
-                    <div class="schedule-row">
-                      <input type="datetime-local" class="schedule-input"
-                             [(ngModel)]="adminScheduleInputs[m.id]"
-                             [id]="'sched-semi-' + m.id" />
-                      <button (click)="scheduleMatchTime(m.id)" class="btn-save-schedule" title="Save scheduled time">
-                        🕐 Set Time
-                      </button>
-                    </div>
-                    <button (click)="manuallyStartMatch(m.id)" class="btn-start-match">
-                      <svg class="play-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Force Start
-                    </button>
-                  </div>
-                </div>
-              </ng-container>
-            </div>
-          </div>
-
-          <!-- FINAL -->
-          <div class="bracket-col col-final" *ngIf="hasStage('final')">
-            <div class="stage-header">FINAL</div>
-
-            <div class="match-list">
-              <ng-container *ngFor="let m of bracketMatches">
-                <div *ngIf="m.stage === 'final'" class="match-box final-match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
-                  
-                  <div class="match-top-status">
-                    <span class="status-lbl">{{ m.status }}</span>
-                    <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
-                  </div>
-
-                  <div class="match-players">
-                    <div class="player-row" [class.winner]="m.p1Score !== undefined && m.p1Score > (m.p2Score || 0)">
-                      <span class="avatar avatar-indigo" [class.avatar-tbd]="m.p1 === 'TBD'">{{ m.p1 === 'TBD' ? '' : m.p1[0] }}</span>
-                      <span class="p-name">{{ m.p1 }}</span>
-                      <span class="p-score">{{ m.p1Score !== undefined ? m.p1Score : '-' }}</span>
-                    </div>
-                    <div class="player-row" [class.winner]="m.p2Score !== undefined && m.p2Score > (m.p1Score || 0)">
-                      <span class="avatar avatar-purple" [class.avatar-tbd]="m.p2 === 'TBD'">{{ m.p2 === 'TBD' ? '' : m.p2[0] }}</span>
-                      <span class="p-name">{{ m.p2 }}</span>
-                      <span class="p-score">{{ m.p2Score !== undefined ? m.p2Score : '-' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Spectate (live, any user) -->
-                  <div *ngIf="m.status === 'live'" class="match-actions">
-                    <button (click)="watchLiveMatch(m)" class="btn-watch-live">
-                      <svg class="play-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Spectate
-                    </button>
-                  </div>
-
-                  <!-- Admin controls (upcoming matches with both players) -->
-                  <div *ngIf="m.status === 'upcoming' && isAdmin && m.p1 !== 'TBD' && m.p2 !== 'TBD'" class="match-actions admin-match-actions">
-                    <div class="schedule-row">
-                      <input type="datetime-local" class="schedule-input"
-                             [(ngModel)]="adminScheduleInputs[m.id]"
-                             [id]="'sched-final-' + m.id" />
-                      <button (click)="scheduleMatchTime(m.id)" class="btn-save-schedule" title="Save scheduled time">
-                        🕐 Set Time
-                      </button>
-                    </div>
-                    <button (click)="manuallyStartMatch(m.id)" class="btn-start-match">
-                      <svg class="play-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Force Start
-                    </button>
-                  </div>
-                </div>
-              </ng-container>
-            </div>
-          </div>
-
-        </div>
-        <ng-template #emptyBracketState>
-          <div class="bracket-empty-state">
-            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .75.225 1.5.879 2.121z" />
-            </svg>
-            <h3>Bracket Not Generated Yet</h3>
-            <p>Once registration closes and the tournament begins, the tournament tree bracket will appear here in real-time.</p>
-          </div>
-        </ng-template>
-      </div>
-
-      <!-- COLUMN 2: Upcoming Matches (Right Column) -->
-      <div class="upcoming-area-container">
-        <h2 class="section-label">Upcoming Matches</h2>
-
-        <div class="upcoming-list" *ngIf="upcomingMatches.length > 0; else noUpcomingState">
-          <div *ngFor="let u of upcomingMatches" class="upcoming-match-card">
-            
-            <div class="upcoming-card-top">
-              <div class="match-time-tag">
-                <svg class="time-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span>{{ u.timeUTC }}</span>
-              </div>
-              <div class="countdown-timer text-green-400 font-mono font-bold">
-                {{ getDisplayTime(u.timeRemainingSeconds) }}
-              </div>
-            </div>
-
-            <div class="upcoming-card-body">
-              <div class="versus-row">
-                <div class="versus-player">
-                  <span class="avatar avatar-blue-sm" [class.avatar-tbd]="u.p1 === 'TBD'">{{ u.p1 === 'TBD' ? '' : u.p1[0] }}</span>
-                  <span class="player-title">{{ u.p1 }}</span>
-                </div>
-                <span class="vs-text">vs</span>
-                <div class="versus-player justify-end">
-                  <span class="player-title text-right">{{ u.p2 }}</span>
-                  <span class="avatar avatar-purple-sm" [class.avatar-tbd]="u.p2 === 'TBD'">{{ u.p2 === 'TBD' ? '' : u.p2[0] }}</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <ng-template #noUpcomingState>
-          <div class="no-upcoming-state">
-            <p>No upcoming matches left in this tournament.</p>
-          </div>
-        </ng-template>
-      </div>
-
-    </div>
-
-  </div>
-
-  <ng-template #noTournamentState>
-    <div class="no-tournament-root">
-      <div class="no-tournament-card">
-        <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+    <!-- ═════ Page Title Header ═════ -->
+    <div class="page-heading-banner">
+      <div class="header-badge">
+        <svg class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h2>No Tournaments Available</h2>
-        <p>There are currently no active or scheduled tournaments. Check back later!</p>
+        <span>CODING CHAMPIONSHIPS</span>
       </div>
+      <h1 class="page-title">Tournament Arena</h1>
+      <p class="page-subtitle">Browse active championships, check tournament brackets, and join live battles in real-time.</p>
     </div>
-  </ng-template>
+
+    <!-- ═════ Tournaments List (Grouped Sections) ═════ -->
+    <div class="tournaments-sections-container" *ngIf="tournaments.length > 0; else noTournamentState">
+      
+      <!-- Live Section -->
+      <div class="tournament-group-section" *ngIf="liveTournaments.length > 0">
+        <h2 class="section-group-title live-title">
+          <span class="live-indicator-dot"></span>
+          Live Championships
+        </h2>
+        <div class="tournaments-accordion-list">
+          <ng-container *ngFor="let t of liveTournaments">
+            <ng-container *ngTemplateOutlet="tournamentItemTemplate; context: { tournament: t }"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Upcoming Section -->
+      <div class="tournament-group-section" *ngIf="upcomingTournaments.length > 0">
+        <h2 class="section-group-title upcoming-title">
+          <svg class="h-6 w-6 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Upcoming & Open Registration
+        </h2>
+        <div class="tournaments-accordion-list">
+          <ng-container *ngFor="let t of upcomingTournaments">
+            <ng-container *ngTemplateOutlet="tournamentItemTemplate; context: { tournament: t }"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Completed Section -->
+      <div class="tournament-group-section" *ngIf="completedTournaments.length > 0">
+        <h2 class="section-group-title completed-title">
+          <svg class="h-6 w-6 text-purple-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Past Tournaments
+        </h2>
+        <div class="tournaments-accordion-list">
+          <ng-container *ngFor="let t of completedTournaments">
+            <ng-container *ngTemplateOutlet="tournamentItemTemplate; context: { tournament: t }"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═════ Tournament Item Template (Collapsible Dropdown Accordion) ═════ -->
+    <ng-template #tournamentItemTemplate let-t="tournament">
+      <div class="tournament-accordion-item" [class.expanded]="selectedTournamentId === t.id">
+        
+        <!-- Accordion Header Card -->
+        <div class="tournament-accordion-header" (click)="toggleTournamentExpand(t.id)">
+          <div class="header-left">
+            <!-- Expand/Collapse Chevron -->
+            <div class="chevron-wrapper" [class.rotated]="selectedTournamentId === t.id">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            
+            <div class="title-section">
+              <div class="status-row">
+                <span class="status-badge" [attr.data-status]="t.status">
+                  {{ t.status === 'RegistrationOpen' ? 'REGISTRATION OPEN' : t.status === 'Live' ? 'LIVE NOW' : t.status }}
+                </span>
+                <span class="language-pill" *ngIf="t.language">{{ t.language }}</span>
+              </div>
+              <h3 class="tournament-title-text">{{ t.title }}</h3>
+            </div>
+          </div>
+
+          <div class="header-right">
+            <div class="meta-pills-row">
+              <div class="meta-pill">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>{{ t.startDate | date:'MMM d, y' }}</span>
+              </div>
+              <div class="meta-pill" *ngIf="t.minRating || t.maxRating">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <span>ELO {{ t.minRating || 0 }} – {{ t.maxRating || '∞' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Expanded Content Container -->
+        <div class="tournament-accordion-content-wrapper" *ngIf="selectedTournamentId === t.id">
+          <div class="tournament-accordion-content">
+            
+            <!-- Metadata & Registration Action Banner -->
+            <div class="expanded-action-banner">
+              <div class="banner-meta-details">
+                <div class="meta-detail-item">
+                  <span class="lbl">Schedule:</span>
+                  <span class="val">{{ t.startDate | date:'medium' }} – {{ t.endDate | date:'medium' }}</span>
+                </div>
+                <div class="meta-detail-item">
+                  <span class="lbl">Registered:</span>
+                  <span class="val">{{ participants.length }} / {{ t.maxParticipants }} competitors</span>
+                </div>
+                <div class="meta-detail-item" *ngIf="t.minRating || t.maxRating">
+                  <span class="lbl">Eligible ELO:</span>
+                  <span class="val">{{ t.minRating || 0 }} – {{ t.maxRating || 'Any' }}</span>
+                </div>
+              </div>
+
+              <div class="banner-action-side">
+                <ng-container *ngIf="t.status === 'RegistrationOpen'; else staticStatusBadge">
+                  <button (click)="isRegistered ? unregister() : register()" class="btn-action-register" [class.registered]="isRegistered" [disabled]="isLoading">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    <span>{{ isRegistered ? 'Unregister from Event' : 'Register for Championship' }}</span>
+                  </button>
+                </ng-container>
+                <ng-template #staticStatusBadge>
+                  <span class="status-static-badge" [attr.data-status]="t.status">
+                    Tournament is {{ t.status }}
+                  </span>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Loader or Grid Content -->
+            <div class="accordion-body-spinner" *ngIf="isLoading; else expandedGridContent">
+              <div class="spinner"></div>
+              <p>Loading brackets & live match details...</p>
+            </div>
+
+            <ng-template #expandedGridContent>
+              <div class="tournament-grid">
+                
+                <!-- COLUMN 1: Tournament Bracket -->
+                <div class="bracket-area-container">
+                  <h4 class="sub-column-title">Tournament Tree</h4>
+                  
+                  <!-- FINAL STANDINGS DISPLAY -->
+                  <div *ngIf="t.status === 'Completed' && tournamentResults.length > 0" class="final-standings-card">
+                    <div class="standings-header">
+                      <svg class="h-6 w-6 text-yellow-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4m-4 0H8m12 9a2 2 0 11-4 0v-2h4v2zm-12-2v2a2 2 0 11-4 0v-2h4z" />
+                      </svg>
+                      <h3>Final Standings & Rewards</h3>
+                    </div>
+                    <div class="standings-grid">
+                      <div *ngFor="let res of tournamentResults | slice:0:5" class="standing-item" [class.winner-item]="res.rank === 1">
+                        <div class="rank-badge" [attr.data-rank]="res.rank">
+                          {{ res.rank === 1 ? '🥇' : res.rank === 2 ? '🥈' : res.rank === 3 ? '🥉' : res.rank }}
+                        </div>
+                        <div class="player-info">
+                          <span class="p-username">{{ res.username }}</span>
+                          <span class="p-fullname">{{ res.fullName }}</span>
+                        </div>
+                        <div class="reward-points">
+                          +{{ res.totalPoints }} XP
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tree Bracket Columns -->
+                  <div class="bracket-columns" *ngIf="bracketMatches.length > 0; else emptyBracketState">
+                    
+                    <!-- QUARTER FINALS -->
+                    <div class="bracket-col col-quarter" *ngIf="hasStage('quarter')">
+                      <div class="stage-header">QUARTER FINALS</div>
+                      <div class="match-list">
+                        <ng-container *ngFor="let m of bracketMatches">
+                          <div *ngIf="m.stage === 'quarter'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
+                            <div class="match-top-status">
+                              <span class="status-lbl">{{ m.status }}</span>
+                              <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
+                            </div>
+                            <div class="match-players">
+                              <div class="player-row" [class.winner]="m.p1Score !== undefined && m.p1Score > (m.p2Score || 0)">
+                                <span class="avatar avatar-indigo" [class.avatar-tbd]="m.p1 === 'TBD'">{{ m.p1 === 'TBD' ? '' : m.p1[0] }}</span>
+                                <span class="p-name">{{ m.p1 }}</span>
+                                <span class="p-score">{{ m.p1Score !== undefined ? m.p1Score : '-' }}</span>
+                              </div>
+                              <div class="player-row" [class.winner]="m.p2Score !== undefined && m.p2Score > (m.p1Score || 0)">
+                                <span class="avatar avatar-purple" [class.avatar-tbd]="m.p2 === 'TBD'">{{ m.p2 === 'TBD' ? '' : m.p2[0] }}</span>
+                                <span class="p-name">{{ m.p2 }}</span>
+                                <span class="p-score">{{ m.p2Score !== undefined ? m.p2Score : '-' }}</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Join/Spectate Actions -->
+                            <div *ngIf="m.status === 'live'" class="match-actions" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                              <button *ngIf="isParticipant(m)" (click)="joinLiveMatch(m)" class="btn-watch-live" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; border: none; box-shadow: 0 0 8px rgba(168,85,247,0.4);">
+                                Join Battle
+                              </button>
+                              <button (click)="watchLiveMatch(m)" class="btn-watch-live">
+                                Spectate
+                              </button>
+                            </div>
+
+                            <!-- Admin controls / Schedule -->
+                            <div *ngIf="m.status === 'upcoming' && isAdmin && m.p1 !== 'TBD' && m.p2 !== 'TBD'" class="match-actions admin-match-actions">
+                              <div class="schedule-row">
+                                <input type="datetime-local" class="schedule-input" [(ngModel)]="adminScheduleInputs[m.id]" [id]="'sched-' + m.id" />
+                                <button (click)="scheduleMatchTime(m.id)" class="btn-save-schedule">Set Time</button>
+                              </div>
+                              <button (click)="manuallyStartMatch(m.id)" class="btn-start-match">Force Start</button>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+
+                    <!-- SEMI FINALS -->
+                    <div class="bracket-col col-semi" *ngIf="hasStage('semi')">
+                      <div class="stage-header">SEMI FINALS</div>
+                      <div class="match-list">
+                        <ng-container *ngFor="let m of bracketMatches">
+                          <div *ngIf="m.stage === 'semi'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
+                            <div class="match-top-status">
+                              <span class="status-lbl">{{ m.status }}</span>
+                              <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
+                            </div>
+                            <div class="match-players">
+                              <div class="player-row" [class.winner]="m.p1Score !== undefined && m.p1Score > (m.p2Score || 0)">
+                                <span class="avatar avatar-indigo" [class.avatar-tbd]="m.p1 === 'TBD'">{{ m.p1 === 'TBD' ? '' : m.p1[0] }}</span>
+                                <span class="p-name">{{ m.p1 }}</span>
+                                <span class="p-score">{{ m.p1Score !== undefined ? m.p1Score : '-' }}</span>
+                              </div>
+                              <div class="player-row" [class.winner]="m.p2Score !== undefined && m.p2Score > (m.p1Score || 0)">
+                                <span class="avatar avatar-purple" [class.avatar-tbd]="m.p2 === 'TBD'">{{ m.p2 === 'TBD' ? '' : m.p2[0] }}</span>
+                                <span class="p-name">{{ m.p2 }}</span>
+                                <span class="p-score">{{ m.p2Score !== undefined ? m.p2Score : '-' }}</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Join/Spectate Actions -->
+                            <div *ngIf="m.status === 'live'" class="match-actions" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                              <button *ngIf="isParticipant(m)" (click)="joinLiveMatch(m)" class="btn-watch-live" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; border: none; box-shadow: 0 0 8px rgba(168,85,247,0.4);">
+                                Join Battle
+                              </button>
+                              <button (click)="watchLiveMatch(m)" class="btn-watch-live">
+                                Spectate
+                              </button>
+                            </div>
+
+                            <!-- Admin controls / Schedule -->
+                            <div *ngIf="m.status === 'upcoming' && isAdmin && m.p1 !== 'TBD' && m.p2 !== 'TBD'" class="match-actions admin-match-actions">
+                              <div class="schedule-row">
+                                <input type="datetime-local" class="schedule-input" [(ngModel)]="adminScheduleInputs[m.id]" [id]="'sched-semi-' + m.id" />
+                                <button (click)="scheduleMatchTime(m.id)" class="btn-save-schedule">Set Time</button>
+                              </div>
+                              <button (click)="manuallyStartMatch(m.id)" class="btn-start-match">Force Start</button>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+
+                    <!-- FINALS -->
+                    <div class="bracket-col col-final" *ngIf="hasStage('final')">
+                      <div class="stage-header">FINALS</div>
+                      <div class="match-list">
+                        <ng-container *ngFor="let m of bracketMatches">
+                          <div *ngIf="m.stage === 'final'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
+                            <div class="match-top-status">
+                              <span class="status-lbl">{{ m.status }}</span>
+                              <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
+                            </div>
+                            <div class="match-players">
+                              <div class="player-row" [class.winner]="m.p1Score !== undefined && m.p1Score > (m.p2Score || 0)">
+                                <span class="avatar avatar-indigo" [class.avatar-tbd]="m.p1 === 'TBD'">{{ m.p1 === 'TBD' ? '' : m.p1[0] }}</span>
+                                <span class="p-name">{{ m.p1 }}</span>
+                                <span class="p-score">{{ m.p1Score !== undefined ? m.p1Score : '-' }}</span>
+                              </div>
+                              <div class="player-row" [class.winner]="m.p2Score !== undefined && m.p2Score > (m.p1Score || 0)">
+                                <span class="avatar avatar-purple" [class.avatar-tbd]="m.p2 === 'TBD'">{{ m.p2 === 'TBD' ? '' : m.p2[0] }}</span>
+                                <span class="p-name">{{ m.p2 }}</span>
+                                <span class="p-score">{{ m.p2Score !== undefined ? m.p2Score : '-' }}</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Join/Spectate Actions -->
+                            <div *ngIf="m.status === 'live'" class="match-actions" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                              <button *ngIf="isParticipant(m)" (click)="joinLiveMatch(m)" class="btn-watch-live" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; border: none; box-shadow: 0 0 8px rgba(168,85,247,0.4);">
+                                Join Battle
+                              </button>
+                              <button (click)="watchLiveMatch(m)" class="btn-watch-live">
+                                Spectate
+                              </button>
+                            </div>
+
+                            <!-- Admin controls / Schedule -->
+                            <div *ngIf="m.status === 'upcoming' && isAdmin && m.p1 !== 'TBD' && m.p2 !== 'TBD'" class="match-actions admin-match-actions">
+                              <div class="schedule-row">
+                                <input type="datetime-local" class="schedule-input" [(ngModel)]="adminScheduleInputs[m.id]" [id]="'sched-final-' + m.id" />
+                                <button (click)="scheduleMatchTime(m.id)" class="btn-save-schedule">Set Time</button>
+                              </div>
+                              <button (click)="manuallyStartMatch(m.id)" class="btn-start-match">Force Start</button>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <ng-template #emptyBracketState>
+                    <div class="empty-bracket-state">
+                      <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                      </svg>
+                      <h3>Bracket Not Generated</h3>
+                      <p>Once registration closes and the tournament tree is generated, matches will display here.</p>
+                    </div>
+                  </ng-template>
+                </div>
+
+                <!-- COLUMN 2: Upcoming Matches -->
+                <div class="upcoming-area-container">
+                  <h4 class="sub-column-title">Upcoming Matches</h4>
+                  <div class="upcoming-list" *ngIf="upcomingMatches.length > 0; else noUpcomingState">
+                    <div *ngFor="let u of upcomingMatches" class="upcoming-match-card">
+                      <div class="upcoming-card-top">
+                        <div class="match-time-tag">
+                          <svg class="h-4 w-4 mr-1.5 time-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          <span>{{ u.timeUTC }}</span>
+                        </div>
+                        <div class="countdown-timer text-green-400 font-mono font-bold">
+                          {{ getDisplayTime(u.timeRemainingSeconds) }}
+                        </div>
+                      </div>
+                      <div class="upcoming-card-body">
+                        <div class="versus-row">
+                          <div class="versus-player">
+                            <span class="avatar avatar-blue-sm" [class.avatar-tbd]="u.p1 === 'TBD'">{{ u.p1 === 'TBD' ? '' : u.p1[0] }}</span>
+                            <span class="player-title">{{ u.p1 }}</span>
+                          </div>
+                          <span class="vs-text">vs</span>
+                          <div class="versus-player justify-end">
+                            <span class="player-title text-right">{{ u.p2 }}</span>
+                            <span class="avatar avatar-purple-sm" [class.avatar-tbd]="u.p2 === 'TBD'">{{ u.p2 === 'TBD' ? '' : u.p2[0] }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <ng-template #noUpcomingState>
+                    <div class="no-upcoming-state">
+                      <p>No upcoming matches scheduled.</p>
+                    </div>
+                  </ng-template>
+                </div>
+
+              </div>
+            </ng-template>
+
+          </div>
+        </div>
+
+      </div>
+    </ng-template>
+
+    <!-- ═════ Empty State (No Tournaments Created) ═════ -->
+    <ng-template #noTournamentState>
+      <div class="no-tournament-root">
+        <div class="no-tournament-card">
+          <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h2>No Tournaments Available</h2>
+          <p>There are currently no active or scheduled tournaments. Check back later!</p>
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
 
   <!-- ═════ Watch Live Simulation Modal ═════ -->
   <div *ngIf="showLiveModal" class="modal-backdrop" (click)="showLiveModal = false">

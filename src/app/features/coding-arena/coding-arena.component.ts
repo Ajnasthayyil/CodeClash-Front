@@ -933,6 +933,50 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           if (battle.durationSeconds !== undefined) {
             this.totalTimeLimitSeconds = battle.durationSeconds;
           }
+
+          if (battle.problemId) {
+            this.problemId = battle.problemId;
+            this.problemService.getProblemById(battle.problemId).subscribe({
+              next: (p) => {
+                this.problem = {
+                  title: p.title,
+                  difficulty: p.difficulty as any,
+                  description: p.statementMarkdown,
+                  examples: p.testCases.filter(tc => !tc.isHidden).map(tc => ({
+                    input: tc.input || '',
+                    output: tc.expectedOutput || ''
+                  })),
+                  constraints: p.constraints,
+                  tags: [p.category]
+                };
+                this.totalTests = p.testCases.length;
+                this.allowedLanguages = p.allowedLanguages || [];
+
+                // Populate starter code snippets from DB if returned
+                if (p.languageTemplates && p.languageTemplates.length > 0) {
+                  p.languageTemplates.forEach(template => {
+                    const langKey = template.language.toLowerCase();
+                    if (this.codeSnippets[langKey] !== undefined) {
+                      this.codeSnippets[langKey] = template.starterCode;
+                    }
+                  });
+                }
+
+                // If a battle language is preset, enforce it
+                if (this.battleLanguage) {
+                  this.selectedLanguage = this.battleLanguage.toLowerCase();
+                } else if (p.allowedLanguages && p.allowedLanguages.length > 0) {
+                  const firstAllowed = p.allowedLanguages[0].toLowerCase();
+                  if (this.languages.includes(firstAllowed)) {
+                    this.selectedLanguage = firstAllowed;
+                  }
+                }
+              },
+              error: (err) => {
+                console.error('Failed to load problem:', err);
+              }
+            });
+          }
           
           if (battle.participants) {
             const opp = battle.participants.find((p: any) => p.userId !== this.currentUser?.id);

@@ -38,6 +38,8 @@ export class TournamentComponent implements OnInit, OnDestroy {
     battleId?: string;
     problemId?: string;
     scheduledTime?: string;
+    player1Id?: string;
+    player2Id?: string;
   }[] = [];
 
   upcomingMatches: {
@@ -71,7 +73,7 @@ export class TournamentComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notificationService: NotificationService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
@@ -86,9 +88,9 @@ export class TournamentComponent implements OnInit, OnDestroy {
     this.subs.add(
       this.tournamentService.matchStarted$.subscribe(data => {
         this.notificationService.showToast('Match started in your tournament!', 'info');
-        
+
         // If this match is for the current user, redirect to coding arena immediately!
-        const isUserPlayer = 
+        const isUserPlayer =
           (data.player1Id && data.player1Id.toLowerCase() === this.currentUserId.toLowerCase()) ||
           (data.player2Id && data.player2Id.toLowerCase() === this.currentUserId.toLowerCase());
 
@@ -170,6 +172,60 @@ export class TournamentComponent implements OnInit, OnDestroy {
     });
   }
 
+  isParticipant(m: any): boolean {
+    if (!this.currentUserId) return false;
+    const uid = this.currentUserId.toLowerCase();
+    return (m.player1Id && m.player1Id.toLowerCase() === uid) || (m.player2Id && m.player2Id.toLowerCase() === uid);
+  }
+
+  joinLiveMatch(m: any): void {
+    if (m.battleId && m.problemId && this.currentUserId) {
+      const isP1 = m.player1Id && m.player1Id.toLowerCase() === this.currentUserId.toLowerCase();
+      const oppUsername = isP1 ? m.p2 : m.p1;
+      this.router.navigate(['/arena/battle'], {
+        queryParams: {
+          battleId: m.battleId,
+          problemId: m.problemId,
+          language: this.selectedTournament?.language || 'Python',
+          opponentName: oppUsername,
+          opponentElo: 1200,
+          mode: 'Tournament'
+        }
+      });
+    }
+  }
+
+  canScheduleMatch(match: any): boolean {
+    if (!this.currentUserId) return false;
+    if (this.isAdmin) return true;
+
+    // Check if match is upcoming and both players are set (not TBD)
+    if (match.status !== 'upcoming') return false;
+    if (!match.player1Id || !match.player2Id) return false;
+
+    const userIdLower = this.currentUserId.toLowerCase();
+    return match.player1Id.toLowerCase() === userIdLower || match.player2Id.toLowerCase() === userIdLower;
+  }
+
+  formatDateForInput(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    let timeStr = dateStr;
+    if (typeof timeStr === 'string' && !timeStr.endsWith('Z') && !timeStr.includes('+') && !timeStr.includes('-')) {
+      timeStr += 'Z';
+    }
+    const date = new Date(timeStr);
+    if (isNaN(date.getTime()) || date.getFullYear() <= 1970) return '';
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const yyyy = date.getFullYear();
+    const MM = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+
+    return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+  }
+
   scheduleMatchTime(matchId: string): void {
     if (!this.selectedTournamentId) return;
     const raw = this.adminScheduleInputs[matchId];
@@ -189,6 +245,43 @@ export class TournamentComponent implements OnInit, OnDestroy {
         this.notificationService.showToast('Failed to update match time.', 'error');
       }
     });
+  }
+
+  get liveTournaments(): Tournament[] {
+    return this.tournaments.filter(t => t.status === 'Live');
+  }
+
+  get upcomingTournaments(): Tournament[] {
+    return this.tournaments.filter(t => 
+      t.status === 'RegistrationOpen' || 
+      t.status === 'RegistrationClosed' || 
+      t.status === 'Published' ||
+      t.status === 'Draft'
+    );
+  }
+
+  get completedTournaments(): Tournament[] {
+    return this.tournaments.filter(t => 
+      t.status === 'Completed' || 
+      t.status === 'Cancelled'
+    );
+  }
+
+  async toggleTournamentExpand(id: string): Promise<void> {
+    if (this.selectedTournamentId === id) {
+      if (this.selectedTournamentId) {
+        await this.tournamentService.leaveHubConnection(this.selectedTournamentId);
+      }
+      this.selectedTournamentId = '';
+      this.selectedTournament = null;
+      this.participants = [];
+      this.matches = [];
+      this.bracketMatches = [];
+      this.upcomingMatches = [];
+      this.tournamentResults = [];
+    } else {
+      await this.onTournamentSelect(id);
+    }
   }
 
   loadTournaments(): void {
@@ -216,7 +309,7 @@ export class TournamentComponent implements OnInit, OnDestroy {
     }
     this.selectedTournamentId = id;
     this.selectedTournament = this.tournaments.find(t => t.id === id) || null;
-    
+
     // Connect to Hub for this tournament
     await this.tournamentService.initHubConnection(id);
 
@@ -225,7 +318,7 @@ export class TournamentComponent implements OnInit, OnDestroy {
 
   loadTournamentData(id: string): void {
     this.isLoading = true;
-    
+
     // Load detail
     this.tournamentService.getTournamentById(id).subscribe({
       next: (t) => {
@@ -241,7 +334,7 @@ export class TournamentComponent implements OnInit, OnDestroy {
               next: (m) => {
                 this.matches = m || [];
                 this.buildBracketAndUpcoming();
-                
+
                 if (t.status === 'Completed') {
                   this.tournamentService.getTournamentResults(id).subscribe({
                     next: (res) => {
@@ -328,9 +421,15 @@ export class TournamentComponent implements OnInit, OnDestroy {
         liveLink: status === 'live',
         battleId: m.battleId,
         problemId: m.assignedProblemId,
-        scheduledTime: m.scheduledTime
+        scheduledTime: m.scheduledTime,
+        player1Id: m.player1Id,
+        player2Id: m.player2Id
       };
       this.bracketMatches.push(bm);
+
+      if (m.scheduledTime) {
+        this.adminScheduleInputs[m.id] = this.formatDateForInput(m.scheduledTime);
+      }
 
       if (status === 'live' && m.battleId && this.currentUserId) {
         const isUserPlayer =

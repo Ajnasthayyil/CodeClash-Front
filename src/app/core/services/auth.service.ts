@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -29,7 +30,7 @@ export interface AuthResponseDto {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private accessToken: string | null = null;
 
   constructor(private http: HttpClient) { }
@@ -129,7 +130,7 @@ export class AuthService {
   }
 
   get isLoggedIn(): boolean {
-    return !!this.getAccessToken();
+    return !!this.getAccessToken() && !!this.getCurrentUser();
   }
 
   getAccessToken(): string | null {
@@ -145,29 +146,29 @@ export class AuthService {
   }
 
   getProfile(): Observable<ApiResponse<any>> {
-    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    const profileUrl = `${environment.apiUrl}/profile`;
     return this.http.get<ApiResponse<any>>(profileUrl);
   }
 
   getProfileStats(): Observable<ApiResponse<any>> {
-    const statsUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/stats';
+    const statsUrl = `${environment.apiUrl}/profile/stats`;
     return this.http.get<ApiResponse<any>>(statsUrl);
   }
 
   updateProfile(payload: { fullName: string; phoneNumber: string; username: string }): Observable<ApiResponse<any>> {
-    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    const profileUrl = `${environment.apiUrl}/profile`;
     return this.http.put<ApiResponse<any>>(profileUrl, payload);
   }
 
   uploadProfileImage(file: File): Observable<ApiResponse<string>> {
-    const uploadUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile/image';
+    const uploadUrl = `${environment.apiUrl}/profile/image`;
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<ApiResponse<string>>(uploadUrl, formData);
   }
 
   deleteAccount(): Observable<ApiResponse<any>> {
-    const profileUrl = 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1/profile';
+    const profileUrl = `${environment.apiUrl}/profile`;
     return this.http.delete<ApiResponse<any>>(profileUrl);
   }
 

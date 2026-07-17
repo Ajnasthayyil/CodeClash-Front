@@ -37,6 +37,8 @@ export class TournamentManagementComponent implements OnInit, OnDestroy {
   ampmList = ['AM', 'PM'];
 
   showCreateModal = false;
+  isEditing = false;
+  editingTournamentId: string | null = null;
   newTournament = {
     title: '',
     description: '',
@@ -103,6 +105,8 @@ export class TournamentManagementComponent implements OnInit, OnDestroy {
   }
 
   openCreateModal(): void {
+    this.isEditing = false;
+    this.editingTournamentId = null;
     this.showCreateModal = true;
     const today = new Date();
     const tomorrow = new Date(today);
@@ -119,8 +123,72 @@ export class TournamentManagementComponent implements OnInit, OnDestroy {
     };
   }
 
+  openEditModal(t: Tournament): void {
+    this.isEditing = true;
+    this.editingTournamentId = t.id;
+    this.showCreateModal = true;
+    
+    const start = t.startDate ? new Date(t.startDate).toISOString().substring(0, 10) : '';
+    const end = t.endDate ? new Date(t.endDate).toISOString().substring(0, 10) : '';
+    
+    this.newTournament = {
+      title: t.title,
+      description: t.description,
+      maxParticipants: t.maxParticipants,
+      startDate: start,
+      endDate: end,
+      minRating: t.minRating ?? null,
+      maxRating: t.maxRating ?? null,
+      language: t.language || ''
+    };
+  }
+
   closeCreateModal(): void {
     this.showCreateModal = false;
+    this.isEditing = false;
+    this.editingTournamentId = null;
+  }
+
+  saveTournament(): void {
+    if (this.isEditing) {
+      this.updateTournament();
+    } else {
+      this.createTournament();
+    }
+  }
+
+  updateTournament(): void {
+    if (!this.editingTournamentId) return;
+    if (!this.newTournament.title || !this.newTournament.startDate || !this.newTournament.endDate) {
+      this.notificationService.showToast('Please fill out all required fields.', 'warning');
+      return;
+    }
+    this.isLoading = true;
+    const payload = {
+      id: this.editingTournamentId,
+      title: this.newTournament.title,
+      description: this.newTournament.description || 'CodeClash Arena Tournament',
+      startDate: new Date(this.newTournament.startDate).toISOString(),
+      endDate: new Date(this.newTournament.endDate).toISOString(),
+      maxParticipants: Number(this.newTournament.maxParticipants),
+      minRating: this.newTournament.minRating ? Number(this.newTournament.minRating) : null,
+      maxRating: this.newTournament.maxRating ? Number(this.newTournament.maxRating) : null,
+      language: this.newTournament.language || null
+    };
+    
+    this.tournamentService.updateTournament(this.editingTournamentId, payload).subscribe({
+      next: () => {
+        this.notificationService.showToast('Tournament updated successfully!', 'success');
+        this.loadTournaments();
+        this.closeCreateModal();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Update tournament failed:', err);
+        const errMsg = err?.error?.message || 'Failed to update tournament.';
+        this.notificationService.showToast(errMsg, 'error');
+      }
+    });
   }
 
   createTournament(): void {
