@@ -1,6 +1,14 @@
 {
   "routes": [
     {
+      "src": "/api/v1/(.*)",
+      "dest": "http://codeclashcode.eu-north-1.elasticbeanstalk.com/api/v1/$1"
+    },
+    {
+      "src": "/hubs/(.*)",
+      "dest": "http://codeclashcode.eu-north-1.elasticbeanstalk.com/hubs/$1"
+    },
+    {
       "handle": "filesystem"
     },
     {
