@@ -300,6 +300,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
         if (langParam) {
           this.preferredLanguage = langParam.toLowerCase();
           this.selectedLanguage = langParam.toLowerCase();
+          this.battleLanguage = langParam;
         }
         this.loadDuelRoomDetails(roomParam);
       } else {
@@ -566,10 +567,12 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
           // Select preferred language if allowed by problem, else first allowed
           if (this.preferredLanguage && p.allowedLanguages.map(l => l.toLowerCase()).includes(this.preferredLanguage)) {
             this.selectedLanguage = this.preferredLanguage;
+            this.battleLanguage = this.preferredLanguage;
           } else if (p.allowedLanguages && p.allowedLanguages.length > 0) {
             const firstAllowed = p.allowedLanguages[0].toLowerCase();
             if (this.languages.includes(firstAllowed)) {
               this.selectedLanguage = firstAllowed;
+              this.battleLanguage = firstAllowed;
             }
           }
           this.setTimerDuration(p.difficulty);
@@ -648,6 +651,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
               }
             } else {
               this.showDefeatModal = true;
+              this.defeatSubtitle = `You were defeated in the duel. ${this.opponentName} solved the challenge first!`;
               this.notificationService.showToast('DEFEAT! Your opponent solved the problem first.', 'error', 5000);
             }
           }
@@ -756,17 +760,7 @@ export class CodingArenaComponent implements OnInit, OnDestroy, AfterViewChecked
 
           if (res.status === 'Accepted') {
             this.notificationService.showToast('Solution Accepted! Processing duel result...', 'success', 3000);
-            if (!this.roomId) {
-              this.showSubmitSuccess = true;
-            } else {
-              // Victory modal is shown by the DuelEnded SignalR event
-              // If no room (solo practice), navigate back after a short delay
-              if (!this.battleHub) {
-                setTimeout(() => {
-                  this.router.navigate(['/arena']);
-                }, 2000);
-              }
-            }
+            this.showSubmitSuccess = true;
           } else {
             this.terminalOutput += `\n✗ Solution Rejected. Keep trying to fix bugs!`;
           }

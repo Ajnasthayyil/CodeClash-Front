@@ -30,8 +30,13 @@
         </button>
       </div>
 
+      <!-- Loading -->
+      <div class="empty-state" *ngIf="isLoading">
+        <p style="color:var(--color-text-muted)">Loading leaderboard...</p>
+      </div>
+
       <!-- Podium Section (Top 3 Players) -->
-      <div class="podium-section" *ngIf="topThree.length > 0">
+      <div class="podium-section" *ngIf="topThree.length > 0 && !isLoading">
         
         <!-- Podium Rank #2 (Left) -->
         <div class="podium-card rank-2" *ngIf="topThree[1]">
@@ -95,7 +100,7 @@
       </div>
 
       <!-- Leaderboard Table (Ranks 4+) -->
-      <div class="table-container">
+      <div class="table-container" *ngIf="!isLoading">
         <table class="data-table" *ngIf="filteredPlayers.length > 0; else noPlayers">
           <thead>
             <tr>
@@ -168,14 +173,34 @@
         <div class="rank-summary">
           <div class="rank-large">#{{ currentUserRank !== null ? currentUserRank : '-' }}</div>
           <div class="rank-details">
-            <span class="rank-total">of {{ totalPlayers | number }} players</span>
-            <span class="pct-badge" *ngIf="currentUserRank !== null && totalPlayers > 0">Top {{ Math.ceil((currentUserRank / totalPlayers) * 100) }}%</span>
+            <span class="rank-total">of {{ (myStats?.totalPlayers ?? totalPlayers) | number }} players</span>
+            <span class="pct-badge" *ngIf="currentUserRank !== null && (myStats?.totalPlayers ?? totalPlayers) > 0">Top {{ Math.ceil((currentUserRank / (myStats?.totalPlayers ?? totalPlayers)) * 100) }}%</span>
+          </div>
+        </div>
+
+        <!-- My Stats -->
+        <div *ngIf="myStats" style="margin-top:12px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <span style="color:var(--color-text-muted)">Points</span>
+            <span style="font-weight:600; color:#f97316;">{{ myStats.totalPoints }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <span style="color:var(--color-text-muted)">ELO Rating</span>
+            <span style="font-weight:600;">{{ myStats.rating }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <span style="color:var(--color-text-muted)">W / L</span>
+            <span style="font-weight:600;">{{ myStats.wins }} / {{ myStats.losses }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <span style="color:var(--color-text-muted)">Fav Language</span>
+            <span style="font-weight:600;">{{ myStats.favLanguage }}</span>
           </div>
         </div>
         
         <!-- ELO Sparkline Section -->
         <div class="elo-spark-section">
-          <span class="spark-title">Points History (30d)</span>
+          <span class="spark-title">ELO Trend (30d)</span>
           <div class="canvas-wrap">
             <canvas #eloSparkline class="spark-canvas"></canvas>
           </div>
@@ -185,31 +210,23 @@
       <!-- Filters Card -->
       <div class="card filter-card">
         <h3 class="card-title">Filters</h3>
-        
-        <div class="filter-group">
-          <label class="filter-label">Country</label>
-          <div class="select-wrapper">
-            <select [(ngModel)]="selectedCountry" (change)="applyFilters()">
-              <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
-            </select>
-          </div>
-        </div>
 
         <div class="filter-group">
           <label class="filter-label">Language</label>
           <div class="select-wrapper">
-            <select [(ngModel)]="selectedLanguage" (change)="applyFilters()">
+            <select [(ngModel)]="selectedLanguage" (change)="onLanguageChange()">
               <option *ngFor="let l of languages" [value]="l">{{ l === 'All' ? 'All Languages' : l }}</option>
             </select>
           </div>
+          <p *ngIf="activeTab !== 'By Language'" style="font-size:0.75rem; color:var(--color-text-muted); margin-top:4px;">Switch to "By Language" tab to filter</p>
         </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Time Period</label>
-          <div class="select-wrapper">
-            <select [(ngModel)]="selectedTimePeriod" (change)="applyFilters()">
-              <option *ngFor="let t of timePeriods" [value]="t">{{ t === 'All' ? 'All Time' : t }}</option>
-            </select>
+        <!-- Language breakdown -->
+        <div *ngIf="myStats && myStats.languageBreakdown && activeTab === 'Global'" style="margin-top:12px;">
+          <p style="font-size:0.75rem; color:var(--color-text-muted); margin-bottom:6px;">Your submissions by language</p>
+          <div *ngFor="let entry of myStats.languageBreakdown | keyvalue" style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+            <span style="color:var(--color-text-muted)">{{ entry.key }}</span>
+            <span style="font-weight:600;">{{ entry.value }}</span>
           </div>
         </div>
 
