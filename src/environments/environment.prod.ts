@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  backendUrl: 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net',
-  apiUrl: 'https://codeclash-ccf0fvekfsfedham.southindia-01.azurewebsites.net/api/v1'
+  backendUrl: 'http://codeclashcode.eu-north-1.elasticbeanstalk.com',
+  apiUrl: 'http://codeclashcode.eu-north-1.elasticbeanstalk.com/api/v1'
 };
