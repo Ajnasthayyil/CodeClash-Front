@@ -53,6 +53,7 @@ import { APP_INITIALIZER } from '@angular/core';
 import { AuthService } from './core/services/auth.service';
 import { AuthSuccessComponent } from './features/auth/auth-success/auth-success.component';
 import { ChatbotWidgetComponent } from './shared/chatbot-widget/chatbot-widget.component';
+import { MatchCountdownWidgetComponent } from './shared/match-countdown-widget/match-countdown-widget.component';
 import { MonacoEditorComponent } from './shared/monaco-editor/monaco-editor.component';
 
 export function initializeApp(authService: AuthService) {
@@ -112,7 +113,8 @@ export function initializeApp(authService: AuthService) {
     PageNotFoundComponent,
     AiAnalysisComponent,
     AuthSuccessComponent,
-    ChatbotWidgetComponent
+    ChatbotWidgetComponent,
+    MatchCountdownWidgetComponent
   ],
   imports: [
     BrowserModule,

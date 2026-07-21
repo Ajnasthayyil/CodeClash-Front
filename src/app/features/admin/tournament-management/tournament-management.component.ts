@@ -82,6 +82,20 @@ export class TournamentManagementComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.subscription.add(
+      this.tournamentService.matchScheduled$.subscribe((data) => {
+        if (this.expandedMatchPanels.has(data.tournamentId)) {
+          this.loadMatches(data.tournamentId);
+        }
+      })
+    );
+
+    this.subscription.add(
+      this.tournamentService.bracketUpdated$.subscribe(() => {
+        this.expandedMatchPanels.forEach(tId => this.loadMatches(tId));
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -370,7 +384,7 @@ export class TournamentManagementComponent implements OnInit, OnDestroy {
 
         // Pre-populate custom date, hour, minute, and AM/PM select options
         matches.forEach(m => {
-          if (m.scheduledTime) {
+          if (m.scheduledTime && !m.scheduledTime.startsWith('0001-01-01')) {
             let timeStr = m.scheduledTime;
             if (typeof timeStr === 'string' && !timeStr.endsWith('Z') && !timeStr.includes('+') && !timeStr.includes('-')) {
               timeStr += 'Z';
@@ -442,9 +456,16 @@ export class TournamentManagementComponent implements OnInit, OnDestroy {
     const parts = dateStr.split('-');
     if (parts.length !== 3) { this.notificationService.showToast('Invalid date format.', 'warning'); return; }
 
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
+    let year: number, month: number, day: number;
+    if (parts[0].length === 4) {
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+      day = parseInt(parts[2], 10);
+    } else {
+      day = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+      year = parseInt(parts[2], 10);
+    }
 
     let hour = parseInt(hourStr, 10);
     const minute = parseInt(minStr, 10);
