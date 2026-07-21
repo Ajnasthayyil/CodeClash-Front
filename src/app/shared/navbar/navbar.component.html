@@ -2,26 +2,28 @@
   <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
     <!-- Logo -->
     <a routerLink="/" class="flex items-center gap-2 group">
-      <span class="text-lg font-extrabold tracking-tight text-white group-hover:text-orange-500 transition duration-300">
+      <span
+        class="text-lg font-extrabold tracking-tight text-white group-hover:text-orange-500 transition duration-300">
         Code<span class="text-orange-500">Clash</span>
       </span>
     </a>
 
     <!-- Nav Links (hidden on mobile, hidden for Admins) -->
     <nav class="hidden md:flex items-center gap-8" *ngIf="currentUser?.role !== 'Admin'">
-      <a routerLink="/" routerLinkActive="text-orange-500" [routerLinkActiveOptions]="{exact: true}" class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
+      <a routerLink="/" routerLinkActive="text-orange-500" [routerLinkActiveOptions]="{exact: true}"
+        class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
         Home
       </a>
-      <a routerLink="/dashboard" routerLinkActive="text-orange-500" class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
-        Dashboard
-      </a>
-      <a routerLink="/problems" routerLinkActive="text-orange-500" class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
+      <a routerLink="/problems" routerLinkActive="text-orange-500"
+        class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
         Problems
       </a>
-      <a routerLink="/leaderboard" routerLinkActive="text-orange-500" class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
+      <a routerLink="/leaderboard" routerLinkActive="text-orange-500"
+        class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
         Leaderboard
       </a>
-      <a routerLink="/arena" routerLinkActive="text-orange-500" class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
+      <a routerLink="/arena" routerLinkActive="text-orange-500"
+        class="text-sm font-semibold text-slate-400 hover:text-white transition duration-200">
         Battle
       </a>
     </nav>
@@ -32,7 +34,9 @@
       <app-notification-bell *ngIf="currentUser?.role !== 'Admin'" class="flex items-center"></app-notification-bell>
 
       <!-- Theme Toggle Switcher -->
-      <button (click)="toggleTheme()" class="p-2.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-900/60 transition duration-200" title="Toggle Light/Dark Theme">
+      <button (click)="toggleTheme()"
+        class="p-2.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-900/60 transition duration-200"
+        title="Toggle Light/Dark Theme">
         <!-- Sun Icon (Dark Mode active, click to switch to Light) -->
         <svg *ngIf="isDarkMode" class="w-5 h-5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="5"></circle>
@@ -53,60 +57,76 @@
 
       <!-- Desktop CTAs (hidden on small devices) -->
       <ng-container *ngIf="!isLoggedIn">
-        <a routerLink="/auth/login" class="hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
+        <a routerLink="/auth/login"
+          class="hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
           Log In
         </a>
-        <a routerLink="/auth/register" class="hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-bold bg-orange-600 text-white hover:bg-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.35)] transition duration-300">
+        <a routerLink="/auth/register"
+          class="hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-bold bg-orange-600 text-white hover:bg-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.35)] transition duration-300">
           Sign Up
         </a>
       </ng-container>
 
       <ng-container *ngIf="isLoggedIn">
         <!-- Profile Icon linking to Profile -->
-        <a routerLink="/profile" class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm border-2 border-slate-900 shadow-md hover:shadow-[0_0_15px_rgba(249,115,22,0.5)] hover:scale-105 transition duration-300 overflow-hidden" title="View Profile">
-          <img *ngIf="currentUser?.profileImageUrl" [src]="currentUser.profileImageUrl" alt="Avatar" class="w-full h-full object-cover">
+        <a routerLink="/profile"
+          class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm border-2 border-slate-900 shadow-md hover:shadow-[0_0_15px_rgba(249,115,22,0.5)] hover:scale-105 transition duration-300 overflow-hidden"
+          title="View Profile">
+          <img *ngIf="currentUser?.profileImageUrl" [src]="currentUser.profileImageUrl" alt="Avatar"
+            class="w-full h-full object-cover">
           <span *ngIf="!currentUser?.profileImageUrl">{{ currentUser?.initials || 'CC' }}</span>
         </a>
         <!-- Log Out Button -->
-        <button (click)="logout()" class="btn-logout-header hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-orange-600 hover:shadow-[0_0_20px_rgba(249,115,22,0.35)] transition duration-300">
+        <button (click)="logout()"
+          class="btn-logout-header hidden sm:inline-block px-5 py-2.5 rounded-full text-sm font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-orange-600 hover:shadow-[0_0_20px_rgba(249,115,22,0.35)] transition duration-300">
           Log Out
         </button>
       </ng-container>
 
       <!-- Hamburger Button (mobile only) -->
-      <button (click)="toggleMobileMenu()" class="md:hidden p-2.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-900/60 transition duration-200" aria-label="Toggle Mobile Menu">
+      <button (click)="toggleMobileMenu()"
+        class="md:hidden p-2.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-900/60 transition duration-200"
+        aria-label="Toggle Mobile Menu">
         <svg class="w-6 h-6 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24">
-          <path *ngIf="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-          <path *ngIf="isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          <path *ngIf="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          <path *ngIf="isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
   </div>
 
   <!-- Mobile Dropdown Menu -->
-  <div *ngIf="isMobileMenuOpen" class="md:hidden bg-slate-950 border-b border-slate-900 px-6 py-6 space-y-4 transition-all duration-300">
+  <div *ngIf="isMobileMenuOpen"
+    class="md:hidden bg-slate-950 border-b border-slate-900 px-6 py-6 space-y-4 transition-all duration-300">
     <nav class="flex flex-col gap-4" *ngIf="currentUser?.role !== 'Admin'">
-      <a routerLink="/" (click)="isMobileMenuOpen = false" class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Home</a>
-      <a routerLink="/dashboard" (click)="isMobileMenuOpen = false" class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Dashboard</a>
-      <a routerLink="/problems" (click)="isMobileMenuOpen = false" class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Problems</a>
-      <a routerLink="/leaderboard" (click)="isMobileMenuOpen = false" class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Leaderboard</a>
-      <a routerLink="/arena" (click)="isMobileMenuOpen = false" class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Battle</a>
+      <a routerLink="/" (click)="isMobileMenuOpen = false"
+        class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Home</a>
+      <a routerLink="/problems" (click)="isMobileMenuOpen = false"
+        class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Problems</a>
+      <a routerLink="/leaderboard" (click)="isMobileMenuOpen = false"
+        class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Leaderboard</a>
+      <a routerLink="/arena" (click)="isMobileMenuOpen = false"
+        class="text-base font-medium text-slate-300 hover:text-white transition duration-200">Battle</a>
     </nav>
     <div class="h-px bg-slate-900 my-4"></div>
     <div class="flex flex-col gap-3" *ngIf="!isLoggedIn">
-      <a routerLink="/auth/login" (click)="isMobileMenuOpen = false" class="w-full text-center py-3 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
+      <a routerLink="/auth/login" (click)="isMobileMenuOpen = false"
+        class="w-full text-center py-3 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
         Log In
       </a>
-      <a routerLink="/auth/register" (click)="isMobileMenuOpen = false" class="w-full text-center py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition duration-200">
+      <a routerLink="/auth/register" (click)="isMobileMenuOpen = false"
+        class="w-full text-center py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition duration-200">
         Sign Up
       </a>
     </div>
 
     <div class="flex flex-col gap-3" *ngIf="isLoggedIn">
-      <a routerLink="/profile" (click)="isMobileMenuOpen = false" class="w-full text-center py-3 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
+      <a routerLink="/profile" (click)="isMobileMenuOpen = false"
+        class="w-full text-center py-3 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:text-white transition duration-200">
         My Profile ({{ currentUser?.name }})
       </a>
-      <button (click)="logoutMobile()" class="w-full text-center py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition duration-200">
+      <button (click)="logoutMobile()"
+        class="w-full text-center py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition duration-200">
         Log Out
       </button>
     </div>

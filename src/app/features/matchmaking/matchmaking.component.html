@@ -105,39 +105,37 @@
 
   </div>
 
-  <!-- ══════════════════════════════════════════════════ -->
-  <!-- POPUP 1: SEARCH FRIEND MODAL                       -->
-  <!-- ══════════════════════════════════════════════════ -->
+  <!-- POPUP 1: CHALLENGE A FRIEND MODAL -->
   <div *ngIf="showSearchPopup" class="search-overlay" (click)="showSearchPopup = false">
-    <div class="search-overlay-content" style="max-width:440px; width:100%;" (click)="$event.stopPropagation()">
+    <div class="premium-popup-card bg-[#0b0f19]/90 border border-purple-500/30 rounded-2xl p-8 shadow-[0_0_50px_rgba(168,85,247,0.3)] max-w-lg w-full relative" (click)="$event.stopPropagation()">
 
       <!-- Header -->
-      <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-lg font-bold text-white">Challenge a Friend</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Search by username or email to send a duel invitation</p>
+          <h2 class="text-2xl font-black tracking-tight bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Challenge a Friend</h2>
+          <p class="text-xs text-slate-400 mt-1">Search by username or email to send an invite</p>
         </div>
-        <button (click)="showSearchPopup = false" class="text-slate-500 hover:text-slate-300 transition-colors">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <button (click)="showSearchPopup = false" class="text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 p-2 rounded-lg transition duration-200">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       <!-- Search Input -->
-      <div class="search-friend-input-wrapper relative mb-4">
-        <svg class="search-input-icon absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/80 pointer-events-none transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <div class="search-friend-input-wrapper relative mb-6">
+        <svg class="search-input-icon absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-purple-400 pointer-events-none transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
           type="text"
           [(ngModel)]="searchQuery"
           (input)="searchUsers()"
-          placeholder="Search by username or email..."
-          class="search-friend-input pl-10 pr-9 text-sm h-11 w-full"
+          placeholder="Enter username or email..."
+          class="w-full pl-11 pr-10 text-sm h-12 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all duration-200"
           autofocus
         />
-        <button *ngIf="searchQuery" (click)="searchQuery = ''; searchResults = []" class="clear-input-btn absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 transition-colors p-1" title="Clear search">
+        <button *ngIf="searchQuery" (click)="searchQuery = ''; searchResults = []" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 transition-colors p-1" title="Clear search">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -145,23 +143,23 @@
       </div>
 
       <!-- Search Results List -->
-      <div *ngIf="searchResults.length > 0" class="space-y-1.5 max-h-52 overflow-y-auto pr-1 mb-4">
+      <div *ngIf="searchResults.length > 0" class="space-y-3.5 max-h-60 overflow-y-auto pr-1 mb-6">
         <div
           *ngFor="let res of searchResults"
-          class="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700/30 hover:border-purple-500/30 transition-colors"
+          class="flex items-center justify-between p-3.5 rounded-xl bg-slate-900/30 border border-slate-800/60 hover:border-purple-500/50 hover:bg-slate-900/50 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 cursor-pointer"
         >
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-sm font-bold">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 text-base font-extrabold shadow-inner">
               {{ res.username.substring(0, 1)?.toUpperCase() }}
             </div>
             <div>
-              <p class="text-sm font-semibold text-slate-200">{{ res.username }}</p>
-              <p class="text-[10px] text-slate-500">{{ res.email }}</p>
+              <p class="text-sm font-bold text-slate-200">{{ res.username }}</p>
+              <p class="text-[11px] text-slate-500">{{ res.email }}</p>
             </div>
           </div>
           <button
             (click)="inviteFriendFromPopup(res)"
-            class="px-3 py-1.5 text-[11px] font-bold rounded-md bg-purple-600 hover:bg-purple-500 text-white transition-all"
+            class="px-4 py-2 text-xs font-bold rounded-lg bg-purple-600 hover:bg-purple-500 text-white shadow-lg hover:shadow-purple-500/20 active:scale-95 transition-all duration-200"
           >
             Invite
           </button>
@@ -169,103 +167,107 @@
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="searchQuery && searchResults.length === 0" class="text-center py-6 text-slate-500 text-sm">
+      <div *ngIf="searchQuery && searchResults.length === 0" class="text-center py-8 text-slate-500 text-sm font-medium">
         No users found for "{{ searchQuery }}"
       </div>
 
       <!-- Prompt when nothing searched yet -->
-      <div *ngIf="!searchQuery" class="text-center py-4 text-slate-600 text-xs">
-        Start typing to search for players
+      <div *ngIf="!searchQuery" class="text-center py-6 text-slate-650 text-xs font-semibold">
+        Start typing to find online combatants
       </div>
 
-      <button (click)="showSearchPopup = false" class="w-full mt-2 text-xs text-slate-500 hover:text-slate-300 transition-colors py-2">
-        Cancel
+      <button (click)="showSearchPopup = false" class="w-full mt-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800/20 rounded-xl transition duration-200 border border-transparent">
+        Close Window
       </button>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════ -->
   <!-- POPUP 2: LOBBY MODAL (Ready States + Difficulty)   -->
-  <!-- ══════════════════════════════════════════════════ -->
   <div *ngIf="showLobbyPopup && lobbyStatus === 'lobby'" class="search-overlay" (click)="showLobbyPopup = false">
-    <div class="search-overlay-content" style="max-width:440px; width:100%;" (click)="$event.stopPropagation()">
+    <div class="premium-popup-card bg-[#0b0f17]/90 border border-purple-500/30 rounded-2xl p-8 shadow-[0_0_50px_rgba(168,85,247,0.3)] max-w-2xl w-full relative" (click)="$event.stopPropagation()">
 
       <!-- Header -->
-      <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-lg font-bold text-white">Duel Lobby</h2>
-          <p class="text-[11px] text-slate-400 font-mono mt-0.5">Room: <span class="text-purple-400 font-bold">{{ friendlyRoomCode }}</span></p>
+          <h2 class="text-2xl font-black tracking-tight bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Duel Lobby</h2>
+          <p class="text-xs text-slate-400 mt-1">Room Code: <span class="text-purple-400 font-bold font-mono">{{ friendlyRoomCode }}</span></p>
         </div>
-        <button (click)="showLobbyPopup = false" class="text-slate-500 hover:text-slate-300 transition-colors">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <button (click)="showLobbyPopup = false" class="text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 p-2 rounded-lg transition duration-200">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-
-
       <!-- Players Ready Grid -->
-      <div class="grid grid-cols-2 gap-3 mb-5">
+      <div class="grid grid-cols-2 gap-5 mb-6">
         <!-- Host Player -->
-        <div class="bg-slate-800/40 border rounded-lg p-3 text-center transition-colors"
-          [ngClass]="isHostReady ? 'border-green-500/30 bg-green-500/5' : 'border-slate-700/30'">
-          <div class="w-10 h-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-sm mx-auto mb-2">
+        <div class="bg-slate-900/30 border rounded-xl p-5 text-center transition-all duration-300 relative overflow-hidden"
+          [ngClass]="isHostReady ? 'border-green-500/40 bg-green-500/5 shadow-[0_0_15px_rgba(34,197,94,0.05)]' : 'border-slate-800 bg-slate-950/20'">
+          <div class="absolute top-2 right-2 text-[10px] text-purple-400 font-black uppercase bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-md">Host</div>
+          <div 
+            class="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 border-2 border-purple-400/40 flex items-center justify-center text-white font-black text-2xl mx-auto mb-3 shadow-lg shadow-purple-950/30 transition-all duration-300"
+            [ngClass]="{'ring-4 ring-green-500/30': isHostReady}"
+          >
             {{ hostUser?.username?.[0]?.toUpperCase() || 'H' }}
           </div>
-          <p class="text-xs font-semibold text-slate-300 truncate">{{ hostUser?.username }}</p>
-          <p class="text-[9px] text-purple-400 font-bold mb-1.5">(Host)</p>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold"
-            [ngClass]="isHostReady ? 'bg-green-500/15 text-green-400' : 'bg-slate-700/50 text-slate-400'">
-            {{ isHostReady ? '✓ READY' : 'NOT READY' }}
+          <p class="text-sm font-bold text-slate-200 truncate mb-3 px-1">{{ hostUser?.username }}</p>
+          <span class="px-3.5 py-1.5 rounded-lg text-xs font-black tracking-wide inline-flex items-center gap-1.5"
+            [ngClass]="isHostReady ? 'bg-green-500/15 text-green-400 border border-green-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700/50'">
+            <span class="w-1.5 h-1.5 rounded-full" [class.bg-green-400]="isHostReady" [class.bg-slate-500]="!isHostReady"></span>
+            {{ isHostReady ? 'READY' : 'NOT READY' }}
           </span>
         </div>
 
         <!-- Friend Player -->
-        <div class="bg-slate-800/40 border rounded-lg p-3 text-center transition-colors"
-          [ngClass]="isFriendReady ? 'border-green-500/30 bg-green-500/5' : 'border-slate-700/30'">
-          <div class="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm mx-auto mb-2">
+        <div class="bg-slate-900/30 border rounded-xl p-5 text-center transition-all duration-300 relative overflow-hidden"
+          [ngClass]="isFriendReady ? 'border-green-500/40 bg-green-500/5 shadow-[0_0_15px_rgba(34,197,94,0.05)]' : 'border-slate-800 bg-slate-950/20'">
+          <div class="absolute top-2 right-2 text-[10px] text-blue-400 font-black uppercase bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md">Guest</div>
+          <div 
+            class="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border-2 border-blue-400/40 flex items-center justify-center text-white font-black text-2xl mx-auto mb-3 shadow-lg shadow-blue-950/30 transition-all duration-300"
+            [ngClass]="{'ring-4 ring-green-500/30': isFriendReady}"
+          >
             {{ invitedFriend?.username?.[0]?.toUpperCase() || '?' }}
           </div>
-          <p class="text-xs font-semibold text-slate-300 truncate">{{ invitedFriend?.username || 'Waiting...' }}</p>
-          <p class="text-[9px] text-slate-500 font-bold mb-1.5">(Challenger)</p>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold"
-            [ngClass]="isFriendReady ? 'bg-green-500/15 text-green-400' : 'bg-slate-700/50 text-slate-400'">
-            {{ isFriendReady ? '✓ READY' : 'NOT READY' }}
+          <p class="text-sm font-bold text-slate-200 truncate mb-3 px-1">{{ invitedFriend?.username || 'Waiting...' }}</p>
+          <span class="px-3.5 py-1.5 rounded-lg text-xs font-black tracking-wide inline-flex items-center gap-1.5"
+            [ngClass]="isFriendReady ? 'bg-green-500/15 text-green-400 border border-green-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700/50'">
+            <span class="w-1.5 h-1.5 rounded-full" [class.bg-green-400]="isFriendReady" [class.bg-slate-500]="!isFriendReady"></span>
+            {{ isFriendReady ? 'READY' : 'NOT READY' }}
           </span>
         </div>
       </div>
 
       <!-- Difficulty Picker (Host Only) -->
-      <div *ngIf="currentUser?.id === hostUser?.id" class="mb-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Select Difficulty <span class="text-purple-400 normal-case font-normal">(Host Only)</span>
+      <div *ngIf="currentUser?.id === hostUser?.id" class="mb-5">
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2.5">
+          Select Match Difficulty <span class="text-purple-400 normal-case font-normal">(Host only)</span>
         </p>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-3 gap-3">
           <button
             (click)="setDifficulty('easy')"
-            class="py-2 rounded-lg text-xs font-bold border transition-all"
+            class="py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-97"
             [ngClass]="selectedDifficulty === 'easy'
-              ? 'bg-green-500/15 border-green-500/40 text-green-400'
-              : 'bg-slate-800/40 border-slate-700/30 text-slate-400 hover:border-green-500/30 hover:text-green-400'"
+              ? 'bg-green-500/15 border-green-500/50 text-green-400 font-black shadow-[0_0_10px_rgba(34,197,94,0.1)]'
+              : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-green-500/30 hover:text-green-400'"
           >
             Easy
           </button>
           <button
             (click)="setDifficulty('medium')"
-            class="py-2 rounded-lg text-xs font-bold border transition-all"
+            class="py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-97"
             [ngClass]="selectedDifficulty === 'medium'
-              ? 'bg-orange-500/15 border-orange-500/40 text-orange-400'
-              : 'bg-slate-800/40 border-slate-700/30 text-slate-400 hover:border-orange-500/30 hover:text-orange-400'"
+              ? 'bg-orange-500/15 border-orange-500/50 text-orange-400 font-black shadow-[0_0_10px_rgba(249,115,22,0.1)]'
+              : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-orange-500/30 hover:text-orange-450'"
           >
             Medium
           </button>
           <button
             (click)="setDifficulty('hard')"
-            class="py-2 rounded-lg text-xs font-bold border transition-all"
+            class="py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-97"
             [ngClass]="selectedDifficulty === 'hard'
-              ? 'bg-red-500/15 border-red-500/40 text-red-400'
-              : 'bg-slate-800/40 border-slate-700/30 text-slate-400 hover:border-red-500/30 hover:text-red-400'"
+              ? 'bg-red-500/15 border-red-500/50 text-red-400 font-black shadow-[0_0_10px_rgba(239,68,68,0.1)]'
+              : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-red-500/30 hover:text-red-400'"
           >
             Hard
           </button>
@@ -273,47 +275,49 @@
       </div>
 
       <!-- Language Picker (Host Only) -->
-      <div *ngIf="currentUser?.id === hostUser?.id" class="mb-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Select Language <span class="text-purple-400 normal-case font-normal">(Host Only)</span>
+      <div *ngIf="currentUser?.id === hostUser?.id" class="mb-5">
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2.5">
+          Select Programming Language <span class="text-purple-400 normal-case font-normal">(Host only)</span>
         </p>
         <select
           [ngModel]="selectedLanguage"
           (ngModelChange)="onLanguageChange($event)"
-          class="w-full bg-slate-800/80 border border-slate-700/60 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-300 focus:outline-none focus:border-purple-500 transition-colors"
+          class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-200 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all duration-200"
         >
-          <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
+          <option *ngFor="let lang of languages" [value]="lang" class="bg-slate-950 text-slate-200 font-medium">{{ lang }}</option>
         </select>
       </div>
 
       <!-- Difficulty and Language displays for guest -->
-      <div *ngIf="currentUser?.id !== hostUser?.id" class="flex flex-col gap-2 mb-4">
-        <div class="bg-slate-800/30 border border-slate-700/20 rounded-lg px-3 py-2 flex items-center justify-between">
-          <p class="text-xs text-slate-400 font-medium">Selected Difficulty:</p>
-          <span class="text-xs font-bold px-2 py-0.5 rounded border capitalize"
-            [ngClass]="selectedDifficulty === 'easy' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 
-                       selectedDifficulty === 'medium' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 
-                       'bg-red-500/10 border-red-500/20 text-red-400'">
+      <div *ngIf="currentUser?.id !== hostUser?.id" class="grid grid-cols-2 gap-3 mb-5">
+        <div class="bg-slate-950/30 border border-slate-800/80 rounded-xl px-4 py-3 flex flex-col gap-1 text-left">
+          <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Difficulty Selected</span>
+          <span class="text-xs font-extrabold capitalize"
+            [ngClass]="selectedDifficulty === 'easy' ? 'text-green-400' : 
+                       selectedDifficulty === 'medium' ? 'text-orange-400' : 
+                       'text-red-400'">
             {{ selectedDifficulty }}
           </span>
         </div>
-        <div class="bg-slate-800/30 border border-slate-700/20 rounded-lg px-3 py-2 flex items-center justify-between">
-          <p class="text-xs text-slate-400 font-medium">Selected Language:</p>
-          <span class="text-xs font-bold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded">
+        <div class="bg-slate-950/30 border border-slate-800/80 rounded-xl px-4 py-3 flex flex-col gap-1 text-left">
+          <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Language Selected</span>
+          <span class="text-xs font-extrabold text-purple-400">
             {{ selectedLanguage }}
           </span>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col gap-2 mt-2">
+      <div class="flex flex-col gap-2.5 mt-2">
         <!-- Ready Toggle -->
         <button
           (click)="toggleReadyState()"
-          class="w-full py-2.5 rounded-lg text-sm font-bold transition-all text-white"
-          [ngClass]="amIReady ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'"
+          class="w-full py-3.5 rounded-xl text-sm font-black tracking-wide transition-all duration-200 text-white shadow-lg active:scale-98"
+          [ngClass]="amIReady 
+            ? 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 hover:shadow-orange-500/10' 
+            : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 hover:shadow-green-500/10'"
         >
-          {{ amIReady ? '✗ Unready' : '✓ Set Ready' }}
+          {{ amIReady ? '❌ Cancel Ready' : '✅ Set Ready' }}
         </button>
 
         <!-- Launch Duel (Host Only) -->
@@ -321,57 +325,56 @@
           *ngIf="currentUser?.id === hostUser?.id && lobbyStatus === 'lobby'"
           (click)="startFriendlyDuel()"
           [disabled]="!isHostReady || !isFriendReady"
-          class="w-full py-2.5 rounded-lg text-sm font-bold transition-all text-white"
-          [ngClass]="(isHostReady && isFriendReady) ? 'btn-start-duel' : 'bg-slate-700 text-slate-500 cursor-not-allowed'"
+          class="w-full py-3.5 rounded-xl text-sm font-black tracking-wide transition-all duration-200 text-white shadow-lg active:scale-98"
+          [ngClass]="(isHostReady && isFriendReady) 
+            ? 'bg-gradient-to-r from-purple-600 to-indigo-650 hover:from-purple-500 hover:to-indigo-550 shadow-purple-500/25' 
+            : 'bg-slate-800 text-slate-500 border border-slate-800/50 cursor-not-allowed'"
         >
           {{ (isHostReady && isFriendReady) ? '⚔️ Launch Duel' : 'Waiting for both players to be ready...' }}
         </button>
 
         <!-- Leave -->
-        <button (click)="resetCustomRoom()" class="w-full py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors">
+        <button (click)="resetCustomRoom()" class="w-full py-2.5 text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-855/50 rounded-xl transition duration-200 border border-transparent">
           Leave Lobby
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════ -->
   <!-- POPUP 3: WAITING FOR FRIEND ACCEPTANCE MODAL      -->
-  <!-- ══════════════════════════════════════════════════ -->
   <div *ngIf="lobbyStatus === 'invited'" class="search-overlay">
-    <div class="search-overlay-content bg-slate-900 border border-purple-500/30 p-6 rounded-lg max-w-sm text-center" style="max-width:400px; width:100%;">
-      <div class="flex items-center justify-center mb-5">
+    <div class="premium-popup-card bg-[#0b0f17]/90 border border-purple-500/30 p-8 rounded-2xl max-w-lg w-full text-center shadow-[0_0_50px_rgba(168,85,247,0.3)]">
+      <div class="flex items-center justify-center mb-6">
         <!-- Pulsing Purple Ring -->
-        <div class="relative w-16 h-16 flex items-center justify-center">
+        <div class="relative w-20 h-20 flex items-center justify-center">
           <div class="absolute w-full h-full rounded-full border-2 border-purple-500/30 animate-ping"></div>
-          <div class="relative w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/35 flex items-center justify-center text-purple-400">
-            <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <div class="relative w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/40 flex items-center justify-center text-purple-400">
+            <svg class="w-7 h-7 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" />
             </svg>
           </div>
         </div>
       </div>
       
-      <h3 class="text-lg font-bold text-white mb-2">Challenging Friend</h3>
+      <h3 class="text-2xl font-black bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-2 tracking-tight">Challenging Friend</h3>
       <p class="text-sm text-slate-300 mb-2">
         Waiting for <strong class="text-purple-400">{{ invitedFriend?.username }}</strong> to accept...
       </p>
-      <p class="text-xs text-slate-500 mb-6">
-        Room Code: <span class="font-mono font-bold text-slate-400">{{ friendlyRoomCode }}</span>
+      <p class="text-xs text-slate-500 mb-6 font-mono">
+        Room Code: <span class="font-bold text-slate-400">{{ friendlyRoomCode }}</span>
       </p>
 
-      <div class="flex flex-col gap-2">
-        <button (click)="copyRoomLink()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition-colors">
-          {{ linkCopied ? 'Copied Link! ✓' : 'Copy Room Link' }}
+      <div class="flex flex-col gap-2.5">
+        <button (click)="copyRoomLink()" class="w-full py-3 bg-slate-900/60 hover:bg-slate-900 text-slate-200 text-xs font-extrabold rounded-xl border border-slate-800 transition-all duration-200 active:scale-97">
+          {{ linkCopied ? 'Copied Link! ✅' : 'Copy Room Link' }}
         </button>
-        <button (click)="resetCustomRoom()" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors">
+        <button (click)="resetCustomRoom()" class="w-full py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black rounded-xl shadow-lg transition-all duration-200 active:scale-97">
           Cancel Challenge
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════ -->
   <!-- Fullscreen Ranked Matchmaking Overlay              -->
   <!-- ══════════════════════════════════════════════════ -->
   <div *ngIf="queueStatus !== 'idle'" class="search-overlay">

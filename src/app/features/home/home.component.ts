@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -6,6 +7,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent {
+  constructor(private authService: AuthService) {}
+
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn;
+  }
+
   selectedTech = 'TypeScript';
   technologies = [
     { id: 'React', name: 'React', version: 'v18.2', speed: '0.04ms', desc: 'Front-end assessments with automated Virtual DOM rendering tests.' },

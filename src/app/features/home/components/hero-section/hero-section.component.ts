@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface CodeSample {
   language: string;
@@ -13,9 +14,14 @@ interface CodeSample {
   styleUrls: ['./hero-section.component.scss']
 })
 export class HeroSectionComponent implements OnInit {
+  constructor(private authService: AuthService) {}
+
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn;
+  }
   languages = ['JavaScript', 'Python', 'C++', 'Go'];
   selectedLanguage = 'JavaScript';
-  
+
   codeSamples: { [key: string]: CodeSample } = {
     'JavaScript': {
       language: 'JavaScript',
@@ -136,7 +142,7 @@ std::vector<int> twoSum(std::vector<int>& nums, int target) {
   runCode() {
     this.isRunning = true;
     this.terminalOutput = 'Compiling and spinning up sandbox container...\n';
-    
+
     setTimeout(() => {
       this.terminalOutput += 'Analyzing security policy & imports...\n';
     }, 400);

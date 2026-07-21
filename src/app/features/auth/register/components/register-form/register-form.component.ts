@@ -125,7 +125,7 @@ export class RegisterFormComponent {
 
     setTimeout(() => {
       this.isLoading = false;
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/arena']);
     }, 1200);
   }
 

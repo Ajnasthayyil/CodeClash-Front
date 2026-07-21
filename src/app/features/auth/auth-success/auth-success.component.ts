@@ -59,7 +59,7 @@ export class AuthSuccessComponent implements OnInit {
               if (currentUser.role === 'Admin') {
                 this.router.navigate(['/admin']);
               } else {
-                this.router.navigate(['/dashboard']);
+                this.router.navigate(['/arena']);
               }
             } else {
               this.handleError('Failed to retrieve user profile.');
