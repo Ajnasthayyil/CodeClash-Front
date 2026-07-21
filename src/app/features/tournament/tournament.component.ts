@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TournamentService, Tournament, TournamentMatch, TournamentParticipant } from '../../core/services/tournament.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../shared/notifications/notification.service';
+import { MatchCountdownService } from '../../core/services/match-countdown.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -72,6 +73,7 @@ export class TournamentComponent implements OnInit, OnDestroy {
     private tournamentService: TournamentService,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private matchCountdownService: MatchCountdownService,
     private router: Router
   ) { }
 
@@ -119,6 +121,48 @@ export class TournamentComponent implements OnInit, OnDestroy {
       this.tournamentService.bracketUpdated$.subscribe(() => {
         this.notificationService.showToast('Tournament bracket updated!', 'info');
         this.loadTournamentData(this.selectedTournamentId);
+      })
+    );
+
+    this.subs.add(
+      this.tournamentService.matchScheduled$.subscribe(data => {
+        let formattedTime = '';
+        if (data.scheduledTime && !data.scheduledTime.startsWith('0001-01-01')) {
+          let timeStr = data.scheduledTime;
+          if (typeof timeStr === 'string' && !timeStr.endsWith('Z') && !timeStr.includes('+') && !timeStr.includes('-')) {
+            timeStr += 'Z';
+          }
+          const d = new Date(timeStr);
+          if (!isNaN(d.getTime())) {
+            formattedTime = d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          }
+        }
+
+        const isUserPlayer =
+          (data.player1Id && data.player1Id.toLowerCase() === this.currentUserId.toLowerCase()) ||
+          (data.player2Id && data.player2Id.toLowerCase() === this.currentUserId.toLowerCase());
+
+        if (isUserPlayer) {
+          this.notificationService.showToast(`📅 Your tournament match has been scheduled for ${formattedTime || 'the set time'}!`, 'success', 6000);
+          // Show the countdown widget for the player
+          const scheduledDate = new Date(data.scheduledTime.endsWith('Z') ? data.scheduledTime : data.scheduledTime + 'Z');
+          if (!isNaN(scheduledDate.getTime()) && scheduledDate > new Date()) {
+            this.matchCountdownService.setMatch({
+              matchId:         data.matchId,
+              tournamentId:    data.tournamentId,
+              tournamentTitle: this.selectedTournament?.title || '',
+              scheduledTime:   scheduledDate,
+              player1Username: data.player1Username || '',
+              player2Username: data.player2Username || '',
+            });
+          }
+        } else {
+          this.notificationService.showToast(`Tournament match scheduled for ${formattedTime || 'a set time'}!`, 'info');
+        }
+
+        if (this.selectedTournamentId && this.selectedTournamentId.toLowerCase() === data.tournamentId.toLowerCase()) {
+          this.loadTournamentData(this.selectedTournamentId);
+        }
       })
     );
 
@@ -452,7 +496,7 @@ export class TournamentComponent implements OnInit, OnDestroy {
         }
       }
 
-      if (status === 'upcoming' && m.scheduledTime) {
+      if (status === 'upcoming' && m.scheduledTime && !m.scheduledTime.startsWith('0001-01-01')) {
         let timeStr = m.scheduledTime;
         if (typeof timeStr === 'string' && !timeStr.endsWith('Z') && !timeStr.includes('+') && !timeStr.includes('-')) {
           timeStr += 'Z';

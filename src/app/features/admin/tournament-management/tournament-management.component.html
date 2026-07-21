@@ -232,7 +232,7 @@
                           <input type="date"
                             [(ngModel)]="matchDateInputs[m.id]"
                             [id]="'admin-date-' + m.id"
-                            class="bg-transparent border-0 text-xs text-slate-200 focus:outline-none focus:ring-0 px-1 py-1 w-28" />
+                            class="bg-transparent border-0 text-xs text-slate-200 focus:outline-none focus:ring-0 px-1 py-1 w-34" />
                           
                           <div class="h-4 w-px bg-slate-800"></div>
 
@@ -314,48 +314,71 @@
 </div>
 
 <!-- Create Modal -->
-<div *ngIf="showCreateModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div class="bg-[#161b22] border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-    <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-      <h3 class="text-lg font-bold text-white">{{ isEditing ? 'Edit Tournament' : 'Create Tournament' }}</h3>
-      <button (click)="closeCreateModal()" class="text-slate-400 hover:text-white transition-colors">
+<div *ngIf="showCreateModal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+  <div class="bg-[#161b22] border border-slate-700/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/60">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-white">{{ isEditing ? 'Edit Tournament' : 'Create Tournament' }}</h3>
+          <p class="text-xs text-slate-400">Configure championship settings, capacity, rating constraints, and schedule.</p>
+        </div>
+      </div>
+      <button (click)="closeCreateModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-      <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tournament Title *</label>
-        <input type="text" [(ngModel)]="newTournament.title" placeholder="e.g. Violet Autumn Cup S1" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</label>
-        <textarea [(ngModel)]="newTournament.description" placeholder="Specify tournament format, rules, and ELO requirements..." rows="3" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all"></textarea>
-      </div>
-      <div class="grid grid-cols-2 gap-4">
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+      
+      <!-- Section 1: Basic Information -->
+      <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Capacity (Max Participants) *</label>
-          <select [(ngModel)]="newTournament.maxParticipants" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
-            <option [value]="8">8 Players</option>
-            <option [value]="16">16 Players</option>
-            <option [value]="32">32 Players</option>
-            <option [value]="64">64 Players</option>
-            <option [value]="128">128 Players</option>
-            <option [value]="256">256 Players</option>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <span>Tournament Title</span>
+            <span class="text-orange-500">*</span>
+          </label>
+          <input type="text" [(ngModel)]="newTournament.title" placeholder="e.g. Algo Blitz 2026 Championship" 
+            class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Description</label>
+          <textarea [(ngModel)]="newTournament.description" placeholder="Specify tournament format, rules, dynamic problem setup, and scoring details..." rows="3" 
+            class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"></textarea>
+        </div>
+      </div>
+
+      <div class="h-px bg-slate-800/80"></div>
+
+      <!-- Section 2: Capacity & Language -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <span>Capacity (Max Participants)</span>
+            <span class="text-orange-500">*</span>
+          </label>
+          <select [(ngModel)]="newTournament.maxParticipants" class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer">
+            <option [value]="8">8 Players (3 Rounds)</option>
+            <option [value]="16">16 Players (4 Rounds)</option>
+            <option [value]="32">32 Players (5 Rounds)</option>
+            <option [value]="64">64 Players (6 Rounds)</option>
+            <option [value]="128">128 Players (7 Rounds)</option>
+            <option [value]="256">256 Players (8 Rounds)</option>
           </select>
         </div>
+
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Min Rating Requirement</label>
-          <input type="number" [(ngModel)]="newTournament.minRating" placeholder="e.g. 1200" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Max Rating Limit</label>
-          <input type="number" [(ngModel)]="newTournament.maxRating" placeholder="e.g. 2000" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Language Constraint</label>
-          <select [(ngModel)]="newTournament.language" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
-            <option value="">Any Language</option>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Language Constraint</label>
+          <select [(ngModel)]="newTournament.language" class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer">
+            <option value="">Any Language (Multi-language)</option>
             <option value="Python">Python</option>
             <option value="JavaScript">JavaScript</option>
             <option value="CSharp">C#</option>
@@ -366,20 +389,56 @@
           </select>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
+
+      <!-- Section 3: Rating Eligibility -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Start Date *</label>
-          <input type="date" [(ngModel)]="newTournament.startDate" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Min Rating Requirement</label>
+          <input type="number" [(ngModel)]="newTournament.minRating" placeholder="e.g. 1200 (Optional)" 
+            class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all">
         </div>
+
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">End Date *</label>
-          <input type="date" [(ngModel)]="newTournament.endDate" class="w-full bg-[#0d1117] border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all">
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Max Rating Limit</label>
+          <input type="number" [(ngModel)]="newTournament.maxRating" placeholder="e.g. 2000 (Optional)" 
+            class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all">
         </div>
       </div>
+
+      <div class="h-px bg-slate-800/80"></div>
+
+      <!-- Section 4: Event Dates -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <span>Start Date</span>
+            <span class="text-orange-500">*</span>
+          </label>
+          <input type="date" [(ngModel)]="newTournament.startDate" 
+            class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <span>End Date</span>
+            <span class="text-orange-500">*</span>
+          </label>
+          <input type="date" [(ngModel)]="newTournament.endDate" 
+            class="w-full bg-[#0d1117] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all">
+        </div>
+      </div>
+
     </div>
-    <div class="px-6 py-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-900/50">
-      <button (click)="closeCreateModal()" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">Cancel</button>
-      <button (click)="saveTournament()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-orange-500/20 transition-all">{{ isEditing ? 'Save' : 'Create' }}</button>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 border-t border-slate-800/80 flex items-center justify-end gap-3 bg-slate-900/60">
+      <button (click)="closeCreateModal()" class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+        Cancel
+      </button>
+      <button (click)="saveTournament()" class="bg-orange-600 hover:bg-orange-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-600/30 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all">
+        {{ isEditing ? 'Save Changes' : 'Create Tournament' }}
+      </button>
     </div>
+
   </div>
 </div>
