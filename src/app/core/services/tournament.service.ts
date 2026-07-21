@@ -47,6 +47,13 @@ export interface TournamentParticipant {
   registeredAt: string;
 }
 
+export interface TournamentDetails {
+  tournament: Tournament;
+  participants: TournamentParticipant[];
+  matches: TournamentMatch[];
+  results: any[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -65,6 +72,10 @@ export class TournamentService {
   // API Methods
   getTournaments(): Observable<Tournament[]> {
     return this.http.get<Tournament[]>(`${environment.apiUrl}/tournaments`);
+  }
+
+  getTournamentDetails(id: string): Observable<TournamentDetails> {
+    return this.http.get<TournamentDetails>(`${environment.apiUrl}/tournaments/${id}/details`);
   }
 
   getTournamentById(id: string): Observable<Tournament> {

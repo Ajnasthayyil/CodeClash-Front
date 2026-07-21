@@ -363,53 +363,19 @@ export class TournamentComponent implements OnInit, OnDestroy {
   loadTournamentData(id: string): void {
     this.isLoading = true;
 
-    // Load detail
-    this.tournamentService.getTournamentById(id).subscribe({
-      next: (t) => {
-        this.selectedTournament = t;
-        // Check registration
-        this.tournamentService.getTournamentParticipants(id).subscribe({
-          next: (parts) => {
-            this.participants = parts || [];
-            this.isRegistered = this.participants.some(p => p.userId.toLowerCase() === this.currentUserId.toLowerCase());
-
-            // Load matches
-            this.tournamentService.getTournamentMatches(id).subscribe({
-              next: (m) => {
-                this.matches = m || [];
-                this.buildBracketAndUpcoming();
-
-                if (t.status === 'Completed') {
-                  this.tournamentService.getTournamentResults(id).subscribe({
-                    next: (res) => {
-                      this.tournamentResults = res || [];
-                      this.isLoading = false;
-                    },
-                    error: (err) => {
-                      this.isLoading = false;
-                      console.error('Failed to load tournament results:', err);
-                    }
-                  });
-                } else {
-                  this.tournamentResults = [];
-                  this.isLoading = false;
-                }
-              },
-              error: (err) => {
-                this.isLoading = false;
-                console.error('Failed to load tournament matches:', err);
-              }
-            });
-          },
-          error: (err) => {
-            this.isLoading = false;
-            console.error('Failed to load tournament participants:', err);
-          }
-        });
+    this.tournamentService.getTournamentDetails(id).subscribe({
+      next: (details) => {
+        this.selectedTournament = details.tournament;
+        this.participants = details.participants || [];
+        this.isRegistered = this.participants.some(p => p.userId.toLowerCase() === this.currentUserId.toLowerCase());
+        this.matches = details.matches || [];
+        this.tournamentResults = details.results || [];
+        this.buildBracketAndUpcoming();
+        this.isLoading = false;
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Failed to load tournament by id:', err);
+        console.error('Failed to load tournament details:', err);
       }
     });
   }
