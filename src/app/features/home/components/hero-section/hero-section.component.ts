@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface CodeSample {
   language: string;
@@ -15,6 +16,12 @@ interface CodeSample {
 export class HeroSectionComponent implements OnInit {
   languages = ['JavaScript', 'Python', 'C++', 'Go'];
   selectedLanguage = 'JavaScript';
+
+  constructor(private authService: AuthService) {}
+
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn;
+  }
   
   codeSamples: { [key: string]: CodeSample } = {
     'JavaScript': {

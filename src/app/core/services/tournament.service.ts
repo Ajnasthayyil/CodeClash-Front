@@ -55,6 +55,7 @@ export class TournamentService {
 
   matchStarted$ = new Subject<any>();
   bracketUpdated$ = new Subject<void>();
+  matchScheduled$ = new Subject<{ tournamentId: string, matchId: string, scheduledTime: string, player1Id?: string, player2Id?: string, player1Username?: string, player2Username?: string, tournamentTitle?: string }>();
   tournamentCompleted$ = new Subject<any>();
   tournamentRegistrantIncremented$ = new Subject<{ tournamentId: string, participantCount: number }>();
   matchCompleted$ = new Subject<{ tournamentId: string, matchId: string, winnerId: string }>();
@@ -157,6 +158,11 @@ export class TournamentService {
       this.bracketUpdated$.next();
     });
 
+    this.hubConnection.on('MatchScheduled', (data) => {
+      console.log('[TournamentHub] MatchScheduled:', data);
+      this.matchScheduled$.next(data);
+    });
+
     this.hubConnection.on('TournamentCompleted', (data) => {
       console.log('[TournamentHub] TournamentCompleted:', data);
       this.tournamentCompleted$.next(data);
@@ -212,6 +218,16 @@ export class TournamentService {
     this.hubConnection.on('MatchCompleted', (data) => {
       console.log('[TournamentHub] MatchCompleted:', data);
       this.matchCompleted$.next(data);
+    });
+
+    this.hubConnection.on('MatchScheduled', (data) => {
+      console.log('[TournamentHub] Admin MatchScheduled:', data);
+      this.matchScheduled$.next(data);
+    });
+
+    this.hubConnection.on('BracketUpdated', (data) => {
+      console.log('[TournamentHub] Admin BracketUpdated:', data);
+      this.bracketUpdated$.next();
     });
 
     await this.hubConnection.start();

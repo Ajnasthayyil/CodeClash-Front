@@ -182,8 +182,11 @@
                       <div class="match-list">
                         <ng-container *ngFor="let m of bracketMatches">
                           <div *ngIf="m.stage === 'quarter'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
-                            <div class="match-top-status">
+                            <div class="match-top-status flex items-center justify-between text-[10px]">
                               <span class="status-lbl">{{ m.status }}</span>
+                              <span *ngIf="m.status === 'upcoming' && m.scheduledTime && !m.scheduledTime.startsWith('0001-01-01')" class="text-orange-400 font-mono">
+                                {{ m.scheduledTime | date:'MMM d, h:mm a' }}
+                              </span>
                               <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
                             </div>
                             <div class="match-players">
@@ -228,8 +231,11 @@
                       <div class="match-list">
                         <ng-container *ngFor="let m of bracketMatches">
                           <div *ngIf="m.stage === 'semi'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
-                            <div class="match-top-status">
+                            <div class="match-top-status flex items-center justify-between text-[10px]">
                               <span class="status-lbl">{{ m.status }}</span>
+                              <span *ngIf="m.status === 'upcoming' && m.scheduledTime && !m.scheduledTime.startsWith('0001-01-01')" class="text-orange-400 font-mono">
+                                {{ m.scheduledTime | date:'MMM d, h:mm a' }}
+                              </span>
                               <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
                             </div>
                             <div class="match-players">
@@ -274,8 +280,11 @@
                       <div class="match-list">
                         <ng-container *ngFor="let m of bracketMatches">
                           <div *ngIf="m.stage === 'final'" class="match-box" [class.live]="m.status === 'live'" [class.completed]="m.status === 'completed'">
-                            <div class="match-top-status">
+                            <div class="match-top-status flex items-center justify-between text-[10px]">
                               <span class="status-lbl">{{ m.status }}</span>
+                              <span *ngIf="m.status === 'upcoming' && m.scheduledTime && !m.scheduledTime.startsWith('0001-01-01')" class="text-orange-400 font-mono">
+                                {{ m.scheduledTime | date:'MMM d, h:mm a' }}
+                              </span>
                               <span *ngIf="m.status === 'live'" class="live-dot-pulse"></span>
                             </div>
                             <div class="match-players">
