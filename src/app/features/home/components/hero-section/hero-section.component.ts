@@ -14,7 +14,7 @@ interface CodeSample {
   styleUrls: ['./hero-section.component.scss']
 })
 export class HeroSectionComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn;
@@ -167,4 +167,5 @@ std::vector<int> twoSum(std::vector<int>& nums, int target) {
       this.isRunning = false;
     }, 2200);
   }
+  //sample
 }
