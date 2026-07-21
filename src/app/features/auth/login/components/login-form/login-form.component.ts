@@ -50,7 +50,7 @@ export class LoginFormComponent {
           if (user && user.role === 'Admin') {
             this.router.navigate(['/admin']);
           } else {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/arena']);
           }
         } else {
           this.errorMessage = res.message || 'Login failed.';
@@ -77,7 +77,7 @@ export class LoginFormComponent {
 
     setTimeout(() => {
       this.isLoading = false;
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/arena']);
     }, 1200);
   }
 

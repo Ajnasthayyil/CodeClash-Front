@@ -8,7 +8,6 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { OTPVerificationComponent } from './features/auth/otp/otp-verification.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CodingArenaComponent } from './features/coding-arena/coding-arena.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { LeaderboardComponent } from './features/leaderboard/leaderboard.component';
@@ -41,7 +40,7 @@ const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: '', component: HomeComponent },
-      { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard, userGuard] },
+      { path: 'dashboard', redirectTo: 'arena', pathMatch: 'full' },
       { path: 'profile', component: ProfileComponent, canActivate: [authGuard, userGuard] },
       { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard, userGuard] },
       { path: 'problems', component: ProblemsComponent, canActivate: [authGuard, userGuard] },

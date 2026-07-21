@@ -2,7 +2,9 @@
 
 <div class="relative overflow-hidden bg-[#0d1117] text-slate-100 font-sans pb-24">
   <!-- Glowing background blobs -->
-  <div class="absolute bottom-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-amber-600 opacity-5 blur-[150px] pointer-events-none"></div>
+  <div
+    class="absolute bottom-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-amber-600 opacity-5 blur-[150px] pointer-events-none">
+  </div>
 
   <main class="max-w-7xl mx-auto px-6 relative z-10">
     <!-- The Ecosystem Section -->
@@ -11,76 +13,93 @@
         <h2 class="text-xs uppercase tracking-widest text-orange-500 font-bold mb-3">THE ECOSYSTEM</h2>
         <h3 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">Every technology. Tracked.</h3>
         <p class="text-slate-400 text-lg max-w-2xl mx-auto">
-          CodeClash sandbox environments support major programming languages, runtimes, and frameworks with sub-millisecond execution analysis.
+          CodeClash sandbox environments support major programming languages, runtimes, and frameworks with
+          sub-millisecond execution analysis.
         </p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <!-- Interactive Technology Badges Grid (8 Cols) -->
         <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          <div *ngFor="let tech of technologies" 
-               (mouseenter)="selectTech(tech.id)"
-               (click)="selectTech(tech.id)"
-               [class]="selectedTech === tech.id ? 'border-orange-500 bg-orange-500/5 text-white shadow-[0_0_20px_rgba(249,115,22,0.15)]' : 'border-slate-900 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:text-slate-200'"
-               class="group relative flex flex-col items-center justify-center p-6 rounded-2xl border backdrop-blur-sm cursor-pointer transition-all duration-300">
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-600/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            
-            <div class="w-12 h-12 flex items-center justify-center mb-3 text-slate-300 group-hover:scale-110 transition duration-300">
+          <div *ngFor="let tech of technologies" (mouseenter)="selectTech(tech.id)" (click)="selectTech(tech.id)"
+            [class]="selectedTech === tech.id ? 'border-orange-500 bg-orange-500/5 text-white shadow-[0_0_20px_rgba(249,115,22,0.15)]' : 'border-slate-900 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:text-slate-200'"
+            class="group relative flex flex-col items-center justify-center p-6 rounded-2xl border backdrop-blur-sm cursor-pointer transition-all duration-300">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-orange-600/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            </div>
+
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-3 text-slate-300 group-hover:scale-110 transition duration-300">
               <ng-container [ngSwitch]="tech.id">
-                <svg *ngSwitchCase="'React'" class="w-10 h-10 text-cyan-400 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(30 12 12)"/>
-                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(90 12 12)"/>
-                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(150 12 12)"/>
-                  <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                <svg *ngSwitchCase="'React'" class="w-10 h-10 text-cyan-400 fill-none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="1.5">
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(30 12 12)" />
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(90 12 12)" />
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(150 12 12)" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
                 </svg>
                 <svg *ngSwitchCase="'TypeScript'" class="w-9 h-9 text-blue-500 fill-current" viewBox="0 0 24 24">
-                  <path d="M0 0h24v24H0V0zm21.6 19.3c0-1.8-1-2.9-3.2-3.8-1.5-.6-2-.9-2-1.5 0-.5.4-.8 1.1-.8.9 0 1.5.3 1.9.9l1.9-1.2c-.7-1.1-1.9-1.7-3.8-1.7-2.3 0-3.8 1.3-3.8 3.2 0 1.9 1.1 2.8 3.4 3.7 1.5.6 1.8 1 1.8 1.5 0 .6-.5.9-1.3.9-1.2 0-2-.6-2.5-1.5l-1.9 1.1c.7 1.4 2.2 2.2 4.4 2.2 2.5 0 4.1-1.2 4.1-3.5zm-8.8-9.4h-7.6V22h2.2v-4.8h5.4V12.1v-2.2z"/>
+                  <path
+                    d="M0 0h24v24H0V0zm21.6 19.3c0-1.8-1-2.9-3.2-3.8-1.5-.6-2-.9-2-1.5 0-.5.4-.8 1.1-.8.9 0 1.5.3 1.9.9l1.9-1.2c-.7-1.1-1.9-1.7-3.8-1.7-2.3 0-3.8 1.3-3.8 3.2 0 1.9 1.1 2.8 3.4 3.7 1.5.6 1.8 1 1.8 1.5 0 .6-.5.9-1.3.9-1.2 0-2-.6-2.5-1.5l-1.9 1.1c.7 1.4 2.2 2.2 4.4 2.2 2.5 0 4.1-1.2 4.1-3.5zm-8.8-9.4h-7.6V22h2.2v-4.8h5.4V12.1v-2.2z" />
                 </svg>
                 <svg *ngSwitchCase="'NodeJS'" class="w-9 h-9 text-green-500 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7.7v11.5L12 25l10-5.8V7.7L12 2zm8 16.4l-8 4.6-8-4.6V8.9l8-4.6 8 4.6v9.5z"/>
-                  <path d="M12 7.4v7l6 3.5V11L12 7.4z"/>
+                  <path d="M12 2L2 7.7v11.5L12 25l10-5.8V7.7L12 2zm8 16.4l-8 4.6-8-4.6V8.9l8-4.6 8 4.6v9.5z" />
+                  <path d="M12 7.4v7l6 3.5V11L12 7.4z" />
                 </svg>
                 <svg *ngSwitchCase="'NextJS'" class="w-9 h-9 text-white fill-current" viewBox="0 0 24 24">
-                  <path d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm5.952 18.066l-6.144-8.082v8.082h-1.564V7.998h1.472l6.096 8.016V7.998h1.564v10.068h-1.424z"/>
+                  <path
+                    d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm5.952 18.066l-6.144-8.082v8.082h-1.564V7.998h1.472l6.096 8.016V7.998h1.564v10.068h-1.424z" />
                 </svg>
                 <svg *ngSwitchCase="'Docker'" class="w-10 h-10 text-sky-400 fill-current" viewBox="0 0 24 24">
-                  <path d="M13.983 11.078h2.119c.102 0 .186-.084.186-.186V8.78c0-.102-.084-.186-.186-.186h-2.119c-.102 0-.186.084-.186.186v2.11c0 .103.085.188.186.188zm-2.925 0h2.12c.102 0 .185-.084.185-.186V8.78c0-.102-.083-.186-.185-.186h-2.12c-.103 0-.186.084-.186.186v2.11c0 .103.083.188.186.188zm-2.927 0h2.117c.103 0 .187-.084.187-.186V8.78c0-.102-.084-.186-.187-.186H8.131c-.103 0-.187.084-.187.186v2.11c0 .103.084.188.187.188zm-2.913 0h2.119c.102 0 .185-.084.185-.186V8.78c0-.102-.083-.186-.185-.186H5.218c-.103 0-.186.084-.186.186v2.11c0 .103.083.188.186.188zM5.218 8.14h2.119c.102 0 .185-.083.185-.185V5.836c0-.102-.083-.185-.185-.185H5.218c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm2.913 0h2.117c.103 0 .187-.083.187-.185V5.836c0-.102-.084-.185-.187-.185H8.131c-.103 0-.187.083-.187.185v2.119c0 .102.084.185.187.185zm2.927 0h2.12c.102 0 .185-.083.185-.185V5.836c0-.102-.083-.185-.185-.185h-2.12c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm-5.84 5.828h2.119c.102 0 .185-.083.185-.185v-2.119c0-.102-.083-.185-.185-.185H5.218c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm2.913 0h2.117c.103 0 .187-.083.187-.185v-2.119c0-.102-.084-.185-.187-.185H8.131c-.103 0-.187.083-.187.185v2.119c0 .102.084.185.187.185zm-5.84-8.63h2.119c.102 0 .185-.083.185-.185V3.12c0-.103-.083-.186-.185-.186H5.218c-.103 0-.186.083-.186.186v2.119c0 .101.083.184.186.184zm23.304 9.954c-.116-.367-.936-2.522-3.136-3.79-.196-.113-.42-.08-.577.082-.41.417-.96.657-1.547.677-.076 0-.15.01-.225.01-1.396 0-2.482-1.007-2.658-2.34-.047-.358-.352-.628-.716-.628-.016 0-.03 0-.047.002-.375.015-.67.313-.703.687-.272 3.125-2.029 4.887-5.223 5.237-.367.04-.632.355-.62.723.013.35.3.623.648.623.023 0 .047-.002.07-.004.148-.016.297-.03.447-.05 2.127-.27 4.142-1.378 5.76-3.155 1.157 1.258 2.802 2.015 4.604 2.015.158 0 .313-.01.468-.02 1.348-.1 2.457-.96 2.895-2.22z"/>
+                  <path
+                    d="M13.983 11.078h2.119c.102 0 .186-.084.186-.186V8.78c0-.102-.084-.186-.186-.186h-2.119c-.102 0-.186.084-.186.186v2.11c0 .103.085.188.186.188zm-2.925 0h2.12c.102 0 .185-.084.185-.186V8.78c0-.102-.083-.186-.185-.186h-2.12c-.103 0-.186.084-.186.186v2.11c0 .103.083.188.186.188zm-2.927 0h2.117c.103 0 .187-.084.187-.186V8.78c0-.102-.084-.186-.187-.186H8.131c-.103 0-.187.084-.187.186v2.11c0 .103.084.188.187.188zm-2.913 0h2.119c.102 0 .185-.084.185-.186V8.78c0-.102-.083-.186-.185-.186H5.218c-.103 0-.186.084-.186.186v2.11c0 .103.083.188.186.188zM5.218 8.14h2.119c.102 0 .185-.083.185-.185V5.836c0-.102-.083-.185-.185-.185H5.218c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm2.913 0h2.117c.103 0 .187-.083.187-.185V5.836c0-.102-.084-.185-.187-.185H8.131c-.103 0-.187.083-.187.185v2.119c0 .102.084.185.187.185zm2.927 0h2.12c.102 0 .185-.083.185-.185V5.836c0-.102-.083-.185-.185-.185h-2.12c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm-5.84 5.828h2.119c.102 0 .185-.083.185-.185v-2.119c0-.102-.083-.185-.185-.185H5.218c-.103 0-.186.083-.186.185v2.119c0 .102.083.185.186.185zm2.913 0h2.117c.103 0 .187-.083.187-.185v-2.119c0-.102-.084-.185-.187-.185H8.131c-.103 0-.187.083-.187.185v2.119c0 .102.084.185.187.185zm-5.84-8.63h2.119c.102 0 .185-.083.185-.185V3.12c0-.103-.083-.186-.185-.186H5.218c-.103 0-.186.083-.186.186v2.119c0 .101.083.184.186.184zm23.304 9.954c-.116-.367-.936-2.522-3.136-3.79-.196-.113-.42-.08-.577.082-.41.417-.96.657-1.547.677-.076 0-.15.01-.225.01-1.396 0-2.482-1.007-2.658-2.34-.047-.358-.352-.628-.716-.628-.016 0-.03 0-.047.002-.375.015-.67.313-.703.687-.272 3.125-2.029 4.887-5.223 5.237-.367.04-.632.355-.62.723.013.35.3.623.648.623.023 0 .047-.002.07-.004.148-.016.297-.03.447-.05 2.127-.27 4.142-1.378 5.76-3.155 1.157 1.258 2.802 2.015 4.604 2.015.158 0 .313-.01.468-.02 1.348-.1 2.457-.96 2.895-2.22z" />
                 </svg>
                 <svg *ngSwitchCase="'AWS'" class="w-10 h-10 text-orange-500 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5zm2.8-5.3l-3.3 3.3c-.3.3-.8.3-1.1 0l-3.3-3.3c-.3-.3-.3-.8 0-1.1s.8-.3 1.1 0l2 2V8c0-.4.3-.8.8-.8s.8.4.8.8v5.2l2-2c.3-.3.8-.3 1.1 0s.3.7 0 1z"/>
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5zm2.8-5.3l-3.3 3.3c-.3.3-.8.3-1.1 0l-3.3-3.3c-.3-.3-.3-.8 0-1.1s.8-.3 1.1 0l2 2V8c0-.4.3-.8.8-.8s.8.4.8.8v5.2l2-2c.3-.3.8-.3 1.1 0s.3.7 0 1z" />
                 </svg>
                 <svg *ngSwitchCase="'GitHub'" class="w-9 h-9 text-slate-100 fill-current" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.197 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.197 22 16.44 22 12.017 22 6.484 17.522 2 12 2z" />
                 </svg>
                 <svg *ngSwitchCase="'MongoDB'" class="w-9 h-9 text-emerald-500 fill-current" viewBox="0 0 24 24">
-                  <path d="M17.15 11.23a10.63 10.63 0 00-4.63-7.53c-.3-.21-.74-.21-1.04 0a10.63 10.63 0 00-4.63 7.53c-.3 2.73.47 5.48 2.14 7.6a16.64 16.64 0 003.01 3.03c.3.23.7.23 1 0a16.64 16.64 0 003.01-3.03c1.67-2.12 2.44-4.87 2.14-7.6zM12 19.33c-.7-.78-2.31-2.91-2.31-6.1a12.75 12.75 0 01.37-3.13c.12-.49.33-.95.63-1.35.37-.48.79-.87 1.31-1.15V19.33zm2.31-6.1c0 3.19-1.61 5.32-2.31 6.1V7.5a4.34 4.34 0 011.31 1.15c.3.4.51.86.63 1.35.24 1 .37 2.06.37 3.13-.01.03-.01.07-.01.1z"/>
+                  <path
+                    d="M17.15 11.23a10.63 10.63 0 00-4.63-7.53c-.3-.21-.74-.21-1.04 0a10.63 10.63 0 00-4.63 7.53c-.3 2.73.47 5.48 2.14 7.6a16.64 16.64 0 003.01 3.03c.3.23.7.23 1 0a16.64 16.64 0 003.01-3.03c1.67-2.12 2.44-4.87 2.14-7.6zM12 19.33c-.7-.78-2.31-2.91-2.31-6.1a12.75 12.75 0 01.37-3.13c.12-.49.33-.95.63-1.35.37-.48.79-.87 1.31-1.15V19.33zm2.31-6.1c0 3.19-1.61 5.32-2.31 6.1V7.5a4.34 4.34 0 011.31 1.15c.3.4.51.86.63 1.35.24 1 .37 2.06.37 3.13-.01.03-.01.07-.01.1z" />
                 </svg>
                 <svg *ngSwitchCase="'Redis'" class="w-9 h-9 text-red-500 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2L2 6.5v11L12 22l10-4.5v-11L12 2zm8 14.5l-8 3.6-8-3.6V8l8 3.6 8-3.6v8.5zm0-9.8L12 10.3 4 6.7 12 3.1l8 3.6z"/>
+                  <path
+                    d="M12 2L2 6.5v11L12 22l10-4.5v-11L12 2zm8 14.5l-8 3.6-8-3.6V8l8 3.6 8-3.6v8.5zm0-9.8L12 10.3 4 6.7 12 3.1l8 3.6z" />
                 </svg>
                 <svg *ngSwitchCase="'Python'" class="w-9 h-9 text-yellow-500 fill-current" viewBox="0 0 24 24">
-                  <path d="M14.25.18c-.98-.04-1.92.07-2.73.34-1.25.43-2.15 1.35-2.45 2.5v1.8H14.1c1.35 0 2.45 1.1 2.45 2.45v2.85h1.95c1.47 0 2.66-1.18 2.66-2.65V4.6c0-1.47-1.19-2.66-2.66-2.66h-1.95V.59c-.43-.28-1.26-.37-2.3-.41zM5.44 3.7c-1.47 0-2.66 1.18-2.66 2.65v2.85c0 1.47 1.19 2.66 2.66 2.66H7.4v-1.8c0-1.35 1.1-2.45 2.45-2.45h4.9V4.76h-4.9c-1.35 0-2.45-1.1-2.45-2.45v-1.8H7.4c-1.07.01-1.93.87-1.96 1.94v1.25zm4.07 8.35c.98.04 1.92-.07 2.73-.34 1.25-.43 2.15-1.35 2.45-2.5v-1.8H9.9c-1.35 0-2.45-1.1-2.45-2.45V4.11H5.5c-1.47 0-2.66 1.18-2.66 2.65v2.85c0 1.47 1.19 2.66 2.66 2.66h1.95v1.36c.43.28 1.26.37 2.3.41z"/>
+                  <path
+                    d="M14.25.18c-.98-.04-1.92.07-2.73.34-1.25.43-2.15 1.35-2.45 2.5v1.8H14.1c1.35 0 2.45 1.1 2.45 2.45v2.85h1.95c1.47 0 2.66-1.18 2.66-2.65V4.6c0-1.47-1.19-2.66-2.66-2.66h-1.95V.59c-.43-.28-1.26-.37-2.3-.41zM5.44 3.7c-1.47 0-2.66 1.18-2.66 2.65v2.85c0 1.47 1.19 2.66 2.66 2.66H7.4v-1.8c0-1.35 1.1-2.45 2.45-2.45h4.9V4.76h-4.9c-1.35 0-2.45-1.1-2.45-2.45v-1.8H7.4c-1.07.01-1.93.87-1.96 1.94v1.25zm4.07 8.35c.98.04 1.92-.07 2.73-.34 1.25-.43 2.15-1.35 2.45-2.5v-1.8H9.9c-1.35 0-2.45-1.1-2.45-2.45V4.11H5.5c-1.47 0-2.66 1.18-2.66 2.65v2.85c0 1.47 1.19 2.66 2.66 2.66h1.95v1.36c.43.28 1.26.37 2.3.41z" />
                 </svg>
                 <svg *ngSwitchCase="'Rust'" class="w-10 h-10 text-orange-600 fill-current" viewBox="0 0 24 24">
-                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(45 12 12)" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(135 12 12)" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(45 12 12)" stroke="currentColor"
+                    stroke-width="1.5" fill="none" />
+                  <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(135 12 12)" stroke="currentColor"
+                    stroke-width="1.5" fill="none" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
                 </svg>
                 <svg *ngSwitchCase="'Postgres'" class="w-9 h-9 text-blue-400 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5c-1.5 0-2.8-.8-3.5-2H8c-.6 0-1-.4-1-1v-2c0-.6.4-1 1-1h1.5c.7-1.2 2-2 3.5-2 2.2 0 4 1.8 4 4s-1.8 4-4 4z"/>
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5c-1.5 0-2.8-.8-3.5-2H8c-.6 0-1-.4-1-1v-2c0-.6.4-1 1-1h1.5c.7-1.2 2-2 3.5-2 2.2 0 4 1.8 4 4s-1.8 4-4 4z" />
                 </svg>
-                <svg *ngSwitchDefault class="w-9 h-9 text-slate-400 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                <svg *ngSwitchDefault class="w-9 h-9 text-slate-400 fill-none" viewBox="0 0 24 24" stroke="currentColor"
+                  stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                 </svg>
               </ng-container>
             </div>
-            
+
             <span class="text-sm font-bold tracking-wide mt-1">{{ tech.name }}</span>
           </div>
         </div>
 
         <!-- Telemetry & Info Dashboard Panel (4 Cols) -->
-        <div class="lg:col-span-4 bg-[#161b22] border border-slate-800 rounded-2xl p-6 font-mono relative overflow-hidden shadow-xl min-h-[350px]">
+        <div
+          class="lg:col-span-4 bg-[#161b22] border border-slate-800 rounded-2xl p-6 font-mono relative overflow-hidden shadow-xl min-h-[350px]">
           <div class="absolute -top-12 -right-12 w-28 h-28 bg-orange-600/10 rounded-full blur-2xl"></div>
 
           <div class="flex items-center justify-between pb-4 border-b border-slate-950 mb-6">
@@ -88,7 +107,9 @@
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">TELEMETRY MONITOR</span>
             </div>
-            <span class="text-[10px] text-orange-400 px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 font-bold uppercase">SANDBOX SECURE</span>
+            <span
+              class="text-[10px] text-orange-400 px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 font-bold uppercase">SANDBOX
+              SECURE</span>
           </div>
 
           <div class="space-y-6">
@@ -102,7 +123,8 @@
 
             <div>
               <span class="text-xs text-slate-500 block uppercase tracking-wider mb-2">Sandbox Isolation Features</span>
-              <p class="text-xs text-slate-300 leading-relaxed font-sans bg-slate-950/80 p-3 rounded-lg border border-slate-900">
+              <p
+                class="text-xs text-slate-300 leading-relaxed font-sans bg-slate-950/80 p-3 rounded-lg border border-slate-900">
                 {{ activeTech.desc }}
               </p>
             </div>
@@ -118,16 +140,19 @@
               </div>
             </div>
 
-            <div class="bg-slate-950/90 p-4 rounded-xl border border-slate-950 text-[10px] text-slate-500 space-y-1.5 min-h-[110px]">
+            <div
+              class="bg-slate-950/90 p-4 rounded-xl border border-slate-950 text-[10px] text-slate-500 space-y-1.5 min-h-[110px]">
               <div><span class="text-slate-700">></span> initializing target container...</div>
               <div><span class="text-slate-700">></span> mounting code sandbox partition</div>
-              <div><span class="text-slate-700">></span> virtual env matching runtime <span class="text-orange-500">{{ activeTech.version }}</span></div>
-              <div class="text-slate-400"><span class="text-slate-700">></span> speed optimized: <span class="text-emerald-400 font-bold">{{ activeTech.speed }}</span> latency</div>
+              <div><span class="text-slate-700">></span> virtual env matching runtime <span class="text-orange-500">{{
+                  activeTech.version }}</span></div>
+              <div class="text-slate-400"><span class="text-slate-700">></span> speed optimized: <span
+                  class="text-emerald-400 font-bold">{{ activeTech.speed }}</span> latency</div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="text-center mt-8 text-xs text-slate-500 italic">
         * Demand scores and compilation runners are updated weekly from production testing cycles.
       </div>
@@ -143,8 +168,11 @@
     <app-testimonials></app-testimonials>
 
     <!-- CTA Section -->
-    <div class="relative bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 rounded-3xl p-12 text-center overflow-hidden my-16">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-orange-500/5 rounded-full blur-[80px]"></div>
+    <div
+      class="relative bg-gradient-to-b from-[#161b22] to-[#0d1117] border border-slate-800 rounded-3xl p-12 text-center overflow-hidden my-16">
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-orange-500/5 rounded-full blur-[80px]">
+      </div>
 
       <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 relative z-10">
         Ready to find your next tech lead?

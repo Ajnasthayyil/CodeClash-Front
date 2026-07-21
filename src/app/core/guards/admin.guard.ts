@@ -16,6 +16,6 @@ export const adminGuard: CanActivateFn = (route, state) => {
 
   // Not an admin, show warning and redirect to dashboard
   notificationService.showToast('Access denied. Admin role required.', 'error');
-  router.navigate(['/dashboard']);
+  router.navigate(['/arena']);
   return false;
 };
